@@ -1,20 +1,11 @@
+import java.util.*;
+
 private InputManager _inputManager;
 
-Test t;
 void setup() {
-    t = new Test();
-
     _inputManager = new InputManager();
 }
 
-void draw() {
-    boolean f = _inputManager.IsPressedKey(Key._0, Key._D, Key._DOWN);
-    if (f) {
-        background(200, 0, 0);
-    } else {
-        background(0, 0, 200);
-    }
-}
 
 void keyPressed() {
     _inputManager.KeyPressed();
@@ -48,7 +39,7 @@ void mouseDragged() {
     _inputManager.MouseDragged();
 }
 
-void mouseEntered(){
+void mouseEntered() {
     _inputManager.MouseEntered();
 }
 
