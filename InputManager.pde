@@ -3,7 +3,7 @@
  */
 public class InputManager {
     private boolean[] _keys;
-
+    
 
     public InputManager() {
         _keys = new boolean[Key.KEY_NUM];

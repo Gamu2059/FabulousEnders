@@ -1,48 +1,49 @@
 import java.util.*;
 
-private InputManager _inputManager;
+InputManager inputManager = new InputManager();
+UIManager uiManager = new UIManager();
 
 void setup() {
-    _inputManager = new InputManager();
+    size(500, 500);
 }
 
 
 void keyPressed() {
-    _inputManager.KeyPressed();
+    inputManager.KeyPressed();
 }
 
 void keyReleased() {
-    _inputManager.KeyReleased();
+    inputManager.KeyReleased();
 }
 
 void mousePressed() {
-    _inputManager.MousePressed();
+    inputManager.MousePressed();
 }
 
 void mouseReleased() {
-    _inputManager.MouseReleased();
+    inputManager.MouseReleased();
 }
 
 void mouseClicked() {
-    _inputManager.MouseClicked();
+    inputManager.MouseClicked();
 }
 
 void mouseWheel() {
-    _inputManager.MouseWheel();
+    inputManager.MouseWheel();
 }
 
 void mouseMoved() {
-    _inputManager.MouseMoved();
+    inputManager.MouseMoved();
 }
 
 void mouseDragged() {
-    _inputManager.MouseDragged();
+    inputManager.MouseDragged();
 }
 
 void mouseEntered() {
-    _inputManager.MouseEntered();
+    inputManager.MouseEntered();
 }
 
 void mouseExited() {
-    _inputManager.MouseExited();
+    inputManager.MouseExited();
 }
