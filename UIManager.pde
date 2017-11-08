@@ -2,7 +2,7 @@
  UIコンポーネントを一元管理するためのクラス。
  格納単位はUIScene。
  */
-public final class UIManager extends UIBase {
+public final class UIManager extends Abs_UIBase {
     private UIScene _activeScene;
     public UIScene GetAcriveScene() { return _activeScene; }
     
@@ -14,7 +14,7 @@ public final class UIManager extends UIBase {
         InitChildren();
     }
 
-    public boolean AddComponent(UIBase comp) {
+    public boolean AddComponent(Abs_UIBase comp) {
         if (comp == null) return false;
         if (!(comp instanceof UIScene)) {
             println("UIマネージャにシーン以外のインスタンスが追加されようとしました。");
@@ -54,7 +54,7 @@ public final class UIManager extends UIBase {
     /**
      UIManagerは全てのコンポーネントの最上位に存在するため、子になることはない。
      */
-    public boolean IsChildOf(UIBase comp) {
+    public boolean IsChildOf(Abs_UIBase comp) {
         return false;
     }
 

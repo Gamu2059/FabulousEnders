@@ -1,9 +1,9 @@
-/*
-キーやマウスの入力の低レベル処理を行うクラス。
+/**
+ キーやマウスの入力の低レベル処理を行うクラス。
  */
 public class InputManager {
     private boolean[] _keys;
-    
+
 
     public InputManager() {
         _keys = new boolean[Key.KEY_NUM];
@@ -25,28 +25,28 @@ public class InputManager {
         }
     }
 
-    public void MousePressed(){
+    public void MousePressed() {
     }
-    
-    public void MouseReleased(){
+
+    public void MouseReleased() {
     }
-    
-    public void MouseClicked(){
+
+    public void MouseClicked() {
     }
-    
-    public void MouseWheel(){
+
+    public void MouseWheel() {
     }
-    
-    public void MouseMoved(){
+
+    public void MouseMoved() {
     }
-    
-    public void MouseDragged(){
+
+    public void MouseDragged() {
     }
-    
-    public void MouseEntered(){
+
+    public void MouseEntered() {
     }
-    
-    public void MouseExited(){
+
+    public void MouseExited() {
     }
 
     // これを呼び出した時点で押されている最後のキーのキーコードをKey列挙定数に変換して返す。

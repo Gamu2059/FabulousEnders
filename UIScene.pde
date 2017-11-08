@@ -1,23 +1,50 @@
 /**
  一つのシーンのコンポーネントを管理するためのクラス。
  */
-public class UIScene extends UIBase {
-    private UIComponent _moc, _mac;
-    public UIComponent GetMOC() { 
+public class UIScene extends Abs_UIBase {
+    // Mouse Overlapped Component
+    private Abs_UIComponent _moc;
+    public Abs_UIComponent GetMOC() { 
         return _moc;
     }
-    public UIComponent GetMAC() { 
+    
+    // Mouse Active Component
+    private Abs_UIComponent _mac;
+    public Abs_UIComponent GetMAC() { 
         return _mac;
     }
 
+
     public UIScene(String name) {
         super(name);
+        super.InitChildren();
         uiManager.AddComponent(this);
     }
 
-    public boolean AddComponent(UIComponent comp) {
+    /**
+    シーンで保持しているコンポーネントを再帰的に変形させる。
+    */
+    public void UpdateTransform() {
+        Abs_UIComponent ui;
+        // シーン直下のコンポーネントだけ呼び出す
+        for (int i=0;i<super.GetChildren().size();i++) {
+            ui = GetComponent(i);
+            if (ui.IsChildOf(this)) {
+                ui.TransformComponent(sceneTransform);
+            }
+        }
+    }
+
+    // 再帰的にシーンを描画する
+    public void DrawScene(){
+        for (int i=0;i<super.GetChildren().size();i++) {
+            GetComponent(i).DrawComponent();
+        }
+    }
+
+    public boolean AddComponent(Abs_UIComponent comp) {
         if (comp == null) return false;
-        if (!(comp instanceof UIComponent)) {
+        if (!(comp instanceof Abs_UIComponent)) {
             println("シーンにコンポーネント以外のインスタンスが追加されようとしました。");
             println("シーンにはコンポーネント及びそのサブクラスのインスタンスしか格納することができません。");
             return false;
@@ -30,25 +57,25 @@ public class UIScene extends UIBase {
         return super.AddComponent(comp);
     }
 
-    public UIComponent GetComponent(int index) {
+    public Abs_UIComponent GetComponent(int index) {
         return _CastToUIComponent(super.GetComponent(index));
     }
 
-    public UIComponent GetComponent(String name) {
+    public Abs_UIComponent GetComponent(String name) {
         return _CastToUIComponent(super.GetComponent(name));
     }
 
-    public boolean RemoveComponent(UIComponent comp) {
+    public boolean RemoveComponent(Abs_UIComponent comp) {
         if (comp == null) return false;
-        if (!(comp instanceof UIComponent)) return false;
+        if (!(comp instanceof Abs_UIComponent)) return false;
         return super.RemoveComponent(comp);
     }
 
-    public UIComponent RemoveComponent(int index) {
+    public Abs_UIComponent RemoveComponent(int index) {
         return _CastToUIComponent(super.RemoveComponent(index));
     }
 
-    public UIComponent RemoveComponent(String name) {
+    public Abs_UIComponent RemoveComponent(String name) {
         return _CastToUIComponent(super.RemoveComponent(name));
     }
 
@@ -56,9 +83,9 @@ public class UIScene extends UIBase {
      引数に渡されたインスタンスをコンポーネントインスタンスにキャストして返す。
      キャストできない場合はnullが返される。
      */
-    private UIComponent _CastToUIComponent(Object o) {
-        if (!(o instanceof UIComponent)) return null;
-        return (UIComponent) o;
+    private Abs_UIComponent _CastToUIComponent(Object o) {
+        if (!(o instanceof Abs_UIComponent)) return null;
+        return (Abs_UIComponent) o;
     }
 
     /**
@@ -81,13 +108,13 @@ public class UIScene extends UIBase {
             return;
         }
 
-        UIComponent ui;
+        Abs_UIComponent ui;
         for (int i=GetChildren().size()-1; i>=0; i--) {
             ui = GetComponent(i);
             if (ui == null) {
                 continue;
             }
-            
+
             //ui.IsOverlappedOf(x, y);
         }
     }

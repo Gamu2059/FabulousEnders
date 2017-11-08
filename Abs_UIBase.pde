@@ -2,24 +2,24 @@
  UIManagerを含む、全てのUI系コンポーネントの基底クラス。
  完成はされているが、抽象クラスとして定義される。
  */
-public  class UIBase {
-    private UIBase _parent;
-    public UIBase GetParent() { return _parent; }
-    public void SetParent(UIBase parent) { _parent = parent; }
+public abstract class Abs_UIBase {
+    private Abs_UIBase _parent;
+    public Abs_UIBase GetParent() { return _parent; }
+    public void SetParent(Abs_UIBase parent) { _parent = parent; }
     
-    private ArrayList<UIBase> _children;
-    public ArrayList<UIBase> GetChildren() { return _children; }
+    private ArrayList<Abs_UIBase> _children;
+    public ArrayList<Abs_UIBase> GetChildren() { return _children; }
     
     
     private String _name;
     public String GetName() { return _name; }
 
-    public UIBase(String name) {
+    public Abs_UIBase(String name) {
         _name = name;
     }
     
     protected void InitChildren() {
-        _children = new ArrayList<UIBase>();
+        _children = new ArrayList<Abs_UIBase>();
     }
 
     /**
@@ -27,9 +27,10 @@ public  class UIBase {
      ただし、既に追加されていた場合は追加できない。
      追加に成功した場合はtrueを返す。
      */
-    public boolean AddComponent(UIBase comp) {
+    public boolean AddComponent(Abs_UIBase comp) {
         if (!IsParentOf(comp)) {
             _children.add(comp);
+            comp.SetParent(this);
             return true;
         }
         return false;
@@ -40,7 +41,7 @@ public  class UIBase {
      負数を指定した場合、後ろからindex番目のコンポーネントを返す。
      存在しない場合はnullを返す。
      */
-    public UIBase GetComponent(int index) {
+    public Abs_UIBase GetComponent(int index) {
         if (_children == null) {
             return null;
         }
@@ -58,11 +59,11 @@ public  class UIBase {
      同名のコンポーネントが存在した場合、リストの早い方を取得する。
      存在しない場合はnullを返す。
      */
-    public UIBase GetComponent(String name) {
+    public Abs_UIBase GetComponent(String name) {
         if (_children == null) {
             return null;
         }
-        UIBase comp;
+        Abs_UIBase comp;
         for (int i=0; i<_children.size(); i++) {
             comp = _children.get(i);
             if (comp._name.equals(name)) {
@@ -77,7 +78,7 @@ public  class UIBase {
      自身のリストに指定したコンポーネントが存在すれば削除する。
      削除に成功した場合はtrueを返す。
      */
-    public boolean RemoveComponent(UIBase comp) {
+    public boolean RemoveComponent(Abs_UIBase comp) {
         if (_children == null) {
             return false;
         }
@@ -90,7 +91,7 @@ public  class UIBase {
      削除に成功した場合は削除したコンポーネントを返す。
      削除に失敗した場合はnullを返す。
      */
-    public UIBase RemoveComponent(int index) {
+    public Abs_UIBase RemoveComponent(int index) {
         if (_children == null) {
             return null;
         }
@@ -108,11 +109,11 @@ public  class UIBase {
      同名のコンポーネントが存在した場合、リストの早い方を削除し、それを返す。
      存在しない場合はnullを返す。
      */
-    public UIBase RemoveComponent(String name) {
+    public Abs_UIBase RemoveComponent(String name) {
         if (_children == null) {
             return null;
         }
-        UIBase comp;
+        Abs_UIBase comp;
         for (int i=0; i<_children.size(); i++) {
             comp = _children.get(i);
             if (comp._name.equals(name)) {
@@ -126,21 +127,21 @@ public  class UIBase {
     /**
      自身が、指定したコンポーネントの親であればtrueを返す。
      */
-    public boolean IsParentOf(UIBase comp) {
+    public boolean IsParentOf(Abs_UIBase comp) {
         return this == comp._parent;
     }
 
     /**
     自身が、指定したコンポーネントの子であればtrueを返す。
      */
-    public boolean IsChildOf(UIBase comp) {
+    public boolean IsChildOf(Abs_UIBase comp) {
         return _parent == comp;
     }
 
     /**
     指定したコンポーネントが自身の再帰的な子の関係にあればtrueを返す。
      */
-    public boolean Contains(UIBase comp) {
+    public boolean Contains(Abs_UIBase comp) {
         if (comp == null) {
             return false;
         }
@@ -159,8 +160,8 @@ public  class UIBase {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (o == null) return false;
-        if (!(o instanceof UIBase)) return false;
-        UIBase comp = (UIBase) o;
+        if (!(o instanceof Abs_UIBase)) return false;
+        Abs_UIBase comp = (Abs_UIBase) o;
         return _name.equals(comp._name);
     }
 
