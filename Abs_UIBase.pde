@@ -1,33 +1,99 @@
 /**
- UIManagerを含む、全てのUI系コンポーネントの基底クラス。
- 完成はされているが、抽象クラスとして定義される。
+ UIManagerを含む、全てのUIコンポーネントの基底クラス。
+ 抽象的な部分は存在しないが、これ自体でのインスタンス化を避けたいため、抽象クラスにしている。
  */
 public abstract class Abs_UIBase {
+    /**
+     親コンポーネント
+     */
     private Abs_UIBase _parent;
-    public Abs_UIBase GetParent() { return _parent; }
-    public void SetParent(Abs_UIBase parent) { _parent = parent; }
-    
-    private ArrayList<Abs_UIBase> _children;
-    public ArrayList<Abs_UIBase> GetChildren() { return _children; }
-    
-    
-    private String _name;
-    public String GetName() { return _name; }
+    public Abs_UIBase GetParent() { 
+        return _parent;
+    }
+    public void SetParent(Abs_UIBase value) { 
+        _parent = value;
+    }
 
+    /**
+     子コンポーネントのリスト
+     */
+    private ArrayList<Abs_UIBase> _children;
+    /**
+     子リストを返す。
+     @return 子リスト
+     @throws Exception 子リストがNullか空の場合
+     */
+    public ArrayList<Abs_UIBase> GetChildren() throws Exception {
+        if (IsNullOrEmptyChildren()) {
+            throw new Exception(this + "\n子リストがNullか空です。");
+        }
+        return _children;
+    }
+
+    /**
+     コンポーネントの名前
+     一度決定したら変更はできない
+     */
+    private String _name;
+    public String GetName() { 
+        return _name;
+    }
+
+    /**
+     コンポーネントの名前を指定して生成する。
+     名前は一度決定したら変更することはできない。
+     */
     public Abs_UIBase(String name) {
         _name = name;
     }
-    
-    protected void InitChildren() {
+
+    /**
+     子リストを初期化する。
+     これを呼び出さない限り子リストの取得の度に例外が発生することになる。
+     
+     @throws Exception 既に子リストが存在する場合 
+     */
+    protected void InitChildren() throws Exception {
+        if (_children != null) {
+            throw new Exception(this + "\n既に子リストが存在しています。");
+        }
         _children = new ArrayList<Abs_UIBase>();
     }
 
     /**
-     自身のリストにコンポーネントを追加する。
-     ただし、既に追加されていた場合は追加できない。
-     追加に成功した場合はtrueを返す。
+     子リストがNullかどうかをチェックする。
+     Nullの場合は例外を発生させる。
+     
+     @throws Exception 子リストがNullの場合
      */
-    public boolean AddComponent(Abs_UIBase comp) {
+    protected void CheckChildren() throws Exception {
+        if (_children == null) {
+            throw new Exception(this + "\n子リストが存在しません。");
+        }
+    }
+
+    /**
+     子リストがNullか空かどうかを判定する。
+     
+     @return 子リストがNullか空の場合はtrueを返す。
+     */
+    public boolean IsNullOrEmptyChildren() {
+        if (_children == null) {
+            return true;
+        }
+        return _children.isEmpty();
+    }
+
+    /**
+     自身のリストにコンポーネントを追加する。
+     ただし、既に子として追加されている場合は追加できない。
+     
+     @return 追加に成功した場合はtrueを返す
+     @throws Exception 子リストがNullの場合
+     */
+    public boolean AddComponent(Abs_UIBase comp) throws Exception {
+        CheckChildren();
+
         if (!IsParentOf(comp)) {
             _children.add(comp);
             comp.SetParent(this);
@@ -39,14 +105,15 @@ public abstract class Abs_UIBase {
     /**
      自身のリストのindex番目のコンポーネントを返す。
      負数を指定した場合、後ろからindex番目のコンポーネントを返す。
-     存在しない場合はnullを返す。
+     
+     @return index番目のコンポーネント 存在しなければNull
+     @throws Exception 子リストがNull もしくはindexが範囲外の場合
      */
-    public Abs_UIBase GetComponent(int index) {
-        if (_children == null) {
-            return null;
-        }
+    public Abs_UIBase GetComponent(int index) throws Exception {
+        CheckChildren();
+
         if (index >= _children.size() || -index > _children.size()) {
-            return null;
+            throw new Exception(this + "indexが範囲外です。index = " + index);
         }
         if (index < 0) {
             index += _children.size();
@@ -55,14 +122,15 @@ public abstract class Abs_UIBase {
     }
 
     /**
-     自身のリストの中からnameと一致するコンポーネントを返す。
-     同名のコンポーネントが存在した場合、リストの早い方を取得する。
-     存在しない場合はnullを返す。
+     自身のリストの中からnameと一致する名前のコンポーネントを返す。
+     同名のコンポーネントが存在した場合、リストの早い方を返す。
+     
+     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @throws Exception 子リストがNull
      */
-    public Abs_UIBase GetComponent(String name) {
-        if (_children == null) {
-            return null;
-        }
+    public Abs_UIBase GetComponent(String name) throws Exception {
+        CheckChildren();
+        
         Abs_UIBase comp;
         for (int i=0; i<_children.size(); i++) {
             comp = _children.get(i);
@@ -76,27 +144,27 @@ public abstract class Abs_UIBase {
 
     /**
      自身のリストに指定したコンポーネントが存在すれば削除する。
-     削除に成功した場合はtrueを返す。
+     
+     @return 削除に成功した場合はtrueを返す。
+     @throws Exception 子リストがNullの場合
      */
-    public boolean RemoveComponent(Abs_UIBase comp) {
-        if (_children == null) {
-            return false;
-        }
+    public boolean RemoveComponent(Abs_UIBase comp) throws Exception {
+        CheckChildren();
         return _children.remove(comp);
     }
 
     /**
      自身のリストのindex番目のコンポーネントを削除する。
      負数を指定した場合、後ろからindex番目のコンポーネントを削除する。
-     削除に成功した場合は削除したコンポーネントを返す。
-     削除に失敗した場合はnullを返す。
+     
+     @return index番目のコンポーネント 存在しなければNull
+     @throws Exception 子リストがNullの場合
      */
-    public Abs_UIBase RemoveComponent(int index) {
-        if (_children == null) {
-            return null;
-        }
+    public Abs_UIBase RemoveComponent(int index) throws Exception {
+        CheckChildren();
+        
         if (index >= _children.size() || -index > _children.size()) {
-            return null;
+            throw new Exception(this + "indexが範囲外です。index = " + index);
         }
         if (index < 0) {
             index += _children.size();
@@ -107,12 +175,13 @@ public abstract class Abs_UIBase {
     /**
      自身のリストの中からnameと一致するコンポーネントを削除する。
      同名のコンポーネントが存在した場合、リストの早い方を削除し、それを返す。
-     存在しない場合はnullを返す。
+     
+     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @throws Exception 子リストがNull
      */
-    public Abs_UIBase RemoveComponent(String name) {
-        if (_children == null) {
-            return null;
-        }
+    public Abs_UIBase RemoveComponent(String name) throws Exception {
+        CheckChildren();
+        
         Abs_UIBase comp;
         for (int i=0; i<_children.size(); i++) {
             comp = _children.get(i);
@@ -125,26 +194,29 @@ public abstract class Abs_UIBase {
 
 
     /**
-     自身が、指定したコンポーネントの親であればtrueを返す。
+     自身が、指定したコンポーネントの親であるかどうか判定する。
+     
+     @return 親である場合はtrueを返す。
      */
     public boolean IsParentOf(Abs_UIBase comp) {
         return this == comp._parent;
     }
 
     /**
-    自身が、指定したコンポーネントの子であればtrueを返す。
+     自身が、指定したコンポーネントの子であるかどうか判定する。
+     
+     @return 子である場合はtrueを返す。
      */
     public boolean IsChildOf(Abs_UIBase comp) {
         return _parent == comp;
     }
 
     /**
-    指定したコンポーネントが自身の再帰的な子の関係にあればtrueを返す。
+     指定したコンポーネントが自身の再帰的な子の関係にあるかどうか判定する。
+     
+     @return 指定したコンポーネントが自身の再帰的な親子関係にある場合はtrueを返す。
      */
     public boolean Contains(Abs_UIBase comp) {
-        if (comp == null) {
-            return false;
-        }
         while (comp._parent != null) {
             if (this == comp._parent) {
                 return true;
@@ -155,8 +227,8 @@ public abstract class Abs_UIBase {
     }
 
     /**
-    名前が一致するならば、等価とする。
-    */
+     Abs_UIBaseのインスタンスであり、かつ同名であればtrueを返す。
+     */
     public boolean equals(Object o) {
         if (o == this) return true;
         if (o == null) return false;

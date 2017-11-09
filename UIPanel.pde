@@ -4,14 +4,18 @@
 public class UIPanel extends Abs_UIComponent {
     public UIPanel(String componentName, UIScene scene) {
         super(componentName, scene);
+        try{
         super.InitChildren();
+        } 
+        catch(Exception e) {
+        }
     }
 
     public void DrawComponent() {
         super.DrawBack();
     }
 
-    public boolean AddComponent(Abs_UIComponent comp) {
+    public boolean AddComponent(Abs_UIComponent comp) throws Exception {
         if (comp == null) return false;
         if (!(comp instanceof Abs_UIComponent)) {
             println("シーンにコンポーネント以外のインスタンスが追加されようとしました。");
@@ -26,7 +30,7 @@ public class UIPanel extends Abs_UIComponent {
         return super.AddComponent(comp);
     }
 
-    public Abs_UIComponent GetComponent(int index) {
+    public Abs_UIComponent GetComponent(int index) throws Exception {
         return _CastToUIComponent(super.GetComponent(index));
     }
 
