@@ -1,23 +1,50 @@
 /**
- UIManagerを含む、全てのUI系コンポーネントの基底クラス。
- 完成はされているが、抽象クラスとして定義される。
+ UIManagerを含む、全てのUIコンポーネントの基底クラス。
+ 抽象的な部分は存在しないが、これ自体でのインスタンス化を避けたいため、抽象クラスにしている。
  */
 public abstract class Abs_UIBase {
+    /**
+     親コンポーネント。
+     */
     private Abs_UIBase _parent;
-    public Abs_UIBase GetParent() { return _parent; }
-    public void SetParent(Abs_UIBase parent) { _parent = parent; }
-    
+    /**
+     親コンポーネントを返す。
+     @return 親コンポーネント
+     */
+    public Abs_UIBase GetParent() { 
+        return _parent;
+    }
+    /**
+     親コンポーネントをセットする。
+     @param value 親コンポーネント
+     */
+    public void SetParent(Abs_UIBase value) { 
+        _parent = value;
+    }
+
+    /**
+     子コンポーネントのリスト。
+     */
     private ArrayList<Abs_UIBase> _children;
-    public ArrayList<Abs_UIBase> GetChildren() { return _children; }
-    
-    
+    /**
+     子コンポーネントのリストを返す。
+     @return 子コンポーネントのリスト
+     @throws java.lang.Exception 子リストがNullか空の場合
+     */
+    public ArrayList<Abs_UIBase> GetChildren() { 
+        return _children;
+    }
+
+
     private String _name;
-    public String GetName() { return _name; }
+    public String GetName() { 
+        return _name;
+    }
 
     public Abs_UIBase(String name) {
         _name = name;
     }
-    
+
     protected void InitChildren() {
         _children = new ArrayList<Abs_UIBase>();
     }
@@ -132,14 +159,14 @@ public abstract class Abs_UIBase {
     }
 
     /**
-    自身が、指定したコンポーネントの子であればtrueを返す。
+     自身が、指定したコンポーネントの子であればtrueを返す。
      */
     public boolean IsChildOf(Abs_UIBase comp) {
         return _parent == comp;
     }
 
     /**
-    指定したコンポーネントが自身の再帰的な子の関係にあればtrueを返す。
+     指定したコンポーネントが自身の再帰的な子の関係にあればtrueを返す。
      */
     public boolean Contains(Abs_UIBase comp) {
         if (comp == null) {
@@ -155,8 +182,8 @@ public abstract class Abs_UIBase {
     }
 
     /**
-    名前が一致するならば、等価とする。
-    */
+     名前が一致するならば、等価とする。
+     */
     public boolean equals(Object o) {
         if (o == this) return true;
         if (o == null) return false;

@@ -19,8 +19,6 @@ MatrixManager matrixManager = new MatrixManager();
 
 float x = 0, y=0;
 
-PImage atsu;
-
 UIScene scene;
 Abs_UIComponent comp1, comp2;
 
@@ -61,47 +59,6 @@ void setup() {
 
 void draw() {
     background(255);
-
-    scene.UpdateTransform();
-    scene.DrawScene();
-    x+=1/frameRate;
-    //comp1.GetTransform().SetRotate(x);
-    comp2.GetTransform().SetRotate(x);
-
-    //translate(width/2, height/2);
-    //rotate(x);
-    //translate(-100,-100);
-
-    //fill(200, 200, 0);
-    //rect(0, 0, 200, 200);
-
-
-    //// 右下基準の矩形
-    //pushMatrix();
-    //// 子から見た親の基準へ移動
-    //translate(200, 200);
-    //// 子の回転
-    //rotate(0);
-    //translate(-100, -50);
-    //fill(color(200, 100, 200, 100));
-    //strokeWeight(5);
-    //rect(0, 0, 100, 50);
-    ////image(atsu, 0, 0, 100, 50);
-    //strokeWeight(1);
-
-    //popMatrix();
-
-    //// 右上基準の矩形
-    //pushMatrix();
-    //translate(200, 0);
-    //rotate(-y);
-    //scale(1, 0.5f);
-    //fill(0);
-    //rect(0, 0, 100, 50);
-    //popMatrix();
-
-    //x+=1/frameRate;
-    //y+=1/frameRate;
 }
 
 void keyPressed() {
