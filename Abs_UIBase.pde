@@ -64,11 +64,11 @@ public abstract class Abs_UIBase {
      子リストがNullかどうかをチェックする。
      Nullの場合は例外を発生させる。
      
-     @throws Exception 子リストがNullの場合
+     @throws NullPointerException 子リストがNullの場合
      */
-    protected void CheckChildren() throws Exception {
+    protected void CheckChildren() throws NullPointerException {
         if (_children == null) {
-            throw new Exception(this + "\n子リストが存在しません。");
+            throw new NullPointerException(this + "\n子リストがNullです。");
         }
     }
 
@@ -89,9 +89,10 @@ public abstract class Abs_UIBase {
      ただし、既に子として追加されている場合は追加できない。
      
      @return 追加に成功した場合はtrueを返す
-     @throws Exception 子リストがNullの場合
+     @throws NullPointerException 子リストがNullの場合
+     指定コンポーネントがNullの場合
      */
-    public boolean AddComponent(Abs_UIBase comp) throws Exception {
+    public boolean AddComponent(Abs_UIBase comp) throws Exception, NullPointerException {
         CheckChildren();
 
         if (!IsParentOf(comp)) {
@@ -107,13 +108,15 @@ public abstract class Abs_UIBase {
      負数を指定した場合、後ろからindex番目のコンポーネントを返す。
      
      @return index番目のコンポーネント 存在しなければNull
-     @throws Exception 子リストがNull もしくはindexが範囲外の場合
+     @throws ArrayIndexOutOfBoundsException indexが範囲外の場合
+     @throws NullPointerException 子リストがNullの場合
+     @throws その他
      */
-    public Abs_UIBase GetComponent(int index) throws Exception {
+    public Abs_UIBase GetComponent(int index) throws ArrayIndexOutOfBoundsException, NullPointerException, Exception {
         CheckChildren();
 
         if (index >= _children.size() || -index > _children.size()) {
-            throw new Exception(this + "indexが範囲外です。index = " + index);
+            throw new ArrayIndexOutOfBoundsException(this + "indexが範囲外です。index = " + index);
         }
         if (index < 0) {
             index += _children.size();
@@ -126,9 +129,10 @@ public abstract class Abs_UIBase {
      同名のコンポーネントが存在した場合、リストの早い方を返す。
      
      @return nameと一致する名前のコンポーネント 存在しなければNull
-     @throws Exception 子リストがNull
+     @throws NullPointerException 子リストがNull
+     @throws Exception その他
      */
-    public Abs_UIBase GetComponent(String name) throws Exception {
+    public Abs_UIBase GetComponent(String name) throws NullPointerException, Exception {
         CheckChildren();
         
         Abs_UIBase comp;
@@ -146,9 +150,9 @@ public abstract class Abs_UIBase {
      自身のリストに指定したコンポーネントが存在すれば削除する。
      
      @return 削除に成功した場合はtrueを返す。
-     @throws Exception 子リストがNullの場合
+     @throws NullPointerException 子リストがNullの場合
      */
-    public boolean RemoveComponent(Abs_UIBase comp) throws Exception {
+    public boolean RemoveComponent(Abs_UIBase comp) throws NullPointerException {
         CheckChildren();
         return _children.remove(comp);
     }
@@ -158,13 +162,15 @@ public abstract class Abs_UIBase {
      負数を指定した場合、後ろからindex番目のコンポーネントを削除する。
      
      @return index番目のコンポーネント 存在しなければNull
-     @throws Exception 子リストがNullの場合
+     @throws ArrayIndexOutOfBoundsException indexが範囲外の場合
+     @throws NullPointerException 子リストがNullの場合
+     @throws Exception その他
      */
-    public Abs_UIBase RemoveComponent(int index) throws Exception {
+    public Abs_UIBase RemoveComponent(int index) throws ArrayIndexOutOfBoundsException, NullPointerException, Exception {
         CheckChildren();
         
         if (index >= _children.size() || -index > _children.size()) {
-            throw new Exception(this + "indexが範囲外です。index = " + index);
+            throw new ArrayIndexOutOfBoundsException(this + "indexが範囲外です。index = " + index);
         }
         if (index < 0) {
             index += _children.size();
@@ -177,9 +183,10 @@ public abstract class Abs_UIBase {
      同名のコンポーネントが存在した場合、リストの早い方を削除し、それを返す。
      
      @return nameと一致する名前のコンポーネント 存在しなければNull
-     @throws Exception 子リストがNull
+     @throws NullPointerException 子リストがNull
+     @throws Exception その他
      */
-    public Abs_UIBase RemoveComponent(String name) throws Exception {
+    public Abs_UIBase RemoveComponent(String name) throws NullPointerException, Exception {
         CheckChildren();
         
         Abs_UIBase comp;
