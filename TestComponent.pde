@@ -2,18 +2,22 @@ public class TestComponent extends Abs_UIComponent {
     public TestComponent(String componentName, UIScene scene) {
         super(componentName, scene);
     }
-    
+
     public void DrawComponent() {
-        resetMatrix();
-        
-        UITransform real, draw;
-        draw = super.GetTransform();
-        real = super.GetRealTransform();
-        
-        //rotate(real.GetRotate());
-        translate(real.GetPosition().x, real.GetPosition().y);
-        
-        fill(255, 0, 0);
-        rect(0, 0, draw.GetSize().x * real.GetScale().x , draw.GetSize().y * real.GetScale().y);
+        super.DrawBack();
+
+        try {
+            if (!super.IsinRegion(mouseX, mouseY)) {
+                fill(0, 0, 255);
+            } else {
+                fill(255, 0, 0);
+            }
+            stroke(0);
+            line(0, 0, 0, height);
+            line(0, 0, width, 0);
+        } 
+        catch(Exception e) {
+            println(e);
+        }
     }
 }

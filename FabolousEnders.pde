@@ -22,24 +22,41 @@ float x = 0, y=0;
 PImage atsu;
 
 UIScene scene;
-Abs_UIComponent comp;
+Abs_UIComponent comp1, comp2;
 
 void setup() {
     size(500, 500);
     
+    // sceneTransfrom definition
     sceneTransform = new UITransform();
     sceneTransform.SetSize(width, height);
     
-    atsu = loadImage("a.png");
-    
     scene = new UIScene("main");
-    comp = new TestComponent("test", scene);
-    UITransform compT = comp.GetTransform();
+    comp1 = new UIPanel("panel", scene);
+    UITransform compT = comp1.GetTransform();
     compT.SetSize(100, 100);
     compT.SetPosition(0, 0);
-    comp.SetParentAnchor(UIAnchor.CENTER_MIDDLE);
-    comp.SetSelfAnchor(UIAnchor.CENTER_MIDDLE);
-    comp.SetBackColor(color(200, 200, 0, 100));
+    compT.SetScale(1, 2);
+    comp1.SetParentAnchor(UIAnchor.CENTER_MIDDLE);
+    comp1.SetSelfAnchor(UIAnchor.CENTER_MIDDLE);
+    comp1.SetBackColor(color(200, 200, 0, 100));
+    comp1.SetDrawBorder(true);
+    comp1.SetBorderColor(color(0));
+    comp1.SetBorderSize(2);
+    
+    comp2 = new UIPanel("nested panel", scene);
+    comp1.AddComponent(comp2);
+    compT = comp2.GetTransform();
+    compT.SetSize(100, 100);
+    compT.SetPosition(100, 0);
+    comp2.SetParentAnchor(UIAnchor.RIGHT_BOTTOM);
+    comp2.SetSelfAnchor(UIAnchor.LEFT_TOP);
+    comp2.SetBackColor(color(0, 200, 200));
+    comp2.SetDrawBorder(true);
+    comp2.SetBorderColor(color(255, 0, 0));
+    comp2.SetBorderSize(2);
+    comp2.SetRelative(true);
+    
 }
 
 void draw() {
@@ -47,8 +64,9 @@ void draw() {
 
     scene.UpdateTransform();
     scene.DrawScene();
-    //x+=1/frameRate;
-    //comp.GetTransform().SetRotate(x);
+    x+=1/frameRate;
+    //comp1.GetTransform().SetRotate(x);
+    comp2.GetTransform().SetRotate(x);
 
     //translate(width/2, height/2);
     //rotate(x);
@@ -63,7 +81,7 @@ void draw() {
     //// 子から見た親の基準へ移動
     //translate(200, 200);
     //// 子の回転
-    //rotate(y);
+    //rotate(0);
     //translate(-100, -50);
     //fill(color(200, 100, 200, 100));
     //strokeWeight(5);

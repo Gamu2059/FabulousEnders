@@ -30,7 +30,7 @@ public class UIScene extends Abs_UIBase {
         for (int i=0;i<super.GetChildren().size();i++) {
             ui = GetComponent(i);
             if (ui.IsChildOf(this)) {
-                ui.TransformComponent(sceneTransform);
+                ui.TransformComponent();
             }
         }
     }
