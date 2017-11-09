@@ -29,32 +29,6 @@ void setup() {
     sceneTransform = new UITransform();
     sceneTransform.SetSize(width, height);
     
-    scene = new UIScene("main");
-    comp1 = new UIPanel("panel", scene);
-    UITransform compT = comp1.GetTransform();
-    compT.SetSize(100, 100);
-    compT.SetPosition(0, 0);
-    compT.SetScale(1, 2);
-    comp1.SetParentAnchor(UIAnchor.CENTER_MIDDLE);
-    comp1.SetSelfAnchor(UIAnchor.CENTER_MIDDLE);
-    comp1.SetBackColor(color(200, 200, 0, 100));
-    comp1.SetDrawBorder(true);
-    comp1.SetBorderColor(color(0));
-    comp1.SetBorderSize(2);
-    
-    comp2 = new UIPanel("nested panel", scene);
-    comp1.AddComponent(comp2);
-    compT = comp2.GetTransform();
-    compT.SetSize(100, 100);
-    compT.SetPosition(100, 0);
-    comp2.SetParentAnchor(UIAnchor.RIGHT_BOTTOM);
-    comp2.SetSelfAnchor(UIAnchor.LEFT_TOP);
-    comp2.SetBackColor(color(0, 200, 200));
-    comp2.SetDrawBorder(true);
-    comp2.SetBorderColor(color(255, 0, 0));
-    comp2.SetBorderSize(2);
-    comp2.SetRelative(true);
-    
 }
 
 void draw() {

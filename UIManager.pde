@@ -4,17 +4,25 @@
  */
 public final class UIManager extends Abs_UIBase {
     private UIScene _activeScene;
-    public UIScene GetAcriveScene() { return _activeScene; }
-    
+    public UIScene GetAcriveScene() { 
+        return _activeScene;
+    }
+
     private UIScene _preScene;
-    public UIScene GetPreScene() { return _preScene; }
+    public UIScene GetPreScene() { 
+        return _preScene;
+    }
 
     public UIManager() {
         super("UIManager");
-        InitChildren();
+        try {
+            InitChildren();
+        } 
+        catch(Exception e) {
+        }
     }
 
-    public boolean AddComponent(Abs_UIBase comp) {
+    public boolean AddComponent(Abs_UIBase comp) throws Exception {
         if (comp == null) return false;
         if (!(comp instanceof UIScene)) {
             println("UIマネージャにシーン以外のインスタンスが追加されようとしました。");
@@ -29,7 +37,7 @@ public final class UIManager extends Abs_UIBase {
         return super.AddComponent(comp);
     }
 
-    public UIScene GetComponent(int index) {
+    public UIScene GetComponent(int index) throws Exception {
         return _CastToUIScene(super.GetComponent(index));
     }
 
@@ -79,7 +87,7 @@ public final class UIManager extends Abs_UIBase {
         }
         _preScene = _activeScene;
         _activeScene = scene;
-        
+
         // TODO:シーントランジションアニメーションを作成できるならば、作る。
         DrawScene();
     }
@@ -90,10 +98,10 @@ public final class UIManager extends Abs_UIBase {
     public void DrawScene() {
         if (_activeScene == null) return;
         background(255);
-        
+
         // TODO:シーンの描画処理を呼び出す。
     }
-    
+
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("\nUIManager : scene num = ").append(super._children.size()).append(", scene = ").append(super._children);

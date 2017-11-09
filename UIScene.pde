@@ -7,7 +7,7 @@ public class UIScene extends Abs_UIBase {
     public Abs_UIComponent GetMOC() { 
         return _moc;
     }
-    
+
     // Mouse Active Component
     private Abs_UIComponent _mac;
     public Abs_UIComponent GetMAC() { 
@@ -17,32 +17,44 @@ public class UIScene extends Abs_UIBase {
 
     public UIScene(String name) {
         super(name);
-        super.InitChildren();
-        uiManager.AddComponent(this);
+        try {
+            super.InitChildren();
+            uiManager.AddComponent(this);
+        } 
+        catch(Exception e) {
+        }
     }
 
     /**
-    シーンで保持しているコンポーネントを再帰的に変形させる。
-    */
+     シーンで保持しているコンポーネントを再帰的に変形させる。
+     */
     public void UpdateTransform() {
         Abs_UIComponent ui;
         // シーン直下のコンポーネントだけ呼び出す
-        for (int i=0;i<super.GetChildren().size();i++) {
-            ui = GetComponent(i);
-            if (ui.IsChildOf(this)) {
-                ui.TransformComponent();
+        try {
+            for (int i=0; i<super.GetChildren().size(); i++) {
+                ui = GetComponent(i);
+                if (ui.IsChildOf(this)) {
+                    ui.TransformComponent();
+                }
             }
+        } 
+        catch(Exception e) {
         }
     }
 
     // 再帰的にシーンを描画する
-    public void DrawScene(){
-        for (int i=0;i<super.GetChildren().size();i++) {
-            GetComponent(i).DrawComponent();
+    public void DrawScene() {
+        try {
+            for (int i=0; i<super.GetChildren().size(); i++) {
+                GetComponent(i).DrawComponent();
+            }
+        } 
+        catch(Exception e) {
         }
     }
 
-    public boolean AddComponent(Abs_UIComponent comp) {
+    public boolean AddComponent(Abs_UIComponent comp) throws Exception {
         if (comp == null) return false;
         if (!(comp instanceof Abs_UIComponent)) {
             println("シーンにコンポーネント以外のインスタンスが追加されようとしました。");
@@ -57,7 +69,7 @@ public class UIScene extends Abs_UIBase {
         return super.AddComponent(comp);
     }
 
-    public Abs_UIComponent GetComponent(int index) {
+    public Abs_UIComponent GetComponent(int index) throws Exception {
         return _CastToUIComponent(super.GetComponent(index));
     }
 
@@ -103,19 +115,23 @@ public class UIScene extends Abs_UIBase {
             _moc = null;
             return;
         }
-        if (GetChildren() == null) {
-            _moc = null;
-            return;
-        }
-
-        Abs_UIComponent ui;
-        for (int i=GetChildren().size()-1; i>=0; i--) {
-            ui = GetComponent(i);
-            if (ui == null) {
-                continue;
+        try {
+            if (GetChildren() == null) {
+                _moc = null;
+                return;
             }
 
-            //ui.IsOverlappedOf(x, y);
+            Abs_UIComponent ui;
+            for (int i=GetChildren().size()-1; i>=0; i--) {
+                ui = GetComponent(i);
+                if (ui == null) {
+                    continue;
+                }
+
+                //ui.IsOverlappedOf(x, y);
+            }
+        } 
+        catch(Exception e) {
         }
     }
 
