@@ -112,7 +112,6 @@ public abstract class Abs_UIComponent extends Abs_UIBase {
             _scene = scene;
 
             _transform = new UITransform();
-            //_realTransform = new UITransform();
             _matrix = new PMatrix2D();
             _parentAnchor = new UIAnchor();
             _selfAnchor = new UIAnchor();

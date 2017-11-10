@@ -24,7 +24,7 @@ public final class UIManager extends Abs_UIBase {
 
     /**
      自身のリストにコンポーネントを追加する。
-     ただし、既に子として追加されている場合は追加できない。
+     ただし、既に子として追加されている場合は追加できない。yo
      
      @return 追加に成功した場合はtrueを返す
      @throws Exception 指定コンポーネントがUISceneインスタンスでない場合
