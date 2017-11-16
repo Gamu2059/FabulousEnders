@@ -13,12 +13,6 @@ public abstract class Abs_UIComponent extends Abs_UIBase {
         return _transform;
     }
 
-    //// 自身の描画用実トランスフォーム
-    //private UITransform _realTransform;
-    //public UITransform GetRealTransform() {
-    //    return _realTransform;
-    //}
-
     private PMatrix2D _matrix;
     public PMatrix2D GetMatrix() {
         return _matrix;
@@ -105,18 +99,21 @@ public abstract class Abs_UIComponent extends Abs_UIBase {
     public Abs_UIComponent(String componentName, UIScene scene) {
         super(componentName);
 
-        if (scene != null) {
-            scene.AddComponent(this);
+        try {
+            if (scene != null) {
+                scene.AddComponent(this);
+            }
+            _scene = scene;
+
+            _transform = new UITransform();
+            _matrix = new PMatrix2D();
+            _parentAnchor = new UIAnchor();
+            _selfAnchor = new UIAnchor();
+
+            _drawBack = true;
+        } 
+        catch(Exception e) {
         }
-        _scene = scene;
-
-        _transform = new UITransform();
-        //_realTransform = new UITransform();
-        _matrix = new PMatrix2D();
-        _parentAnchor = new UIAnchor();
-        _selfAnchor = new UIAnchor();
-
-        _drawBack = true;
     }
 
 
@@ -168,16 +165,19 @@ public abstract class Abs_UIComponent extends Abs_UIBase {
         gen2 = GetTransform().GetSize();
         translate(-par1 * gen2.x + gen1.x, -par2 * gen2.y + gen1.y);
 
-        if (super.GetChildren() != null) {
-            Abs_UIBase base;
-            for (int i=0;i<GetChildren().size();i++) {
-                base = GetChildren().get(i);
-                if (base instanceof Abs_UIComponent) {
-                    ((Abs_UIComponent) base).TransformComponent();
+        try {
+            if (super.GetChildren() != null) {
+                Abs_UIBase base;
+                for (int i=0; i<GetChildren().size(); i++) {
+                    base = GetChildren().get(i);
+                    if (base instanceof Abs_UIComponent) {
+                        ((Abs_UIComponent) base).TransformComponent();
+                    }
                 }
             }
+        } 
+        catch(Exception e) {
         }
-
         PushMatrix();
         matrixManager.PopMatrix();
     }

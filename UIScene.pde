@@ -1,5 +1,5 @@
 /**
- 一つのシーンのコンポーネントを管理するためのクラス。
+ UIコンポーネントをまとめて管理するためのクラス。
  */
 public class UIScene extends Abs_UIBase {
     // Mouse Overlapped Component
@@ -7,116 +7,235 @@ public class UIScene extends Abs_UIBase {
     public Abs_UIComponent GetMOC() { 
         return _moc;
     }
-    
+
     // Mouse Active Component
     private Abs_UIComponent _mac;
     public Abs_UIComponent GetMAC() { 
         return _mac;
     }
 
-
+    /**
+     名前を指定してシーンインスタンスを生成する。
+     インスタンスは自動的にマネージャに追加される。
+     */
     public UIScene(String name) {
         super(name);
-        super.InitChildren();
-        uiManager.AddComponent(this);
+        try {
+            uiManager.AddComponent(this);
+            super.InitChildren();
+        }
+        catch(Exception e) {
+            println(this + e.toString());
+        }
     }
 
     /**
-    シーンで保持しているコンポーネントを再帰的に変形させる。
-    */
-    public void UpdateTransform() {
+     アクティブシーンになった時に自動的に呼び出される。
+     主にシーンの初期化を行う。
+     */
+    public void SceneEnabled() {
+    }
+
+    /**
+     ノンアクティブシーンになった時に自動的に呼び出される。
+     コンポーネントの後始末などを行う。
+     */
+    public void SceneDisabled() {
+    }
+
+    /**
+     背景を更新する。
+     基本的に背景を塗りつぶすだけだが、任意の処理を記述できる許容がある。
+     */
+    public void ResetBackGround() {
+    }
+
+    /**
+     アクティブシーンかつシーンに追加されたばかりのコンポーネントに対して呼び出しを行う。
+     UnityでのAwake関数。
+     */
+    public void AwakeComponentCaller() {
+    }
+
+    /**
+     追加されて
+     */
+    public void StartComponentCaller() {
+    }
+
+    public void UpdateComponentCaller() {
+    }
+
+    public void AnimationComponentCaller() {
+    }
+
+    /**
+     アフィン行列を初期化する。
+     基本的にスタックを全て放棄して単位行列にするだけだが、任意の処理を記述できる許容がある。
+     */
+    public void ResetMatrix() {
+    }
+
+    public void TransformComponentCaller() {
+    }
+
+    public void SortingComponent() {
+    }
+
+    public void CheckMOC() {
+    }
+
+    public void CheckMAC() {
+    }
+
+    public void DrawComponentCaller() {
+    }
+
+    public void DestroyComponentCaller() {
+    }
+
+    /**
+     コンポーネントのアニメーション処理を呼び出す。
+     アニメーションメソッドを持っていなれければ呼び出さない。
+     */
+    public void UpdateAnimation() {
+    }
+
+    /**
+     シーンで保持しているコンポーネントを再帰的にトランスフォーム処理する。
+     matrixスタックをオーバーしても例外は各コンポーネントで対処する。
+     
+     @throws Exception 子リストがNullか空であった場合
+     */
+    public void UpdateTransform() throws Exception {
         Abs_UIComponent ui;
         // シーン直下のコンポーネントだけ呼び出す
-        for (int i=0;i<super.GetChildren().size();i++) {
-            ui = GetComponent(i);
-            if (ui.IsChildOf(this)) {
-                ui.TransformComponent();
+        for (int i=0; i<super.GetChildren().size(); i++) {
+            try {
+                ui = GetComponent(i);
+                if (ui.IsChildOf(this)) {
+                    ui.TransformComponent();
+                }
+            } 
+            catch (Exception e) {
+                println(this + e.toString());
             }
         }
     }
 
+    public void SortingWithProprity() {
+    }
+
     // 再帰的にシーンを描画する
-    public void DrawScene(){
-        for (int i=0;i<super.GetChildren().size();i++) {
-            GetComponent(i).DrawComponent();
+    public void DrawScene() {
+        try {
+            for (int i=0; i<super.GetChildren().size(); i++) {
+                GetComponent(i).DrawComponent();
+            }
+        } 
+        catch(Exception e) {
         }
     }
 
-    public boolean AddComponent(Abs_UIComponent comp) {
-        if (comp == null) return false;
+
+
+
+    /**
+     自身のリストにコンポーネントを追加する。
+     ただし、既に子として追加されている場合は追加できない。yo
+     
+     @return 追加に成功した場合はtrueを返す
+     @throws Exception 指定コンポーネントがコンポーネントインスタンスでない場合
+     指定コンポーネントが既に追加されている場合
+     @throws NullPointerException 子リストがNullの場合
+     */
+    public boolean AddComponent(Abs_UIComponent comp) throws NullPointerException, Exception {
         if (!(comp instanceof Abs_UIComponent)) {
-            println("シーンにコンポーネント以外のインスタンスが追加されようとしました。");
-            println("シーンにはコンポーネント及びそのサブクラスのインスタンスしか格納することができません。");
-            return false;
+            throw new Exception(this + "\nAbs_UIComponentインスタンスでないコンポーネントが指定されました。");
         }
         if (GetComponent(comp.GetName()) != null) {
-            println("既に同名のシーンが存在するため、追加することができません。");
-            println("UIManagerには同名のシーンインスタンスは格納することができません。");
-            return false;
+            throw new Exception(this + "\n既に同名のコンポーネントインスタンスが存在するため追加することができません。 name = " + comp.GetName());
         }
         return super.AddComponent(comp);
     }
 
-    public Abs_UIComponent GetComponent(int index) {
+    /**
+     自身のリストのindex番目のコンポーネントを返す。
+     負数を指定した場合、後ろからindex番目のコンポーネントを返す。
+     
+     @return index番目のコンポーネント 存在しなければNull
+     @throws NullPointerException 子リストがNull 
+     @throws ArrayIndexOutOfBoundsException indexが範囲外の場合
+     @throws Exception 取得したインスタンスがコンポーネントインスタンスでなかった場合
+     */
+    public Abs_UIComponent GetComponent(int index) throws ArrayIndexOutOfBoundsException, NullPointerException, Exception {
         return _CastToUIComponent(super.GetComponent(index));
     }
 
-    public Abs_UIComponent GetComponent(String name) {
+    /**
+     自身のリストの中からnameと一致する名前のコンポーネントを返す。
+     同名のコンポーネントが存在した場合、リストの早い方を返す。
+     
+     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @throws NullPointerException 子リストがNull
+     @throws Exception 取得したインスタンスがコンポーネントインスタンスでなかった場合
+     */
+    public Abs_UIComponent GetComponent(String name) throws NullPointerException, Exception {
         return _CastToUIComponent(super.GetComponent(name));
     }
 
-    public boolean RemoveComponent(Abs_UIComponent comp) {
-        if (comp == null) return false;
-        if (!(comp instanceof Abs_UIComponent)) return false;
+    /**
+     自身のリストに指定したコンポーネントが存在すれば削除する。
+     
+     @return 削除に成功した場合はtrueを返す。
+     @throws Exception 指定コンポーネントがUISceneインスタンスでない場合
+     @throws NullPointerException 子リストがNullの場合
+     */
+    public boolean RemoveComponent(Abs_UIComponent comp) throws NullPointerException, Exception {
+        if (!(comp instanceof Abs_UIComponent)) {
+            throw new Exception(this + "\nAbs_UIComponentインスタンスでないコンポーネントが指定されました。");
+        }
         return super.RemoveComponent(comp);
     }
 
-    public Abs_UIComponent RemoveComponent(int index) {
+    /**
+     自身のリストのindex番目のコンポーネントを削除する。
+     負数を指定した場合、後ろからindex番目のコンポーネントを削除する。
+     
+     @return index番目のコンポーネント 存在しなければNull
+     @throws NullPointerException 子リストがNull 
+     @throws ArrayIndexOutOfBoundsException indexが範囲外の場合
+     @throws Exception 削除したインスタンスがコンポーネントインスタンスでなかった場合
+     */
+    public Abs_UIComponent RemoveComponent(int index) throws ArrayIndexOutOfBoundsException, NullPointerException, Exception {
         return _CastToUIComponent(super.RemoveComponent(index));
     }
 
-    public Abs_UIComponent RemoveComponent(String name) {
+    /**
+     自身のリストの中からnameと一致するコンポーネントを削除する。
+     同名のコンポーネントが存在した場合、リストの早い方を削除し、それを返す。
+     
+     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @throws NullPointerException 子リストがNull
+     @throws Exception 削除したインスタンスがコンポーネントインスタンスでなかった場合
+     */
+    public Abs_UIComponent RemoveComponent(String name) throws NullPointerException, Exception {
         return _CastToUIComponent(super.RemoveComponent(name));
     }
 
     /**
      引数に渡されたインスタンスをコンポーネントインスタンスにキャストして返す。
-     キャストできない場合はnullが返される。
+     
+     @throws Exception 指定コンポーネントがAbs_UIComponentインスタンスでない場合
      */
-    private Abs_UIComponent _CastToUIComponent(Object o) {
-        if (!(o instanceof Abs_UIComponent)) return null;
+    private Abs_UIComponent _CastToUIComponent(Object o) throws Exception {
+        if (o == null) {
+            return null;
+        }
+        if (!(o instanceof Abs_UIComponent)) {
+            throw new Exception(this + "\nAbs_UIComponentインスタンスでないコンポーネントが指定されました。");
+        }
         return (Abs_UIComponent) o;
-    }
-
-    /**
-     MOCの判定を行う。
-     スクリーン上にマウスが存在しない場合は、MOCはnullになる。
-     */
-    public void CheckMOC() {
-        int x, y, w, h;
-        x = mouseX;
-        y = mouseY;
-        w = width;
-        h = height;
-
-        if  (x < 0 || x >= w || y < 0 || y >= height) {
-            _moc = null;
-            return;
-        }
-        if (GetChildren() == null) {
-            _moc = null;
-            return;
-        }
-
-        Abs_UIComponent ui;
-        for (int i=GetChildren().size()-1; i>=0; i--) {
-            ui = GetComponent(i);
-            if (ui == null) {
-                continue;
-            }
-
-            //ui.IsOverlappedOf(x, y);
-        }
     }
 
     public String toString() {
