@@ -14,21 +14,16 @@ UITransform sceneTransform;
 
 // マネージャインスタンス
 InputManager inputManager = new InputManager();
-UIManager uiManager = new UIManager();
+SceneManager sceneManager = new SceneManager();
 MatrixManager matrixManager = new MatrixManager();
 
-float x = 0, y=0;
-
-UIScene scene;
-Abs_UIComponent comp1, comp2;
 
 void setup() {
     size(500, 500);
-    
+
     // sceneTransfrom definition
     sceneTransform = new UITransform();
     sceneTransform.SetSize(width, height);
-    
 }
 
 void draw() {
