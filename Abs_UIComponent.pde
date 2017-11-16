@@ -13,12 +13,6 @@ public abstract class Abs_UIComponent extends Abs_UIBase {
         return _transform;
     }
 
-    //// 自身の描画用実トランスフォーム
-    //private UITransform _realTransform;
-    //public UITransform GetRealTransform() {
-    //    return _realTransform;
-    //}
-
     private PMatrix2D _matrix;
     public PMatrix2D GetMatrix() {
         return _matrix;

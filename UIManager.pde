@@ -121,6 +121,9 @@ public final class UIManager extends Abs_UIBase {
      @throws Exception 指定コンポーネントがUISceneインスタンスでない場合
      */
     private UIScene _CastToUIScene(Object o) throws Exception {
+        if (o == null) {
+            return null;
+        }
         if (!(o instanceof UIScene)) {
             throw new Exception(this + "\nUISceneインスタンスでないコンポーネントが指定されました。");
         }

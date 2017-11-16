@@ -54,10 +54,16 @@ public class UIPanel extends Abs_UIComponent {
 
     /**
      引数に渡されたインスタンスをコンポーネントインスタンスにキャストして返す。
-     キャストできない場合はnullが返される。
+     
+     @throws Exception 指定コンポーネントがAbs_UIComponentインスタンスでない場合
      */
-    private Abs_UIComponent _CastToUIComponent(Object o) {
-        if (!(o instanceof Abs_UIComponent)) return null;
+    private Abs_UIComponent _CastToUIComponent(Object o) throws Exception {
+        if (o == null) {
+            return null;
+        }
+        if (!(o instanceof Abs_UIComponent)) {
+            throw new Exception(this + "\nAbs_UIComponentインスタンスでないコンポーネントが指定されました。");
+        }
         return (Abs_UIComponent) o;
     }
 }

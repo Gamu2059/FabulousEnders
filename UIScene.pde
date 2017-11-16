@@ -30,6 +30,71 @@ public class UIScene extends Abs_UIBase {
     }
 
     /**
+     アクティブシーンになった時に自動的に呼び出される。
+     主にシーンの初期化を行う。
+     */
+    public void SceneEnabled() {
+    }
+
+    /**
+     ノンアクティブシーンになった時に自動的に呼び出される。
+     コンポーネントの後始末などを行う。
+     */
+    public void SceneDisabled() {
+    }
+
+    /**
+     背景を更新する。
+     基本的に背景を塗りつぶすだけだが、任意の処理を記述できる許容がある。
+     */
+    public void ResetBackGround() {
+    }
+
+    /**
+     アクティブシーンかつシーンに追加されたばかりのコンポーネントに対して呼び出しを行う。
+     UnityでのAwake関数。
+     */
+    public void AwakeComponentCaller() {
+    }
+
+    /**
+     追加されて
+     */
+    public void StartComponentCaller() {
+    }
+
+    public void UpdateComponentCaller() {
+    }
+
+    public void AnimationComponentCaller() {
+    }
+
+    /**
+     アフィン行列を初期化する。
+     基本的にスタックを全て放棄して単位行列にするだけだが、任意の処理を記述できる許容がある。
+     */
+    public void ResetMatrix() {
+    }
+
+    public void TransformComponentCaller() {
+    }
+
+    public void SortingComponent() {
+    }
+
+    public void CheckMOC() {
+    }
+
+    public void CheckMAC() {
+    }
+
+    public void DrawComponentCaller() {
+    }
+
+    public void DestroyComponentCaller() {
+    }
+
+    /**
      コンポーネントのアニメーション処理を呼び出す。
      アニメーションメソッドを持っていなれければ呼び出さない。
      */
@@ -59,7 +124,6 @@ public class UIScene extends Abs_UIBase {
     }
 
     public void SortingWithProprity() {
-        
     }
 
     // 再帰的にシーンを描画する
@@ -165,45 +229,13 @@ public class UIScene extends Abs_UIBase {
      @throws Exception 指定コンポーネントがAbs_UIComponentインスタンスでない場合
      */
     private Abs_UIComponent _CastToUIComponent(Object o) throws Exception {
+        if (o == null) {
+            return null;
+        }
         if (!(o instanceof Abs_UIComponent)) {
-            throw new Exception(this + "\nUISceneインスタンスでないコンポーネントが指定されました。");
+            throw new Exception(this + "\nAbs_UIComponentインスタンスでないコンポーネントが指定されました。");
         }
         return (Abs_UIComponent) o;
-    }
-
-    /**
-     MOCの判定を行う。
-     スクリーン上にマウスが存在しない場合は、MOCはnullになる。
-     */
-    public void CheckMOC() {
-        int x, y, w, h;
-        x = mouseX;
-        y = mouseY;
-        w = width;
-        h = height;
-
-        if  (x < 0 || x >= w || y < 0 || y >= height) {
-            _moc = null;
-            return;
-        }
-        try {
-            if (GetChildren() == null) {
-                _moc = null;
-                return;
-            }
-
-            Abs_UIComponent ui;
-            for (int i=GetChildren().size()-1; i>=0; i--) {
-                ui = GetComponent(i);
-                if (ui == null) {
-                    continue;
-                }
-
-                //ui.IsOverlappedOf(x, y);
-            }
-        } 
-        catch(Exception e) {
-        }
     }
 
     public String toString() {
