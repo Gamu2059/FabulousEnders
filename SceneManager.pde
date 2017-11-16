@@ -12,7 +12,7 @@ public class SceneManager {
     }
 
     /**
-     自身のリストにコンポーネントを追加する。
+     自身のリストにシーンを追加する。
      ただし、既に子として追加されている場合は追加できない。
      
      @return 追加に成功した場合はtrueを返す
@@ -25,10 +25,10 @@ public class SceneManager {
     }
 
     /**
-     自身のリストのindex番目のコンポーネントを返す。
-     負数を指定した場合、後ろからindex番目のコンポーネントを返す。
+     自身のリストのindex番目のシーンを返す。
+     負数を指定した場合、後ろからindex番目のシーンを返す。
      
-     @return index番目のコンポーネント 存在しなければnull
+     @return index番目のシーン 存在しなければnull
      @throws Exception indexがリストのサイズより大きい場合
      */
     public Scene GetScene(int index) throws Exception {
@@ -42,10 +42,9 @@ public class SceneManager {
     }
 
     /**
-     自身のリストの中からnameと一致する名前のコンポーネントを返す。
-     同名のコンポーネントが存在した場合、リストの早い方を返す。
+     自身のリストの中からnameと一致する名前のシーンを返す。
      
-     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @return nameと一致する名前のシーン 存在しなければNull
      */
     public Scene GetScene(String name) {
         Scene s;
@@ -59,7 +58,7 @@ public class SceneManager {
     }
 
     /**
-     自身のリストに指定したコンポーネントが存在すれば削除する。
+     自身のリストに指定したシーンが存在すれば削除する。
      
      @return 削除に成功した場合はtrueを返す。
      */
@@ -68,10 +67,10 @@ public class SceneManager {
     }
 
     /**
-     自身のリストのindex番目のコンポーネントを削除する。
-     負数を指定した場合、後ろからindex番目のコンポーネントを削除する。
+     自身のリストのindex番目のシーンを削除する。
+     負数を指定した場合、後ろからindex番目のシーンを削除する。
      
-     @return index番目のコンポーネント 存在しなければNull
+     @return index番目のシーン 存在しなければNull
      @throws Exception indexがリストのサイズより大きい場合
      */
     public Scene RemoveScene(int index) throws Exception {
@@ -85,10 +84,9 @@ public class SceneManager {
     }
 
     /**
-     自身のリストの中からnameと一致するコンポーネントを削除する。
-     同名のコンポーネントが存在した場合、リストの早い方を削除し、それを返す。
+     自身のリストの中からnameと一致するシーンを削除する。
      
-     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @return nameと一致する名前のシーン 存在しなければNull
      */
     public Scene RemoveScene(String name) {
         Scene s;
