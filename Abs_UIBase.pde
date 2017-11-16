@@ -2,7 +2,7 @@
  UIManagerを含む、全てのUIコンポーネントの基底クラス。
  抽象的な部分は存在しないが、これ自体でのインスタンス化を避けたいため、抽象クラスにしている。
  */
-public abstract class Abs_UIBase {
+public abstract class Abs_UIBase implements EventListener {
     /**
      親コンポーネント
      */
