@@ -59,7 +59,7 @@ public class Scene extends SceneObject {
         }
         return null;
     }
-    
+
     /**
      自身のリストに指定したオブジェクトが存在すれば削除する。
      
@@ -100,6 +100,12 @@ public class Scene extends SceneObject {
             }
         }
         return null;
+    }
+
+    /**
+     毎フレーム呼び出さるメインループ。
+     */
+    public void UpdateScene() {
     }
 
     public boolean equals(Object o) {
