@@ -1,4 +1,6 @@
-/***/
+/**
+ シーンオブジェクトにアタッチする振る舞いの抽象クラス。
+ */
 public abstract class Abs_SceneObjectBehavior {
     private String[] _classNames;
     protected String[] GetClassNames() {
@@ -71,6 +73,77 @@ public abstract class Abs_SceneObjectBehavior {
             }
         }
         return false;
+    }
+
+    /**
+     シーンがアクティブになってからの最初のフレームで呼び出される。
+     これが呼び出される段階では、全てのオブジェクトが揃っているので、自身以外への参照の保持などを行える。
+     */
+    public void Start() {
+    }
+
+    /**
+     シーンがアクティブの時、毎フレーム呼び出される。
+     初回フレームでは、全ての振る舞いのStartが呼び出された後に呼び出される。
+     アニメーションやキー判定などは、基本的にここで処理する。
+     */
+    public void Update() {
+    }
+
+    /**
+     シーンがノンアクティブになったフレームで呼び出される。
+     Destroyとは異なり、オブジェクトの破壊などを行うためのメソッドではないので注意。
+     */
+    public void Stop() {
+    }
+
+    /**
+     様々な処理の中でオブジェクトそのものや振る舞いが削除された時に呼び出される。
+     一度破壊してしまうと、シーンをもう一度初期化しない限り自動的に復活することは無いので大変危険。
+     */
+    public void Destroy() {
+    }
+
+    /**
+     オブジェクトがアクティブになったフレームで呼び出される。
+     */
+    public void OnEnabled() {
+    }
+
+    /**
+     オブジェクトがノンアクティブになったフレームで呼び出される。
+     */
+    public void OnDisabled() {
+    }
+
+    /**
+     オブジェクトがアクティブの状態でマウスクリックか決定キーを押された時に呼び出される。
+     */
+    public void OnDecided() {
+    }
+
+    /**
+     オブジェクトがアクティブの状態で上キーを押された時に呼び出される。
+     */
+    public void OnUpCursor() {
+    }
+
+    /**
+     オブジェクトがアクティブの状態で下キーを押された時に呼び出される。
+     */
+    public void OnDownCursor() {
+    }
+
+    /**
+     オブジェクトがアクティブの状態で左キーを押された時に呼び出される。
+     */
+    public void OnLeftCursor() {
+    }
+
+    /**
+     オブジェクトがアクティブの状態で右キーを押された時に呼び出される。
+     */
+    public void OnRightCursor() {
     }
 
     /**
