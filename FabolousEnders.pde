@@ -20,7 +20,10 @@ MatrixManager matrixManager = new MatrixManager();
 void setup() {
     size(500, 500);
     
-    Transform t = new Transform();
+    Scene scene = new Scene("main");
+    SceneObject o = new SceneObject("camera?", scene);
+    
+    println(scene);
 }
 
 void draw() {
