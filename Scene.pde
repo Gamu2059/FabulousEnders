@@ -123,7 +123,7 @@ public class Scene {
 
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("\nScene :");
+        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
         b.append("\n  name : ").append(_name);
         b.append("\n  objects :\n");
         b.append(_objects);
