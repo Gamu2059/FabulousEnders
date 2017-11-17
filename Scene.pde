@@ -1,19 +1,14 @@
 /**
  SceneObjectをまとめるクラス。
  */
-public class Scene {
-    private String _name;
-    public String GetName() {
-        return _name;
-    }
-
+public class Scene extends SceneObject {
     private ArrayList<SceneObject> _objects;
     public ArrayList<SceneObject> GetObjects() {
         return _objects;
     }
 
     public Scene (String name) {
-        _name = name;
+        super(name);
         _objects = new ArrayList<SceneObject>();
 
         sceneManager.AddScene(this);
@@ -118,13 +113,13 @@ public class Scene {
             return false;
         }
         Scene s = (Scene) o;
-        return _name.equals(s.GetName());
+        return GetName().equals(s.GetName());
     }
 
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("\n").append(getClass().getSimpleName()).append(" :\n");
-        b.append("\n  name : ").append(_name);
+        b.append("\n  name : ").append(GetName());
         b.append("\n  objects :\n");
         b.append(_objects);
 

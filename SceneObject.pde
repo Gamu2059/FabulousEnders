@@ -17,6 +17,18 @@ public class SceneObject {
         return _scene;
     }
 
+    /**
+     Sceneインスタンス専用コンストラクタ。
+     */
+    protected SceneObject(String name) {
+        _name = name;
+        _scene = null;
+        _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
+    }
+
+    /**
+     通常のSceneObjectインスタンス用のコンストラクタ。
+     */
     public SceneObject(String name, Scene scene) {
         _name = name;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
