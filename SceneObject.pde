@@ -32,6 +32,7 @@ public class SceneObject {
 
         _transform = new SceneObjectTransform(this);
         _transform.SetSize(width, height);
+        _transform.SetPriority(0);
 
         AddBehavior(_transform);
     }

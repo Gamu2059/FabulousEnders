@@ -82,7 +82,7 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior {
         return _priority;
     }
     public void SetPriority(int value) {
-        if (value > 0) {
+        if (value >= 0) {
             _priority = value;
         }
     }
@@ -170,6 +170,7 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior {
         _size = new PVector();
         _parentAnchor = new SceneObjectAnchor();
         _selfAnchor = new SceneObjectAnchor();
+        _priority = 1;
 
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
