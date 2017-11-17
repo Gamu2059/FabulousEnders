@@ -111,7 +111,7 @@ public class SceneManager {
 
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("\nSceneManager :\n");
+        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
         b.append(_scenes);
         return b.toString();
     }

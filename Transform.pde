@@ -1,7 +1,7 @@
 /**
- 汎用的な描画用トランスフォームクラス。
+ トランスフォームコンポーネント。
  */
-public class UITransform implements Cloneable {
+public class Transform extends Abs_SceneObjectBehavior {
     private PVector _position;
     public PVector GetPosition() { 
         return _position;
@@ -44,50 +44,43 @@ public class UITransform implements Cloneable {
         _scale.set(x, y);
     }
 
-    public UITransform() {
+    public Transform() {
+        super();
         _position = new PVector(0, 0);
         _rotate = 0;
         _size = new PVector(0, 0);
         _scale = new PVector(1, 1);
     }
 
-    public UITransform(PVector position) {
+    public Transform(PVector position) {
         _position = position;
         _rotate = 0;
         _size = new PVector(0, 0);
         _scale = new PVector(1, 1);
     }
 
-    public UITransform(PVector position, float rotate) {
+    public Transform(PVector position, float rotate) {
         _position = position;
         _rotate = rotate;
         _size = new PVector(0, 0);
         _scale = new PVector(1, 1);
     }
 
-    public UITransform(PVector position, float rotate, PVector size) {
+    public Transform(PVector position, float rotate, PVector size) {
         _position = position;
         _rotate = rotate;
         _size = size;
         _scale = new PVector(1, 1);
     }
 
-    public UITransform(PVector position, float rotate, PVector size, PVector scale) {
+    public Transform(PVector position, float rotate, PVector size, PVector scale) {
         _position = position;
         _rotate = rotate;
         _size = size;
         _scale = scale;
     }
-
-    public UITransform clone() {
-        return new UITransform(GetPosition(), GetRotate());
-    }
     
-    public void CopyTo(UITransform copy) {
-        float a, b;
-        copy.SetPosition(GetPosition().x, GetPosition().y);
-        copy.SetRotate(GetRotate());
-        copy.SetScale(GetScale().x, GetScale().y);
-        copy.SetSize(GetSize().x, GetSize().y);
+    public final String GetBehavior() {
+        return getClass().getSimpleName();
     }
 }
