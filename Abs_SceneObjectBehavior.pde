@@ -15,14 +15,17 @@ public abstract class Abs_SceneObjectBehavior {
         return _object;
     }
 
-    public Abs_SceneObjectBehavior(String name, SceneObject object) {
-        _name = name;
+    public Abs_SceneObjectBehavior(SceneObject object) {
+        _name = getClass().getSimpleName();
         _object = object;
 
         // 自身も含めた継承しているクラスを全て列挙
         ArrayList<String> list = new ArrayList<String>();
         Class<?> c = getClass();
-        while (c != null || c.getSimpleName().equals(_OldestClassName())) {
+        while (c != null) {
+            if (c.getSimpleName().equals(_OldestClassName())) {
+                break;
+            }
             list.add(c.getSimpleName());
             c = c.getSuperclass();
         }
@@ -33,9 +36,17 @@ public abstract class Abs_SceneObjectBehavior {
     }
 
     /**
+     ClassNames配列を生成する際に、"自身の振る舞いを特定できない最も古い振る舞い"を返す。
+     基本的な振る舞いは、全て "Abs_SceneObjectBehavior" を返す。
+     */
+    protected String _OldestClassName() {
+        return "Abs_SceneObjectBehavior";
+    }
+
+    /**
      同じ系統の振る舞いであった場合、trueを返す。
      */
-    public boolean IsSameBehavior(Abs_SceneObjectBehavior behavior) {
+    public final boolean IsSameBehavior(Abs_SceneObjectBehavior behavior) {
         String[] a, b;
         a = _classNames;
         b = behavior.GetClassNames();
@@ -50,17 +61,9 @@ public abstract class Abs_SceneObjectBehavior {
     }
 
     /**
-     ClassNames配列を生成する際に、"自身の振る舞いを特定できない最も古い振る舞い"を返す。
-     基本的な振る舞いは、全て "Abs_SceneObjectBehavior" を返す。
-     */
-    protected String _OldestClassName() {
-        return "Abs_SceneObjectBehavior";
-    }
-
-    /**
      指定した名前と一致する振る舞いであるか、もしくはそれを継承している場合、trueを返す。
      */
-    public boolean IsBehaviorAs(String behavior) {
+    public final boolean IsBehaviorAs(String behavior) {
         String[] a = _classNames;
         for (int i=0; i<a.length; i++) {
             if (a[i].equals(behavior)) {
@@ -95,10 +98,8 @@ public abstract class Abs_SceneObjectBehavior {
 
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
-        b.append("  name : ").append(_name);
-        b.append("  inhered class name : ").append(_classNames);
-        b.append("  scene oject : ").append(_object);
+        b.append(getClass().getSimpleName()).append(" :\n");
+        b.append("  name : ").append(_name).append(" \n");
         return b.toString();
     }
 }

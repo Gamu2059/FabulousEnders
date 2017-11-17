@@ -17,6 +17,11 @@ public class SceneObject {
         return _scene;
     }
 
+    private SceneObjectTransform _transform;
+    public SceneObjectTransform GetTransform() {
+        return _transform;
+    }
+
     /**
      Sceneインスタンス専用コンストラクタ。
      */
@@ -24,6 +29,11 @@ public class SceneObject {
         _name = name;
         _scene = null;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
+
+        _transform = new SceneObjectTransform(this);
+        _transform.SetSize(width, height);
+
+        AddBehavior(_transform);
     }
 
     /**
@@ -33,6 +43,8 @@ public class SceneObject {
         _name = name;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
         _scene = scene;
+        _transform = new SceneObjectTransform(this);
+        AddBehavior(_transform);
 
         scene.AddObject(this);
     }
@@ -44,6 +56,9 @@ public class SceneObject {
      @return 追加に成功した場合はtrueを返す
      */
     public boolean AddBehavior(Abs_SceneObjectBehavior behavior) {
+        if (IsHaveBehavior(behavior)) {
+            return false;
+        }
         return _behaviors.add(behavior);
     }
 
@@ -141,5 +156,15 @@ public class SceneObject {
             return true;
         }
         return false;
+    }
+
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(getClass().getSimpleName()).append(" :\n");
+        b.append("  name : ").append(_name).append(" \n");
+        b.append("  behaviors :\n");
+        b.append(_behaviors).append(" \n");
+
+        return b.toString();
     }
 }

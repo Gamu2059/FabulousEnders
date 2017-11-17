@@ -118,10 +118,10 @@ public class Scene extends SceneObject {
 
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
-        b.append("\n  name : ").append(GetName());
-        b.append("\n  objects :\n");
-        b.append(_objects);
+        b.append(getClass().getSimpleName()).append(" \n");
+        b.append("  name : ").append(GetName()).append(" \n");
+        b.append("  objects :\n");
+        b.append(_objects).append(" \n");
 
         return b.toString();
     }

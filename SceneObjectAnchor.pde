@@ -1,7 +1,7 @@
 /**
- UIのアンカー情報の列挙定数を定義するクラス。
+ SceneObjectの基準位置を指定する情報のクラス。
  */
-public class UIAnchor {
+public final class SceneObjectAnchor {
     public final static int LEFT_TOP = 0; 
     public final static int LEFT_MIDDLE = 1; 
     public final static int LEFT_BOTTOM = 2;
@@ -30,11 +30,11 @@ public class UIAnchor {
         }
     }
 
-    public UIAnchor() {
+    public SceneObjectAnchor() {
         SetAnchor(LEFT_TOP);
     }
 
-    public UIAnchor(int anchor) {
+    public SceneObjectAnchor(int anchor) {
         SetAnchor(anchor);
     }
 
