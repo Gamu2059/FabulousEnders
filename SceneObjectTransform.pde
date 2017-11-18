@@ -4,7 +4,7 @@
  絶対変化量は、絶対回転量によって回転した後、絶対平行移動量によって平行移動することにより表現されます。
  相対変化量は、相対回転量による回転、相対平行移動量による平行移動、回転、平行移動、、、を繰り返すことにより表現されます。
  */
-public final class SceneObjectTransform extends Abs_SceneObjectBehavior {
+public final class SceneObjectTransform extends Abs_SceneObjectBehavior implements Comparable<SceneObjectTransform> {
     /**
      親トランスフォーム。
      */
@@ -256,7 +256,14 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior {
         }
         return false;
     }
-    
+
+    /**
+     優先度によって比較を行う。
+     */
+    public int compareTo(SceneObjectTransform t) {
+        return _priority - t.GetPriority();
+    }
+
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append(super.toString());

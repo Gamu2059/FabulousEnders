@@ -24,6 +24,8 @@ void setup() {
     SceneObject o = new SceneObject("camera?", scene);
     
     println(scene);
+    
+    sceneManager.Start("");
 }
 
 void draw() {

@@ -1,3 +1,5 @@
+import java.util.*;
+
 /**
  SceneObjectをまとめるクラス。
  */
@@ -5,6 +7,14 @@ public class Scene extends SceneObject {
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
         return _objects;
+    }
+
+    /**
+     マウスやカーソルによって選択されているオブジェクトを返す。
+     */
+    private SceneObject _activeObject;
+    public SceneObject GetActiveObject() {
+        return _activeObject;
     }
 
     /**
@@ -22,6 +32,12 @@ public class Scene extends SceneObject {
         _disabledFlag = value;
     }
 
+    /**
+     オブジェクトの優先度変更が発生している場合はtrueになる。
+     これがtrueでなければソートはされない。
+     */
+    private boolean _isNeedSorting;
+
     public Scene (String name) {
         super(name);
         _objects = new ArrayList<SceneObject>();
@@ -29,10 +45,14 @@ public class Scene extends SceneObject {
         sceneManager.AddScene(this);
     }
 
+
     /**
-     毎フレーム呼び出される。
+     シーンの初期化を行う。
+     ゲーム開始時に呼び出される。
      */
-    public final void Update() {
+    public void InitScene() {
+        _isNeedSorting = true;
+        _Sorting();
     }
 
     /**
@@ -47,6 +67,120 @@ public class Scene extends SceneObject {
      */
     public void Disabled() {
         _disabledFlag = false;
+    }
+
+
+    /**
+     毎フレームのシーン更新処理。
+     */
+    public void Update() {
+        _Start();
+        _Update();
+        _Animation();
+        _Transform();
+        _Sorting();
+        _CheckMAO();
+        _Draw();
+    }
+
+    /**
+     フレームの最も最初に呼び出される。
+     ロードされてからは一度しか呼び出されない。
+     */
+    protected void _Start() {
+        if (_objects == null) {
+            return;
+        }
+
+        SceneObject s;
+        for (int i=0; i<_objects.size(); i++) {
+            s = _objects.get(i);
+            if (s.IsEnable() && s.IsStartFlag()) {
+                ;
+            }
+        }
+    }
+
+    /**
+     毎フレーム呼び出される。
+     入力待ちやオブジェクトのアニメーション処理を行う。
+     */
+    public void _Update() {
+        SceneObject s;
+        for (int i=0; i<_objects.size(); i++) {
+            s = _objects.get(i);
+            if (s.IsEnable()) {
+                ;
+            }
+        }
+    }
+
+    /**
+     _Updateとは異なり、AnimationBehaviorによる高度なフレームアニメーションを行う。
+     主に子オブジェクトのアニメーションや画像連番表示を処理するのに用いる。
+     */
+    public void _Animation() {
+        SceneObject s;
+        for (int i=0; i<_objects.size(); i++) {
+            s = _objects.get(i);
+            if (s.IsEnable() && s.GetBehavior(SceneObjectAnimationController.class) != null) {
+                ;
+            }
+        }
+    }
+
+    /**
+     オブジェクトを移動させる。
+     ここまでに指示されたトランスフォームの移動は、全てここで処理される。
+     それ以降のトランスフォーム処理は無視される。
+     */
+    public void _Transform() {
+        SceneObject s;
+        for (int i=0; i<_objects.size(); i++) {
+            s = _objects.get(i);
+            if (s.IsEnable() && s.IsChildOf(this)) {
+                ;
+            }
+        }
+    }
+
+    /**
+     オブジェクトのトランスフォームの優先度によってソートする。
+     毎度処理していると重くなるのフラグが立っている時のみ処理する。
+     */
+    public void _Sorting() {
+        if (!_isNeedSorting) {
+            return;
+        }
+
+        _isNeedSorting = false;
+        Collections.sort(_objects);
+    }
+
+    /**
+     オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
+     */
+    public void _CheckMAO() {
+        SceneObject s;
+        for (int i=_objects.size()-1; i>=0; i--) {
+            s = _objects.get(i);
+            if (s.IsEnable() && s.GetBehavior(SceneObjectInputListener.class) != null) {
+                ;
+            }
+        }
+    }
+
+    /**
+     ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
+     */
+    public void _Draw() {
+        SceneObject s;
+        for (int i=0; i<_objects.size(); i++) {
+            s = _objects.get(i);
+            if (s.IsEnable() && s.IsChildOf(this)) {
+                ;
+            }
+        }
     }
 
     /**

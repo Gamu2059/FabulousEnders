@@ -1,25 +1,73 @@
 /**
  シーンを構成するオブジェクトのクラス。
  */
-public class SceneObject {
+public class SceneObject implements Comparable<SceneObject> {
+    /**
+     名前。
+     */
     private String _name;
     public String GetName() {
         return _name;
     }
 
+    /**
+     振る舞いリスト。
+     */
     private ArrayList<Abs_SceneObjectBehavior> _behaviors;
     public ArrayList<Abs_SceneObjectBehavior> GetBehaviors() {
         return _behaviors;
     }
 
+    /**
+     自身が所属するシーンインスタンス。
+     */
     private Scene _scene;
     public Scene GetScene() {
         return _scene;
     }
 
+    /**
+     自身のトランスフォーム。
+     振る舞いリストとは独立して呼び出しやすいようにした。
+     */
     private SceneObjectTransform _transform;
     public SceneObjectTransform GetTransform() {
         return _transform;
+    }
+
+    /**
+     オブジェクトとして有効かどうかを管理するフラグ。
+     */
+    private boolean _enable;
+    public boolean IsEnable() {
+        return _enable;
+    }
+    /**
+     有効フラグを設定する。
+     ただし、自身の親の有効フラグがfalseの場合、設定は反映されない。
+     さらに、自身の設定を行うと同時に、階層構造的に子となる全てのオブジェクトの設定にも影響を与える。
+     */
+    public void SetEnable(boolean value) {
+        if (GetParent() == null) {
+            return;
+        }
+        RecursiveSetEnable(value);
+    }
+    private void RecursiveSetEnable(boolean value) {
+        _enable = value;
+
+        ArrayList<SceneObjectTransform> list = _transform.GetChildren();
+        for (int i=0; i<list.size(); i++) {
+            list.get(i).GetObject().RecursiveSetEnable(value);
+        }
+    }
+
+    /**
+     Start関数を呼び出しても良い場合、trueになっている。
+     */
+    private boolean _startFlag;
+    public boolean IsStartFlag() {
+        return _startFlag;
     }
 
     /**
@@ -161,11 +209,50 @@ public class SceneObject {
         return false;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Transfrom generally method
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     自身が指定されたオブジェクトの親の場合、trueを返す。
+     */
+    public boolean IsParentOf(SceneObject s) {
+        return _transform.IsParentOf(s.GetTransform());
+    }
+
+    /**
+     自身が指定されたオブジェクトの子の場合、trueを返す。
+     */
+    public boolean IsChildOf(SceneObject s) {
+        return _transform.IsChildOf(s.GetTransform());
+    }
+
+    /**
+     自身の親のオブジェクトを取得する。
+     ただし、有効フラグがfalseの場合、nullを返す。
+     */
+    public SceneObject GetParent() {
+        SceneObject s = _transform.GetParent().GetObject();
+        if (s == null) {
+            return null;
+        }
+        return s;
+    }
+
+    /**
+     自身以外はfalseを返す。
+     */
     public boolean equals(Object o) {
         if (o == this) {
             return true;
         }
         return false;
+    }
+
+    /**
+     Transformに記録されている優先度によって比較する。
+     */
+    public int compareTo(SceneObject s) {
+        return _transform.compareTo(s.GetTransform());
     }
 
     public String toString() {
