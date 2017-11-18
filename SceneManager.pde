@@ -1,14 +1,72 @@
 /**
  シーンを管理するためのマネージャクラス。
  */
-public class SceneManager {
+public final static class SceneManager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {
         return _scenes;
     }
 
+    /**
+     現在描画されているシーン。
+     */
+    private Scene _activeScene;
+    /**
+     次にアクティブになるシーン。
+     */
+    private Scene _nextScene;
+
+    /**
+     シーンの読込要求が出された場合にtrueになる。
+     */
+    private boolean _loadFlag;
+
     public SceneManager () {
         _scenes = new ArrayList<Scene>();
+    }
+
+    /**
+     シーンを読み込み、次のフレームからアクティブにさせる。
+     */
+    public void LoadScene(String sceneName) {
+        Scene s = GetScene(sceneName);
+        if (s == null) {
+            return;
+        }
+
+        _nextScene = s;
+
+        _loadFlag = true;
+        _nextScene.SetEnabledFlag(true);
+        _activeScene.SetDisabledFlag(true);
+    }
+
+    /**
+     フレーム更新を行う。
+     アクティブシーンのみ処理される。
+     */
+    public void Update() {
+        if (_activeScene == null) {
+            return;
+        }
+        _activeScene.Update();
+        if (_loadFlag) {
+            _ChangeScene();
+        }
+    }
+
+    /**
+     シーンを切り替える。
+     シーンの終了処理と開始処理を呼び出す。
+     */
+    private void _ChangeScene() {
+        _loadFlag = false;
+
+        _activeScene.Disabled();
+        _nextScene.Enabled();
+
+        _activeScene = _nextScene;
+        _nextScene = null;
     }
 
     /**

@@ -97,6 +97,15 @@ public class SceneObject {
     }
 
     /**
+     自身のリストの中からbehaviorに該当する振る舞いを返す。
+     
+     @return behaviorに該当する名前の振る舞い 存在しなければNull
+     */
+    public Abs_SceneObjectBehavior GetBehavior(Class<? extends Abs_SceneObjectBehavior> behavior) {
+        return GetBehavior(behavior.getSimpleName());
+    }
+
+    /**
      自身のリストに指定した振る舞いが存在すれば削除する。
      
      @return 削除に成功した場合はtrueを返す。

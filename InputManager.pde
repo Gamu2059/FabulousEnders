@@ -1,7 +1,7 @@
 /**
  キーやマウスの入力の低レベル処理を行うクラス。
  */
-public class InputManager {
+public final static class InputManager {
     private boolean[] _keys;
 
 
