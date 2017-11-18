@@ -26,6 +26,16 @@ public final static class SceneManager {
     }
 
     /**
+     ゲームを開始するために一番最初に呼び出す処理。
+     setup関数の一番最後に呼び出す必要がある。
+     */
+    public void Start(String sceneName) {
+
+        LoadScene(sceneName);
+        Update();
+    }
+
+    /**
      シーンを読み込み、次のフレームからアクティブにさせる。
      */
     public void LoadScene(String sceneName) {
@@ -38,7 +48,10 @@ public final static class SceneManager {
 
         _loadFlag = true;
         _nextScene.SetEnabledFlag(true);
-        _activeScene.SetDisabledFlag(true);
+
+        if (_activeScene != null) {
+            _activeScene.SetDisabledFlag(true);
+        }
     }
 
     /**
@@ -67,6 +80,19 @@ public final static class SceneManager {
 
         _activeScene = _nextScene;
         _nextScene = null;
+    }
+
+    /**
+     シーンインスタンスを初期化する。
+     主にシーン内のソーティングなどである。
+     */
+    private void _InitScenes() {
+        if (_scenes == null) {
+            return;
+        }
+
+        for (int i=0; i<_scenes.size(); i++) {
+        }
     }
 
     /**
