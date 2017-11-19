@@ -80,8 +80,9 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         return _priority;
     }
     public void SetPriority(int value) {
-        if (value >= 0) {
+        if (value >= 0 && _priority != value) {
             _priority = value;
+            GetObject().GetScene().SetNeedSorting(true);
         }
     }
 
@@ -295,6 +296,11 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
             index += _children.size();
         }
         return _children.remove(index);
+    }
+
+    public void Draw() {
+        resetMatrix();
+        setMatrix(_matrix);
     }
 
     /**

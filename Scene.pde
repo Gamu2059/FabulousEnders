@@ -37,6 +37,9 @@ public class Scene extends SceneObject {
      これがtrueでなければソートはされない。
      */
     private boolean _isNeedSorting;
+    public void SetNeedSorting(boolean value) {
+        _isNeedSorting = value;
+    }
 
     public Scene (String name) {
         super(name);
@@ -205,7 +208,7 @@ public class Scene extends SceneObject {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsChildOf(this)) {
+            if (s.IsEnable()) {
                 s.Draw();
             }
         }
