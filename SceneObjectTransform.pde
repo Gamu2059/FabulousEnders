@@ -1,8 +1,6 @@
 /**
  トランスフォームコンポーネント。
  保持されている変化量は、回転の後に平行移動することを前提としています。
- 絶対変化量は、絶対回転量によって回転した後、絶対平行移動量によって平行移動することにより表現されます。
- 相対変化量は、相対回転量による回転、相対平行移動量による平行移動、回転、平行移動、、、を繰り返すことにより表現されます。
  */
 public final class SceneObjectTransform extends Abs_SceneObjectBehavior implements Comparable<SceneObjectTransform> {
     /**
@@ -95,9 +93,24 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     public PMatrix2D GetMatrix() {
         return _matrix;
     }
+    private void _PushMatrix() {
+        getMatrix(_matrix);
+    }
 
     /**
-     絶対平行移動量。
+     平行移動量と回転量の表現しているものが、親トランスフォームの相対量なのか、シーンからの絶対量なのかを決める。
+     trueの場合、相対量となる。
+     */
+    private boolean _isRelative;
+    public boolean IsRelative() {
+        return _isRelative;
+    }
+    public void SetRelative(boolean value) {
+        _isRelative = value;
+    }
+
+    /**
+     平行移動量。
      */
     private PVector _position;
     public PVector GetPosition() {
@@ -111,21 +124,7 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     }
 
     /**
-     相対平行移動量。
-     */
-    private PVector _localPosition;
-    public PVector GetLocalPosition() { 
-        return _localPosition;
-    }
-    public void SetLocalPosition(PVector value) { 
-        _localPosition = value;
-    }
-    public void SetLocalPosition(float x, float y) {
-        _localPosition.set(x, y);
-    }
-
-    /**
-     絶対回転量。
+     回転量。
      */
     private float _rotate;
     public float GetRotate() { 
@@ -133,17 +132,6 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     }
     public void SetRotate(float value) { 
         _rotate = value;
-    }
-
-    /**
-     相対回転量。
-     */
-    private float _localRotate;
-    public float GetLocalRotate() { 
-        return _localRotate;
-    }
-    public void SetLocalRotate(float value) { 
-        _localRotate = value;
     }
 
     /**
@@ -164,16 +152,78 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     public SceneObjectTransform(SceneObject obj) {
         super(obj);
         _position = new PVector();
-        _localPosition = new PVector();
         _rotate = 0;
-        _localRotate = 0;
         _size = new PVector();
         _parentAnchor = new SceneObjectAnchor();
         _selfAnchor = new SceneObjectAnchor();
         _priority = 1;
+        _isRelative = true;
 
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
+    }
+
+    /**
+     オブジェクトのトランスフォーム処理を実行する。
+     */
+    public void Transform() {
+        if (!GetObject().IsEnable()) {
+            return;
+        }
+        // 保存の限界でないかどうか
+        if (!matrixManager.PushMatrix()) {
+            return;
+        }
+
+        // 相対量か絶対量かを指定
+        SceneObjectTransform parent;
+        if (_isRelative) {
+            parent = _parent;
+        } else {
+            parent = GetObject().GetScene().GetTransform();
+        }
+
+        float par1, par2;
+
+        // 親の基準へ移動
+        par1 = _parentAnchor.GetHorizontal();
+        par2 = _parentAnchor.GetVertical();
+        translate(par1 * parent.GetSize().x, par2 * parent.GetSize().y);
+
+        // 自身の基準での回転
+        rotate(_rotate);
+
+        // 自身の基準へ移動
+        par1 = _selfAnchor.GetHorizontal();
+        par2 = _selfAnchor.GetVertical();
+        translate(-par1 * _size.x + _position.x, -par2 * _size.y + _position.y);
+
+        // 再帰的に計算していく
+        if (_children != null) {
+            Abs_UIBase base;
+            for (int i=0; i<_children.size(); i++) {
+                _children.get(i).Transform();
+            }
+        }
+        _PushMatrix();
+        matrixManager.PopMatrix();
+    }
+
+    /**
+     指定座標がトランスフォームの領域内であればtrueを返す。
+     */
+    public boolean IsInRegion(float y, float x) {
+        PMatrix2D inv = GetMatrix().get();
+        if (!inv.invert()) {
+            println(this);
+            println("逆アフィン変換ができません。");
+        }
+
+        float[] in, out;
+        in = new float[]{x, y};
+        out = new float[2];
+        inv.mult(in, out);
+        return 0 <= out[0] && out[0] < _size.x && 0 <= out[1] && out[1] < _size.y;
     }
 
     /**

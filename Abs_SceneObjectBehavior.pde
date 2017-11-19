@@ -17,9 +17,18 @@ public abstract class Abs_SceneObjectBehavior {
         return _object;
     }
 
+    private boolean _enable;
+    public boolean IsEnable() {
+        return _enable;
+    }
+    public void SetEnable(boolean value) {
+        _enable = value;
+    }
+
     public Abs_SceneObjectBehavior(SceneObject object) {
         _name = getClass().getSimpleName();
         _object = object;
+        _enable = true;
 
         // 自身も含めた継承しているクラスを全て列挙
         ArrayList<String> list = new ArrayList<String>();
@@ -76,6 +85,13 @@ public abstract class Abs_SceneObjectBehavior {
     }
 
     /**
+     指定した振る舞いに該当する場合、trueを返す。
+     */
+    public final boolean IsBehaviorAs(Class<?> c) {
+        return IsBehaviorAs(c.getSimpleName());
+    }
+
+    /**
      シーンがアクティブになってからの最初のフレームで呼び出される。
      これが呼び出される段階では、全てのオブジェクトが揃っているので、自身以外への参照の保持などを行える。
      */
@@ -91,6 +107,20 @@ public abstract class Abs_SceneObjectBehavior {
     }
 
     /**
+     シーンがアクティブの時、毎フレーム呼び出される。
+     アニメーションコントローラ以外は基本的に何も処理しない。
+     */
+    public void Animation() {
+    }
+
+    /**
+     シーンがアクティブの時、毎フレーム呼び出される。
+     ドロービヘイビア以外は基本的に何も処理しない。
+     */
+    public void Draw() {
+    }
+
+    /**
      シーンがノンアクティブになったフレームで呼び出される。
      Destroyとは異なり、オブジェクトの破壊などを行うためのメソッドではないので注意。
      */
@@ -98,22 +128,15 @@ public abstract class Abs_SceneObjectBehavior {
     }
 
     /**
-     様々な処理の中でオブジェクトそのものや振る舞いが削除された時に呼び出される。
-     一度破壊してしまうと、シーンをもう一度初期化しない限り自動的に復活することは無いので大変危険。
-     */
-    public void Destroy() {
-    }
-
-    /**
      オブジェクトがアクティブになったフレームで呼び出される。
      */
-    public void OnEnabled() {
+    public void OnEnabledActive() {
     }
 
     /**
      オブジェクトがノンアクティブになったフレームで呼び出される。
      */
-    public void OnDisabled() {
+    public void OnDisabledActive() {
     }
 
     /**

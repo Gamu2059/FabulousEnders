@@ -36,6 +36,24 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     /**
+     自身の背景描画ビヘイビア。
+     振る舞いリストとは独立して呼び出しやすいようにした。
+     */
+    private SceneObjectDrawBack _drawBack;
+    public SceneObjectDrawBack GetDrawBack() {
+        return _drawBack;
+    }
+
+    /**
+     自身のインプットリスナ。
+     振る舞いリストとは独立して呼び出しやすいようにした。
+     */
+    private SceneObjectInputListener _inputListener;
+    public SceneObjectInputListener GetInputListener() {
+        return _inputListener;
+    }
+
+    /**
      オブジェクトとして有効かどうかを管理するフラグ。
      */
     private boolean _enable;
@@ -93,9 +111,104 @@ public class SceneObject implements Comparable<SceneObject> {
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
         _scene = scene;
         _transform = new SceneObjectTransform(this);
-        AddBehavior(_transform);
+        _drawBack = new SceneObjectDrawBack(this);
 
         scene.AddObject(this);
+    }
+
+    /**
+     シーンがアクティブになってから最初の一度だけ呼び出される。
+     */
+    public void Start() {
+        _transform.Start();
+        _drawBack.Start();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.Start();
+            }
+        }
+    }
+
+    /**
+     シーンがノンアクティブになった時に呼び出される。
+     振る舞いの有効フラグに関わらず必ず呼び出す。
+     */
+    public void Stop() {
+        _transform.Stop();
+        _drawBack.Stop();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.Stop();
+            }
+        }
+    }
+
+    public void Update() {
+        _transform.Update();
+        _drawBack.Update();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.Update();
+            }
+        }
+    }
+
+    public void Animation() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.Animation();
+            }
+        }
+    }
+
+    public void Draw() {
+        _transform.Draw();
+        _drawBack.Draw();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.Draw();
+            }
+        }
+    }
+
+    /**
+     mouse active objectになれる場合、trueを返す。
+     */
+    public boolean IsAbleMAO() {
+        if (_inputListener == null) {
+            return false;
+        }
+        if (!_inputListener.IsEnable()) {
+            return false;
+        }
+
+        return _transform.IsInRegion(mouseX, mouseY);
+    }
+
+    /**
+     active objectになった時に呼び出される。
+     */
+    public void OnEnabledActive() {
+    }
+
+    /**
+     active objectでなくなった時に呼び出される。
+     */
+    public void OnDisabledActive() {
     }
 
     /**
@@ -107,6 +220,10 @@ public class SceneObject implements Comparable<SceneObject> {
     public boolean AddBehavior(Abs_SceneObjectBehavior behavior) {
         if (IsHaveBehavior(behavior)) {
             return false;
+        }
+        // inputListener系統ならば、バッファリングする
+        if (behavior.IsBehaviorAs(SceneObjectInputListener.class)) {
+            _inputListener = (SceneObjectInputListener) behavior;
         }
         return _behaviors.add(behavior);
     }
