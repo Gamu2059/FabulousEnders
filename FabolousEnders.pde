@@ -10,7 +10,6 @@
 import java.util.*;
 
 // 全てのシーンインスタンスで共通するトランスフォームパラメータ
-UITransform sceneTransform;
 
 // マネージャインスタンス
 InputManager inputManager = new InputManager();
@@ -20,10 +19,13 @@ MatrixManager matrixManager = new MatrixManager();
 
 void setup() {
     size(500, 500);
-
-    // sceneTransfrom definition
-    sceneTransform = new UITransform();
-    sceneTransform.SetSize(width, height);
+    
+    Scene scene = new Scene("main");
+    SceneObject o = new SceneObject("camera?", scene);
+    
+    println(scene);
+    
+    sceneManager.Start("");
 }
 
 void draw() {

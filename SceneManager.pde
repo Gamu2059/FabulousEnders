@@ -1,18 +1,102 @@
 /**
  シーンを管理するためのマネージャクラス。
  */
-public class SceneManager {
+public final class SceneManager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {
         return _scenes;
     }
+
+    /**
+     現在描画されているシーン。
+     */
+    private Scene _activeScene;
+    /**
+     次にアクティブになるシーン。
+     */
+    private Scene _nextScene;
+
+    /**
+     シーンの読込要求が出された場合にtrueになる。
+     */
+    private boolean _loadFlag;
 
     public SceneManager () {
         _scenes = new ArrayList<Scene>();
     }
 
     /**
-     自身のリストにコンポーネントを追加する。
+     ゲームを開始するために一番最初に呼び出す処理。
+     setup関数の一番最後に呼び出す必要がある。
+     */
+    public void Start(String sceneName) {
+
+        LoadScene(sceneName);
+        Update();
+    }
+
+    /**
+     シーンを読み込み、次のフレームからアクティブにさせる。
+     */
+    public void LoadScene(String sceneName) {
+        Scene s = GetScene(sceneName);
+        if (s == null) {
+            return;
+        }
+
+        _nextScene = s;
+
+        _loadFlag = true;
+        _nextScene.SetEnabledFlag(true);
+
+        if (_activeScene != null) {
+            _activeScene.SetDisabledFlag(true);
+        }
+    }
+
+    /**
+     フレーム更新を行う。
+     アクティブシーンのみ処理される。
+     */
+    public void Update() {
+        if (_activeScene == null) {
+            return;
+        }
+        _activeScene.Update();
+        if (_loadFlag) {
+            _ChangeScene();
+        }
+    }
+
+    /**
+     シーンを切り替える。
+     シーンの終了処理と開始処理を呼び出す。
+     */
+    private void _ChangeScene() {
+        _loadFlag = false;
+
+        _activeScene.Disabled();
+        _nextScene.Enabled();
+
+        _activeScene = _nextScene;
+        _nextScene = null;
+    }
+
+    /**
+     シーンインスタンスを初期化する。
+     主にシーン内のソーティングなどである。
+     */
+    private void _InitScenes() {
+        if (_scenes == null) {
+            return;
+        }
+
+        for (int i=0; i<_scenes.size(); i++) {
+        }
+    }
+
+    /**
+     自身のリストにシーンを追加する。
      ただし、既に子として追加されている場合は追加できない。
      
      @return 追加に成功した場合はtrueを返す
@@ -25,10 +109,10 @@ public class SceneManager {
     }
 
     /**
-     自身のリストのindex番目のコンポーネントを返す。
-     負数を指定した場合、後ろからindex番目のコンポーネントを返す。
+     自身のリストのindex番目のシーンを返す。
+     負数を指定した場合、後ろからindex番目のシーンを返す。
      
-     @return index番目のコンポーネント 存在しなければnull
+     @return index番目のシーン 存在しなければnull
      @throws Exception indexがリストのサイズより大きい場合
      */
     public Scene GetScene(int index) throws Exception {
@@ -42,10 +126,9 @@ public class SceneManager {
     }
 
     /**
-     自身のリストの中からnameと一致する名前のコンポーネントを返す。
-     同名のコンポーネントが存在した場合、リストの早い方を返す。
+     自身のリストの中からnameと一致する名前のシーンを返す。
      
-     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @return nameと一致する名前のシーン 存在しなければNull
      */
     public Scene GetScene(String name) {
         Scene s;
@@ -59,7 +142,7 @@ public class SceneManager {
     }
 
     /**
-     自身のリストに指定したコンポーネントが存在すれば削除する。
+     自身のリストに指定したシーンが存在すれば削除する。
      
      @return 削除に成功した場合はtrueを返す。
      */
@@ -68,10 +151,10 @@ public class SceneManager {
     }
 
     /**
-     自身のリストのindex番目のコンポーネントを削除する。
-     負数を指定した場合、後ろからindex番目のコンポーネントを削除する。
+     自身のリストのindex番目のシーンを削除する。
+     負数を指定した場合、後ろからindex番目のシーンを削除する。
      
-     @return index番目のコンポーネント 存在しなければNull
+     @return index番目のシーン 存在しなければNull
      @throws Exception indexがリストのサイズより大きい場合
      */
     public Scene RemoveScene(int index) throws Exception {
@@ -85,10 +168,9 @@ public class SceneManager {
     }
 
     /**
-     自身のリストの中からnameと一致するコンポーネントを削除する。
-     同名のコンポーネントが存在した場合、リストの早い方を削除し、それを返す。
+     自身のリストの中からnameと一致するシーンを削除する。
      
-     @return nameと一致する名前のコンポーネント 存在しなければNull
+     @return nameと一致する名前のシーン 存在しなければNull
      */
     public Scene RemoveScene(String name) {
         Scene s;
@@ -113,7 +195,7 @@ public class SceneManager {
 
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("\nSceneManager :\n");
+        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
         b.append(_scenes);
         return b.toString();
     }
