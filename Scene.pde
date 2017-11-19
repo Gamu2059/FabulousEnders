@@ -40,6 +40,7 @@ public class Scene extends SceneObject {
 
     public Scene (String name) {
         super(name);
+
         _objects = new ArrayList<SceneObject>();
 
         sceneManager.AddScene(this);
@@ -67,6 +68,7 @@ public class Scene extends SceneObject {
      */
     public void Disabled() {
         _disabledFlag = false;
+        _Stop();
     }
 
 
@@ -74,30 +76,44 @@ public class Scene extends SceneObject {
      毎フレームのシーン更新処理。
      */
     public void Update() {
+        _ResetBackGround();
         _Start();
         _Update();
         _Animation();
+        _ResetMatrix();
         _Transform();
         _Sorting();
         _CheckMAO();
         _Draw();
     }
 
+    protected void _ResetBackGround() {
+    }
+
     /**
-     フレームの最も最初に呼び出される。
-     ロードされてからは一度しか呼び出されない。
+     フレームの最初に呼び出される。
+     _Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
      */
     protected void _Start() {
-        if (_objects == null) {
-            return;
-        }
-
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable() && s.IsStartFlag()) {
-                ;
+                s.Start();
             }
+        }
+    }
+
+    /**
+     フレームの最後に呼び出される。
+     一度しか呼び出されない。
+     オブジェクトの有効フラグに関わらず必ず呼び出す。
+     */
+    protected void _Stop() {
+        SceneObject s;
+        for (int i=0; i<_objects.size(); i++) {
+            s = _objects.get(i);
+            s.Stop();
         }
     }
 
@@ -105,12 +121,12 @@ public class Scene extends SceneObject {
      毎フレーム呼び出される。
      入力待ちやオブジェクトのアニメーション処理を行う。
      */
-    public void _Update() {
+    protected void _Update() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable()) {
-                ;
+                s.Update();
             }
         }
     }
@@ -119,14 +135,22 @@ public class Scene extends SceneObject {
      _Updateとは異なり、AnimationBehaviorによる高度なフレームアニメーションを行う。
      主に子オブジェクトのアニメーションや画像連番表示を処理するのに用いる。
      */
-    public void _Animation() {
+    protected void _Animation() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable() && s.GetBehavior(SceneObjectAnimationController.class) != null) {
-                ;
+                s.Animation();
             }
         }
+    }
+
+    /**
+     アフィン行列を初期化する。
+     */
+    protected void _ResetMatrix() {
+        while (matrixManager.PopMatrix());
+        resetMatrix();
     }
 
     /**
@@ -134,12 +158,12 @@ public class Scene extends SceneObject {
      ここまでに指示されたトランスフォームの移動は、全てここで処理される。
      それ以降のトランスフォーム処理は無視される。
      */
-    public void _Transform() {
+    protected void _Transform() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable() && s.IsChildOf(this)) {
-                ;
+                s.GetTransform().Transform();
             }
         }
     }
@@ -148,7 +172,7 @@ public class Scene extends SceneObject {
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
-    public void _Sorting() {
+    protected void _Sorting() {
         if (!_isNeedSorting) {
             return;
         }
@@ -160,12 +184,16 @@ public class Scene extends SceneObject {
     /**
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
      */
-    public void _CheckMAO() {
+    protected void _CheckMAO() {
         SceneObject s;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
             if (s.IsEnable() && s.GetBehavior(SceneObjectInputListener.class) != null) {
-                ;
+                if (_activeObject != null) {
+                    _activeObject.OnDisabledActive();
+                }
+                _activeObject = s;
+                _activeObject.OnEnabledActive();
             }
         }
     }
@@ -173,12 +201,12 @@ public class Scene extends SceneObject {
     /**
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
-    public void _Draw() {
+    protected void _Draw() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable() && s.IsChildOf(this)) {
-                ;
+                s.Draw();
             }
         }
     }

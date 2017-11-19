@@ -1,7 +1,7 @@
 /**
  シーンを管理するためのマネージャクラス。
  */
-public final static class SceneManager {
+public final class SceneManager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {
         return _scenes;
