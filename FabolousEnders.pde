@@ -25,7 +25,7 @@ void setup() {
     
     println(scene);
     
-    sceneManager.Start("");
+    sceneManager.Start("main");
 }
 
 void draw() {
