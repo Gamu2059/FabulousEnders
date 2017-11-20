@@ -23,7 +23,9 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         }
 
         SceneObjectTransform t = GetObject().GetScene().GetTransform();
-        _parent.RemoveChild(this);
+        if (_parent != null) {
+            _parent.RemoveChild(this);
+        }
         if (value == null) {
             _parent = t;
             t._AddChild(this);

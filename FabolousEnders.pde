@@ -16,12 +16,17 @@ InputManager inputManager = new InputManager();
 SceneManager sceneManager = new SceneManager();
 MatrixManager matrixManager = new MatrixManager();
 
+float x;
+SceneObjectTransform objT;
 
 void setup() {
-    size(500, 500);
+    size(1024, 600);
 
     Scene scene = new Scene("main");
     SceneObject o = new SceneObject("camera?", scene);
+    objT = o.GetTransform();
+    objT.SetSize(100, 100);
+    objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
     sceneManager.Start("main");
 }
