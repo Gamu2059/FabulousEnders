@@ -19,17 +19,15 @@ MatrixManager matrixManager = new MatrixManager();
 
 void setup() {
     size(500, 500);
-    
+
     Scene scene = new Scene("main");
     SceneObject o = new SceneObject("camera?", scene);
-    
-    println(scene);
-    
+
     sceneManager.Start("main");
 }
 
 void draw() {
-    background(255);
+    sceneManager.Update();
 }
 
 void keyPressed() {

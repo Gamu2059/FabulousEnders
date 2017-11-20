@@ -93,7 +93,7 @@ public class SceneObject implements Comparable<SceneObject> {
      */
     protected SceneObject(String name) {
         _name = name;
-        _scene = null;
+        _scene = (Scene) this;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
 
         _transform = new SceneObjectTransform(this);
