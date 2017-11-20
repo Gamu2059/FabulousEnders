@@ -1,5 +1,5 @@
 /**
- トランスフォームコンポーネント。
+ オブジェクトの階層構造や相対位置を管理するクラス。
  保持されている変化量は、回転の後に平行移動することを前提としています。
  */
 public final class SceneObjectTransform extends Abs_SceneObjectBehavior implements Comparable<SceneObjectTransform> {
@@ -18,16 +18,15 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
      さらに、自身がシーンインスタンスのトランスフォームであった場合、この処理は無視される。
      */
     public void SetParent(SceneObjectTransform value) {
-        Scene s = GetObject().GetScene();
-        if (s == null) {
-            // シーンインスタンスがnullになるのは、シーンインスタンスだけ
+        if (GetObject() instanceof Scene) {
             return;
         }
 
+        SceneObjectTransform t = GetObject().GetScene().GetTransform();
         _parent.RemoveChild(this);
         if (value == null) {
-            _parent = s.GetTransform();
-            s.GetTransform()._AddChild(this);
+            _parent = t;
+            t._AddChild(this);
         } else {
             _parent = value;
             _parent._AddChild(this);
@@ -82,7 +81,9 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
-            GetObject().GetScene().SetNeedSorting(true);
+            if (!(GetObject() instanceof Scene)) {
+                GetObject().GetScene().SetNeedSorting(true);
+            }
         }
     }
 
