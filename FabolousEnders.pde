@@ -20,7 +20,8 @@ float x;
 SceneObjectTransform objT;
 
 void setup() {
-    size(1024, 600);
+    size(displayWidth, displayHeight);
+    frame.setLocation(0, 0);
 
     Scene scene = new Scene("main");
     SceneObject o = new SceneObject("camera?", scene);
