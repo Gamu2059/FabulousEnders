@@ -11,6 +11,9 @@ public final class SceneManager {
      現在描画されているシーン。
      */
     private Scene _activeScene;
+    public Scene GetActiveScene() {
+        return _activeScene;
+    }
     /**
      次にアクティブになるシーン。
      */
@@ -58,10 +61,9 @@ public final class SceneManager {
      アクティブシーンのみ処理される。
      */
     public void Update() {
-        if (_activeScene == null) {
-            return;
+        if (_activeScene != null) {
+            _activeScene.Update();
         }
-        _activeScene.Update();
         if (_loadFlag) {
             _ChangeScene();
         }
@@ -74,8 +76,12 @@ public final class SceneManager {
     private void _ChangeScene() {
         _loadFlag = false;
 
-        _activeScene.Disabled();
-        _nextScene.Enabled();
+        if (_activeScene != null) {
+            _activeScene.Disabled();
+        }
+        if (_nextScene != null) {
+            _nextScene.Enabled();
+        }
 
         _activeScene = _nextScene;
         _nextScene = null;
@@ -91,6 +97,7 @@ public final class SceneManager {
         }
 
         for (int i=0; i<_scenes.size(); i++) {
+            _scenes.get(i).InitScene();
         }
     }
 

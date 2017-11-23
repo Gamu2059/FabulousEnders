@@ -100,7 +100,21 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
     }
 
     public void Draw() {
-        println(this);
+        PVector size = GetObject().GetTransform().GetSize();
+
+        if (_enableBorder) {
+            stroke(_borderColorInfo.GetColor());
+            strokeWeight(_borderSize);
+            strokeCap(_borderType);
+        } else {
+            noStroke();
+        }
+        if (_enableBack) {
+            fill(_backColorInfo.GetColor());
+        } else {
+            fill(0, 0);
+        }
+        rect(0, 0, size.x, size.y);
     }
 
     public String toString() {

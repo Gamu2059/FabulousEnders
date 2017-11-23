@@ -91,6 +91,7 @@ public class Scene extends SceneObject {
     }
 
     protected void _ResetBackGround() {
+        background(GetDrawBack().GetBackColorInfo().GetColor());
     }
 
     /**
@@ -224,6 +225,7 @@ public class Scene extends SceneObject {
         if (GetObject(object.GetName()) != null) {
             return false;
         }
+        object.GetTransform().SetParent(GetTransform());
         return _objects.add(object);
     }
 

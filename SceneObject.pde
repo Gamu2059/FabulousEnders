@@ -94,13 +94,13 @@ public class SceneObject implements Comparable<SceneObject> {
     protected SceneObject(String name) {
         _name = name;
         _scene = (Scene) this;
+        _enable = true;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
 
         _transform = new SceneObjectTransform(this);
         _transform.SetSize(width, height);
         _transform.SetPriority(0);
-
-        AddBehavior(_transform);
+        _drawBack = new SceneObjectDrawBack(this);
     }
 
     /**
@@ -110,6 +110,7 @@ public class SceneObject implements Comparable<SceneObject> {
         _name = name;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
         _scene = scene;
+        _enable = true;
         _transform = new SceneObjectTransform(this);
         _drawBack = new SceneObjectDrawBack(this);
 
