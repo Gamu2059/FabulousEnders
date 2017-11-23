@@ -27,9 +27,10 @@ void setup() {
 
     Scene scene = new Scene("main");
     SceneObject o = new SceneObject("camera?", scene);
-    
-    SetText(o);
-    
+    o.GetDrawBack().GetBackColorInfo().SetBlueOrBrightness(200);
+
+    //SetText(o);
+
     objT = o.GetTransform();
     objT.SetSize(100, 100);
     objT.SetRotate(1);
@@ -40,8 +41,7 @@ void setup() {
 
 void SetImage(SceneObject o) {
     SceneObjectImage i = new SceneObjectImage(o);
-    o.GetDrawBack().GetBackColorInfo().SetRedOrHue(255);
-    i.SetImage("icon.png");
+    i.SetUsingImageName("icon.png");
 }
 
 void SetText(SceneObject o) {
@@ -68,6 +68,7 @@ void draw() {
 
 void keyPressed() {
     inputManager.KeyPressed();
+    SetImage(objT.GetObject());
 }
 
 void keyReleased() {

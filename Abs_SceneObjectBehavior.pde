@@ -23,12 +23,26 @@ public abstract class Abs_SceneObjectBehavior {
     }
     public void SetEnable(boolean value) {
         _enable = value;
+        if (_enable) {
+            OnEnabled();
+        } else {
+            OnDisabled();
+        }
+    }
+
+    /**
+     振る舞いとしてスタート関数が呼び出されたかどうか。
+     既に呼び出された場合はtrueになる。
+     */
+    private boolean _isStart;
+    public boolean IsStart() {
+        return _isStart;
     }
 
     public Abs_SceneObjectBehavior(SceneObject object) {
         _name = getClass().getSimpleName();
         _object = object;
-        _enable = true;
+        SetEnable(true);
 
         // 自身も含めた継承しているクラスを全て列挙
         ArrayList<String> list = new ArrayList<String>();
@@ -98,6 +112,7 @@ public abstract class Abs_SceneObjectBehavior {
      これが呼び出される段階では、全てのオブジェクトが揃っているので、自身以外への参照の保持などを行える。
      */
     public void Start() {
+        _isStart = true;
     }
 
     /**
@@ -127,6 +142,21 @@ public abstract class Abs_SceneObjectBehavior {
      Destroyとは異なり、オブジェクトの破壊などを行うためのメソッドではないので注意。
      */
     public void Stop() {
+    }
+
+    /**
+     オブジェクトが有効化されたフレームで呼び出される。
+     振る舞い単体でも呼び出される可能性はある。
+     */
+    public void OnEnabled() {
+        _isStart = false;
+    }
+
+    /**
+     オブジェクトが無効化されたフレームで呼び出される。
+     振る舞い単体でも呼び出される可能性はある。
+     */
+    public void OnDisabled() {
     }
 
     /**

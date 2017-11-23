@@ -68,7 +68,7 @@ public class SceneObject implements Comparable<SceneObject> {
         if (this instanceof Scene) {
             return;
         }
-        
+
         if (GetParent() == null) {
             return;
         }
@@ -87,14 +87,6 @@ public class SceneObject implements Comparable<SceneObject> {
         } else {
             _OnDisable();
         }
-    }
-
-    /**
-     Start関数を呼び出しても良い場合、trueになっている。
-     */
-    private boolean _startFlag;
-    public boolean IsStartFlag() {
-        return _startFlag;
     }
 
     /**
@@ -122,7 +114,7 @@ public class SceneObject implements Comparable<SceneObject> {
         _drawBack = new SceneObjectDrawBack(this);
 
         scene.AddObject(this);
-        
+
         // トランスフォームが設定されてからでないと例外を発生させてしまう
         SetEnable(true);
     }
@@ -141,7 +133,6 @@ public class SceneObject implements Comparable<SceneObject> {
                 b.Start();
             }
         }
-        _startFlag = false;
     }
 
     /**
@@ -215,13 +206,32 @@ public class SceneObject implements Comparable<SceneObject> {
      オブジェクトが有効になった時に呼び出される。
      */
     protected void _OnEnable() {
-        _startFlag = true;
+        _transform.OnEnabled();
+        _drawBack.OnEnabled();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnEnabled();
+            }
+        }
     }
 
     /**
      オブジェクトが無効になった時に呼び出される。
      */
     protected void _OnDisable() {
+        _transform.OnDisabled();
+        _drawBack.OnDisabled();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnDisabled();
+            }
+        }
     }
 
     /**
