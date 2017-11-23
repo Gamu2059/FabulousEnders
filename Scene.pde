@@ -90,6 +90,8 @@ public class Scene extends SceneObject {
         _Draw();
     }
 
+    
+
     protected void _ResetBackGround() {
         background(GetDrawBack().GetBackColorInfo().GetColor());
     }

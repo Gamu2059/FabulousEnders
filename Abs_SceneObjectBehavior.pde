@@ -49,6 +49,8 @@ public abstract class Abs_SceneObjectBehavior {
     /**
      ClassNames配列を生成する際に、"自身の振る舞いを特定できない最も古い振る舞い"を返す。
      基本的な振る舞いは、全て "Abs_SceneObjectBehavior" を返す。
+     
+     返り値に指定したクラスを継承する振る舞いはオブジェクトに複数存在することが許可される。
      */
     protected String _OldestClassName() {
         return "Abs_SceneObjectBehavior";

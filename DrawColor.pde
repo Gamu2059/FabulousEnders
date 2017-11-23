@@ -125,11 +125,15 @@ public final class DrawColor {
     }
 
     public DrawColor() {
-        _InitParameterOnConstructor(true, 0, 0, 0, MAX_ALPHA);
+        _InitParameterOnConstructor(true, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
     }
 
     public DrawColor(boolean isRGB) {
-        _InitParameterOnConstructor(_isRGB, 0, 0, 0, MAX_ALPHA);
+        if (_isRGB) {
+            _InitParameterOnConstructor(_isRGB, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+        } else {
+            _InitParameterOnConstructor(_isRGB, MAX_HUE, MAX_SATURATION, MAX_BRIGHTNESS, MAX_ALPHA);
+        }
     }
 
     public DrawColor(boolean isRGB, float p1, float p2, float p3) {
@@ -151,5 +155,33 @@ public final class DrawColor {
         } else {
             colorMode(HSB, MAX_HUE, MAX_SATURATION, MAX_BRIGHTNESS, MAX_ALPHA);
         }
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof DrawColor)) {
+            return false;
+        }
+        DrawColor d = (DrawColor) o;
+        return 
+            IsRGB() == d.IsRGB() && 
+            GetRedOrHue() == d.GetRedOrHue() && 
+            GetGreenOrSaturation() == d.GetGreenOrSaturation() && 
+            GetBlueOrBrightness() == d.GetBlueOrBrightness() && 
+            GetAlpha() == d.GetAlpha();
+    }
+
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(getClass().getSimpleName()).append(" :\n");
+        b.append("  is RGB : ").append(IsRGB()).append(" \n");
+        b.append("  parameter : ").append(GetRedOrHue()).append(", ").append(GetGreenOrSaturation()).append(", ").append(GetBlueOrBrightness()).append(", ").append(GetAlpha());
+
+        return b.toString();
     }
 }
