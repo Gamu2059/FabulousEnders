@@ -17,10 +17,10 @@ public final class ImageManager {
     }
 
     public PImage GetImage(String path) {
+        path = IMAGEPATH + path;
         if (GetImageHash().containsKey(path)) {
             return GetImageHash().get(path);
         }
-        path = IMAGEPATH + path;
         PImage image = requestImage(path);
         if (image != null) {
             GetImageHash().put(path, image);

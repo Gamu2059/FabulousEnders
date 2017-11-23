@@ -104,7 +104,7 @@ public class Scene extends SceneObject {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsStartFlag()) {
+            if (s.IsEnable()) {
                 s.Start();
             }
         }

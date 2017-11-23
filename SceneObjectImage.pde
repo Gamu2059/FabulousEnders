@@ -2,14 +2,13 @@
  オブジェクトに画像描画を提供する振る舞い。
  */
 public class SceneObjectImage extends Abs_SceneObjectDrawBase {
-    private PImage _image;
-    public PImage GetImage() {
-        return _image;
+    private String _usingImageName;
+    public String GetUsingImageName() {
+        return _usingImageName;
     }
-    public void SetImage(String value) {
-        PImage p = imageManager.GetImage(value);
-        if (p != null) {
-            _image = p;
+    public void SetUsingImageName(String value) {
+        if (value != null) {
+            _usingImageName = value;
         }
     }
 
@@ -21,7 +20,7 @@ public class SceneObjectImage extends Abs_SceneObjectDrawBase {
 
     public SceneObjectImage(SceneObject obj, String imagePath) {
         super(obj);
-        SetImage(imagePath);
+        SetUsingImageName(imagePath);
     }
 
     public void Start() {
@@ -29,11 +28,11 @@ public class SceneObjectImage extends Abs_SceneObjectDrawBase {
     }
 
     public void Draw() {
-        if (GetImage() == null) {
+        PImage img = imageManager.GetImage(GetUsingImageName());
+        if (img == null) {
             return;
         }
-
         tint(GetColorInfo().GetColor());
-        image(GetImage(), 0, 0, _objSize.x, _objSize.y);
+        image(img, 0, 0, _objSize.x, _objSize.y);
     }
 }
