@@ -204,7 +204,6 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
 
         // 再帰的に計算していく
         if (_children != null) {
-            Abs_UIBase base;
             for (int i=0; i<_children.size(); i++) {
                 _children.get(i).Transform();
             }

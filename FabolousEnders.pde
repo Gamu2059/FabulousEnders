@@ -8,13 +8,15 @@
  */
 
 import java.util.*;
+import java.lang.reflect.*;
 
 // 全てのシーンインスタンスで共通するトランスフォームパラメータ
 
 // マネージャインスタンス
-InputManager inputManager = new InputManager();
-SceneManager sceneManager = new SceneManager();
-MatrixManager matrixManager = new MatrixManager();
+InputManager inputManager;
+SceneManager sceneManager;
+MatrixManager matrixManager;
+ImageManager imageManager;
 
 float x;
 SceneObjectTransform objT;
@@ -23,13 +25,31 @@ void setup() {
     size(displayWidth, displayHeight);
     frame.setLocation(0, 0);
 
+    InitManager();
+
     Scene scene = new Scene("main");
     SceneObject o = new SceneObject("camera?", scene);
+    SceneObjectImage i = new SceneObjectImage(o);
+    o.GetDrawBack().GetBackColorInfo().SetRedOrHue(255);
+    //o.GetDrawBack().SetEnableBorder(false);
+    o.GetDrawBack().SetEnable(false);
+    i.SetImage("icon.png");
     objT = o.GetTransform();
     objT.SetSize(100, 100);
+    objT.SetRotate(1);
     objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
     sceneManager.Start("main");
+}
+
+/**
+ 用意されたマネージャオブジェクトを自動的に生成する。
+ */
+void InitManager() {
+    inputManager = new InputManager();
+    sceneManager = new SceneManager();
+    matrixManager = new MatrixManager();
+    imageManager = new ImageManager();
 }
 
 void draw() {
