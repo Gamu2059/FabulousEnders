@@ -10,36 +10,45 @@
 import java.util.*;
 import java.lang.reflect.*;
 
-// 全てのシーンインスタンスで共通するトランスフォームパラメータ
-
 // マネージャインスタンス
 InputManager inputManager;
 SceneManager sceneManager;
 MatrixManager matrixManager;
 ImageManager imageManager;
+FontManager fontManager;
 
 float x;
 SceneObjectTransform objT;
 
 void setup() {
     size(displayWidth, displayHeight);
-    frame.setLocation(0, 0);
 
     InitManager();
 
     Scene scene = new Scene("main");
     SceneObject o = new SceneObject("camera?", scene);
-    SceneObjectImage i = new SceneObjectImage(o);
-    o.GetDrawBack().GetBackColorInfo().SetRedOrHue(255);
-    //o.GetDrawBack().SetEnableBorder(false);
-    o.GetDrawBack().SetEnable(false);
-    i.SetImage("icon.png");
+    
+    SetText(o);
+    
     objT = o.GetTransform();
     objT.SetSize(100, 100);
     objT.SetRotate(1);
     objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
     sceneManager.Start("main");
+}
+
+void SetImage(SceneObject o) {
+    SceneObjectImage i = new SceneObjectImage(o);
+    o.GetDrawBack().GetBackColorInfo().SetRedOrHue(255);
+    i.SetImage("icon.png");
+}
+
+void SetText(SceneObject o) {
+    SceneObjectText t = new SceneObjectText(o, "TestTestTestTestTestTestTestTest");
+    t.SetDrawInOrder(true);
+    t.SetDrawSpeed(10);
+    t.GetColorInfo().SetColor(0, 0, 200);
 }
 
 /**
@@ -50,6 +59,7 @@ void InitManager() {
     sceneManager = new SceneManager();
     matrixManager = new MatrixManager();
     imageManager = new ImageManager();
+    fontManager = new FontManager();
 }
 
 void draw() {

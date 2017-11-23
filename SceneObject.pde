@@ -2,9 +2,6 @@
  シーンを構成するオブジェクトのクラス。
  */
 public class SceneObject implements Comparable<SceneObject> {
-    /**
-     名前。
-     */
     private String _name;
     public String GetName() {
         return _name;
@@ -64,8 +61,14 @@ public class SceneObject implements Comparable<SceneObject> {
      有効フラグを設定する。
      ただし、自身の親の有効フラグがfalseの場合、設定は反映されない。
      さらに、自身の設定を行うと同時に、階層構造的に子となる全てのオブジェクトの設定にも影響を与える。
+     
+     自身がシーンインスタンスであった場合は無視する。
      */
     public void SetEnable(boolean value) {
+        if (this instanceof Scene) {
+            return;
+        }
+        
         if (GetParent() == null) {
             return;
         }
@@ -77,6 +80,12 @@ public class SceneObject implements Comparable<SceneObject> {
         ArrayList<SceneObjectTransform> list = _transform.GetChildren();
         for (int i=0; i<list.size(); i++) {
             list.get(i).GetObject().RecursiveSetEnable(value);
+        }
+
+        if (_enable) {
+            _OnEnable();
+        } else {
+            _OnDisable();
         }
     }
 
@@ -94,7 +103,6 @@ public class SceneObject implements Comparable<SceneObject> {
     protected SceneObject(String name) {
         _name = name;
         _scene = (Scene) this;
-        _enable = true;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
 
         _transform = new SceneObjectTransform(this);
@@ -110,11 +118,13 @@ public class SceneObject implements Comparable<SceneObject> {
         _name = name;
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
         _scene = scene;
-        _enable = true;
         _transform = new SceneObjectTransform(this);
         _drawBack = new SceneObjectDrawBack(this);
 
         scene.AddObject(this);
+        
+        // トランスフォームが設定されてからでないと例外を発生させてしまう
+        SetEnable(true);
     }
 
     /**
@@ -131,6 +141,7 @@ public class SceneObject implements Comparable<SceneObject> {
                 b.Start();
             }
         }
+        _startFlag = false;
     }
 
     /**
@@ -198,6 +209,19 @@ public class SceneObject implements Comparable<SceneObject> {
         }
 
         return _transform.IsInRegion(mouseX, mouseY);
+    }
+
+    /**
+     オブジェクトが有効になった時に呼び出される。
+     */
+    protected void _OnEnable() {
+        _startFlag = true;
+    }
+
+    /**
+     オブジェクトが無効になった時に呼び出される。
+     */
+    protected void _OnDisable() {
     }
 
     /**

@@ -33,6 +33,7 @@ public final class SceneManager {
      setup関数の一番最後に呼び出す必要がある。
      */
     public void Start(String sceneName) {
+        _InitScenes();
         LoadScene(sceneName);
         Update();
     }
