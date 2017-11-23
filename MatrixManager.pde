@@ -1,7 +1,7 @@
 /**
  Processing内部で保持しているアフィン行列の管理をしやすくするためのマネージャ。
  */
-public final class MatrixManager {
+public final class MatrixManager extends Abs_Manager {
     public final static int MAX_STACK = 32;
 
     private int _stackNum;
@@ -10,6 +10,7 @@ public final class MatrixManager {
     }
 
     public MatrixManager() {
+        super();
         _stackNum = 0;
     }
 

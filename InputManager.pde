@@ -1,11 +1,12 @@
 /**
  キーやマウスの入力の低レベル処理を行うクラス。
  */
-public final class InputManager {
+public final class InputManager extends Abs_Manager {
     private boolean[] _keys;
 
 
     public InputManager() {
+        super();
         _keys = new boolean[Key.KEY_NUM];
     }
 

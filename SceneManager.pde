@@ -1,7 +1,7 @@
 /**
  シーンを管理するためのマネージャクラス。
  */
-public final class SceneManager {
+public final class SceneManager extends Abs_Manager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {
         return _scenes;
@@ -25,6 +25,7 @@ public final class SceneManager {
     private boolean _loadFlag;
 
     public SceneManager () {
+        super();
         _scenes = new ArrayList<Scene>();
     }
 
