@@ -100,6 +100,11 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
     }
 
     public void Draw() {
+        // DrawBackは強制呼び出しなので、カットする
+        if (!IsEnable()) {
+            return;
+        }
+
         PVector size = GetObject().GetTransform().GetSize();
 
         if (_enableBorder) {

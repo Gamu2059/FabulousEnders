@@ -27,13 +27,19 @@ void setup() {
 
     InitManager();
 
-    //Scene scene = new Scene("main");
-    //SceneObject o = new SceneObject("camera?", scene);
-    //objT = o.GetTransform();
-    //objT.SetSize(100, 100);
-    //objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+    Scene scene = new Scene("main");
+    SceneObject o = new SceneObject("camera?", scene);
+    SceneObjectImage i = new SceneObjectImage(o);
+    o.GetDrawBack().GetBackColorInfo().SetRedOrHue(255);
+    //o.GetDrawBack().SetEnableBorder(false);
+    o.GetDrawBack().SetEnable(false);
+    i.SetImage("icon.png");
+    objT = o.GetTransform();
+    objT.SetSize(100, 100);
+    objT.SetRotate(1);
+    objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
-    //sceneManager.Start("main");
+    sceneManager.Start("main");
 }
 
 /**
@@ -47,7 +53,7 @@ void InitManager() {
 }
 
 void draw() {
-    //sceneManager.Update();
+    sceneManager.Update();
 }
 
 void keyPressed() {

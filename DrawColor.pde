@@ -5,31 +5,31 @@ public final class DrawColor {
     /**
      RGBモードでの赤色の最大値。
      */
-    public final int MAX_RED = 255;
+    public static final int MAX_RED = 255;
     /**
      RGBモードでの緑色の最大値。
      */
-    public final int MAX_GREEN = 255;
+    public static final int MAX_GREEN = 255;
     /**
      RGBモードでの青色の最大値。
      */
-    public final int MAX_BLUE = 255;
+    public static final int MAX_BLUE = 255;
     /**
      HSBモードでの色相の最大値。
      */
-    public final int MAX_HUE = 360;
+    public static final int MAX_HUE = 360;
     /**
      HSBモードでの彩度の最大値。
      */
-    public final int MAX_SATURATION = 100;
+    public static final int MAX_SATURATION = 100;
     /**
      HSBモードでの明度の最大値。
      */
-    public final int MAX_BRIGHTNESS = 100;
+    public static final int MAX_BRIGHTNESS = 100;
     /**
      RGB, HSBモードでのアルファの最大値。
      */
-    public final int MAX_ALPHA = 255;
+    public static final int MAX_ALPHA = 255;
 
     private boolean _isRGB;
     public boolean IsRGB() {
