@@ -42,15 +42,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     /**
-     自身のインプットリスナ。
-     振る舞いリストとは独立して呼び出しやすいようにした。
-     */
-    private SceneObjectInputListener _inputListener;
-    public SceneObjectInputListener GetInputListener() {
-        return _inputListener;
-    }
-
-    /**
      オブジェクトとして有効かどうかを管理するフラグ。
      */
     private boolean _enable;
@@ -89,6 +80,14 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
+    private boolean _isActivatable;
+    public boolean IsActivatable() {
+        return _isActivatable;
+    }
+    public void SetActivatable(boolean value) {
+        _isActivatable = value;
+    }
+
     /**
      Sceneインスタンス専用コンストラクタ。
      */
@@ -117,6 +116,7 @@ public class SceneObject implements Comparable<SceneObject> {
 
         // トランスフォームが設定されてからでないと例外を発生させてしまう
         SetEnable(true);
+        SetActivatable(true);
     }
 
     /**
@@ -192,14 +192,7 @@ public class SceneObject implements Comparable<SceneObject> {
      mouse active objectになれる場合、trueを返す。
      */
     public boolean IsAbleMAO() {
-        if (_inputListener == null) {
-            return false;
-        }
-        if (!_inputListener.IsEnable()) {
-            return false;
-        }
-
-        return _transform.IsInRegion(mouseX, mouseY);
+        return IsActivatable() && _transform.IsInRegion(mouseX, mouseY);
     }
 
     /**
@@ -238,12 +231,32 @@ public class SceneObject implements Comparable<SceneObject> {
      active objectになった時に呼び出される。
      */
     public void OnEnabledActive() {
+        _transform.OnEnabledActive();
+        _drawBack.OnEnabledActive();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnEnabledActive();
+            }
+        }
     }
 
     /**
      active objectでなくなった時に呼び出される。
      */
     public void OnDisabledActive() {
+        _transform.OnDisabledActive();
+        _drawBack.OnDisabledActive();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnDisabledActive();
+            }
+        }
     }
 
     /**
@@ -255,10 +268,6 @@ public class SceneObject implements Comparable<SceneObject> {
     public boolean AddBehavior(Abs_SceneObjectBehavior behavior) {
         if (IsHaveBehavior(behavior)) {
             return false;
-        }
-        // inputListener系統ならば、バッファリングする
-        if (behavior.IsBehaviorAs(SceneObjectInputListener.class)) {
-            _inputListener = (SceneObjectInputListener) behavior;
         }
         return _behaviors.add(behavior);
     }

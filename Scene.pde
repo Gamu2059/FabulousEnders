@@ -90,7 +90,7 @@ public class Scene extends SceneObject {
         _Draw();
     }
 
-    
+
 
     protected void _ResetBackGround() {
         background(GetDrawBack().GetBackColorInfo().GetColor());
@@ -192,15 +192,28 @@ public class Scene extends SceneObject {
      */
     protected void _CheckMAO() {
         SceneObject s;
+        boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.GetBehavior(SceneObjectInputListener.class) != null) {
+            if (s.IsEnable() && s.IsAbleMAO()) {
+                f = true;
+                if (s == _activeObject) {
+                    return;
+                }
+
                 if (_activeObject != null) {
                     _activeObject.OnDisabledActive();
                 }
                 _activeObject = s;
                 _activeObject.OnEnabledActive();
             }
+        }
+        // 何もアクティブにならなければアクティブオブジェクトも無効化する
+        if (!f) {
+            if (_activeObject != null) {
+                _activeObject.OnDisabledActive();
+            }
+            _activeObject = null;
         }
     }
 

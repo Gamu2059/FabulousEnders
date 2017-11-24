@@ -21,7 +21,7 @@ float x;
 SceneObjectTransform objT;
 
 void setup() {
-    size(displayWidth, displayHeight);
+    size(800, 800);
 
     InitManager();
 
@@ -29,7 +29,8 @@ void setup() {
     SceneObject o = new SceneObject("camera?", scene);
     o.GetDrawBack().GetBackColorInfo().SetBlueOrBrightness(200);
 
-    //SetText(o);
+    SetText(o);
+    SetButton(o);
 
     objT = o.GetTransform();
     objT.SetSize(100, 100);
@@ -51,6 +52,10 @@ void SetText(SceneObject o) {
     t.GetColorInfo().SetColor(0, 0, 200);
 }
 
+void SetButton(SceneObject o) {
+    SceneObjectButton b = new SceneObjectButton(o);
+}
+
 /**
  用意されたマネージャオブジェクトを自動的に生成する。
  */
@@ -68,7 +73,6 @@ void draw() {
 
 void keyPressed() {
     inputManager.KeyPressed();
-    SetImage(objT.GetObject());
 }
 
 void keyReleased() {

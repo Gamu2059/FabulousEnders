@@ -26,6 +26,10 @@ public final class SceneManager {
 
     public SceneManager () {
         _scenes = new ArrayList<Scene>();
+        
+        if (inputManager == null) {
+            inputManager = new InputManager();
+        }
     }
 
     /**
@@ -100,6 +104,36 @@ public final class SceneManager {
         for (int i=0; i<_scenes.size(); i++) {
             _scenes.get(i).InitScene();
         }
+    }
+
+    private void OnMousePressed() {
+    }
+
+    private void OnMouseReleased() {
+    }
+
+    private void OnMouseClicked() {
+    }
+
+    private void OnMouseWheel() {
+    }
+
+    private void OnMouseMoved() {
+    }
+
+    private void OnMouseDragged() {
+    }
+
+    private void OnMouseEntered() {
+    }
+
+    private void OnMouseExited() {
+    }
+
+    private void OnKeyPressed() {
+    }
+
+    private void OnKeyReleased() {
     }
 
     /**
