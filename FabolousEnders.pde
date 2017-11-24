@@ -17,27 +17,37 @@ MatrixManager matrixManager;
 ImageManager imageManager;
 FontManager fontManager;
 
-float x;
-SceneObjectTransform objT;
-
 void setup() {
     size(800, 800);
+    try {
+        InitManager();
 
-    InitManager();
+        Scene scene = new Scene("main");
 
-    Scene scene = new Scene("main");
-    SceneObject o = new SceneObject("camera?", scene);
-    o.GetDrawBack().GetBackColorInfo().SetBlueOrBrightness(200);
+        SceneObjectTransform objT;
 
-    SetText(o);
-    SetButton(o);
+        SceneObject o = new SceneObject("camera?", scene);
+        o.GetDrawBack().GetBackColorInfo().SetBlueOrBrightness(200);
+        SetText(o);
+        SetButton(o);
+        objT = o.GetTransform();
+        objT.SetSize(100, 100);
+        objT.SetRotate(1);
+        objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
-    objT = o.GetTransform();
-    objT.SetSize(100, 100);
-    objT.SetRotate(1);
-    objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        o = new SceneObject("Overlapped", scene);
+        o.GetDrawBack().GetBackColorInfo().SetColor(200, 200, 200);
+        SetText(o);
+        objT = o.GetTransform();
+        objT.SetSize(100, 140);
+        objT.SetPriority(2);
+        objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
-    sceneManager.Start("main");
+        sceneManager.Start("main");
+    } 
+    catch(Exception e) {
+        println(e);
+    }
 }
 
 void SetImage(SceneObject o) {
@@ -53,7 +63,7 @@ void SetText(SceneObject o) {
 }
 
 void SetButton(SceneObject o) {
-    SceneObjectButton b = new SceneObjectButton(o);
+    new SceneObjectButton(o);
 }
 
 /**
@@ -68,7 +78,12 @@ void InitManager() {
 }
 
 void draw() {
-    sceneManager.Update();
+    try {
+        sceneManager.Update();
+    } 
+    catch(Exception e) {
+        println(e);
+    }
 }
 
 void keyPressed() {

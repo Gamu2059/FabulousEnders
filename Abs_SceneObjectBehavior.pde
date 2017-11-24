@@ -159,46 +159,25 @@ public abstract class Abs_SceneObjectBehavior {
     public void OnDisabled() {
     }
 
-    /**
-     オブジェクトがアクティブになったフレームで呼び出される。
-     */
     public void OnEnabledActive() {
     }
 
-    /**
-     オブジェクトがノンアクティブになったフレームで呼び出される。
-     */
     public void OnDisabledActive() {
     }
 
-    /**
-     オブジェクトがアクティブの状態でマウスクリックか決定キーを押された時に呼び出される。
-     */
-    public void OnDecided() {
+    public void OnMousePressed() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で上キーを押された時に呼び出される。
-     */
-    public void OnUpCursor() {
+    public void OnMouseReleased() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で下キーを押された時に呼び出される。
-     */
-    public void OnDownCursor() {
+    public void OnMouseClicked() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で左キーを押された時に呼び出される。
-     */
-    public void OnLeftCursor() {
+    public void OnKeyPressed() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で右キーを押された時に呼び出される。
-     */
-    public void OnRightCursor() {
+    public void OnKeyReleased() {
     }
 
     /**

@@ -188,16 +188,10 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    /**
-     mouse active objectになれる場合、trueを返す。
-     */
     public boolean IsAbleMAO() {
         return IsActivatable() && _transform.IsInRegion(mouseX, mouseY);
     }
 
-    /**
-     オブジェクトが有効になった時に呼び出される。
-     */
     protected void _OnEnable() {
         _transform.OnEnabled();
         _drawBack.OnEnabled();
@@ -211,9 +205,6 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    /**
-     オブジェクトが無効になった時に呼び出される。
-     */
     protected void _OnDisable() {
         _transform.OnDisabled();
         _drawBack.OnDisabled();
@@ -227,9 +218,6 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    /**
-     active objectになった時に呼び出される。
-     */
     public void OnEnabledActive() {
         _transform.OnEnabledActive();
         _drawBack.OnEnabledActive();
@@ -243,9 +231,6 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    /**
-     active objectでなくなった時に呼び出される。
-     */
     public void OnDisabledActive() {
         _transform.OnDisabledActive();
         _drawBack.OnDisabledActive();
@@ -255,6 +240,71 @@ public class SceneObject implements Comparable<SceneObject> {
             b = _behaviors.get(i);
             if (b.IsEnable()) {
                 b.OnDisabledActive();
+            }
+        }
+    }
+
+    public void OnMousePressed() {
+        _transform.OnMousePressed();
+        _drawBack.OnMousePressed();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnMousePressed();
+            }
+        }
+    }
+
+    public void OnMouseReleased() {
+        _transform.OnMouseReleased();
+        _drawBack.OnMouseReleased();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnMouseReleased();
+            }
+        }
+    }
+
+    public void OnMouseClicked() {
+        _transform.OnMouseClicked();
+        _drawBack.OnMouseClicked();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnMouseClicked();
+            }
+        }
+    }
+
+    public void OnKeyPressed() {
+        _transform.OnKeyPressed();
+        _drawBack.OnKeyPressed();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnKeyPressed();
+            }
+        }
+    }
+
+    public void OnKeyReleased() {
+        _transform.OnKeyReleased();
+        _drawBack.OnKeyReleased();
+
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnKeyReleased();
             }
         }
     }

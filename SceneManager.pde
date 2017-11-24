@@ -141,16 +141,19 @@ public final class SceneManager {
 
     private void OnMousePressed() {
         if (GetActiveScene() != null) {
+            GetActiveScene().OnMousePressed();
         }
     }
 
     private void OnMouseReleased() {
         if (GetActiveScene() != null) {
+            GetActiveScene().OnMouseReleased();
         }
     }
 
     private void OnMouseClicked() {
         if (GetActiveScene() != null) {
+            GetActiveScene().OnMouseClicked();
         }
     }
 
@@ -171,11 +174,13 @@ public final class SceneManager {
 
     private void OnKeyPressed() {
         if (GetActiveScene() != null) {
+            GetActiveScene().OnKeyPressed();
         }
     }
 
     private void OnKeyReleased() {
         if (GetActiveScene() != null) {
+            GetActiveScene().OnKeyReleased();
         }
     }
 
