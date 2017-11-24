@@ -230,6 +230,21 @@ public class Scene extends SceneObject {
         }
     }
 
+    public void OnMousePressed() {
+    }
+
+    public void OnMouseReleased() {
+    }
+
+    public void OnMouseClicked() {
+    }
+
+    public void OnKeyPressed() {
+    }
+
+    public void OnKeyReleased() {
+    }
+
     /**
      自身のリストにオブジェクトを追加する。
      ただし、既に子として追加されている場合は追加できない。

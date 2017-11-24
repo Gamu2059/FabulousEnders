@@ -26,10 +26,43 @@ public final class SceneManager {
 
     public SceneManager () {
         _scenes = new ArrayList<Scene>();
-        
+        _InitSceneEvent();
+    }
+
+    private void _InitSceneEvent() {
         if (inputManager == null) {
             inputManager = new InputManager();
         }
+        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new Event() { 
+            public void Event() {
+                OnMousePressed();
+            }
+        }
+        );
+        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new Event() {
+            public void Event() {
+                OnMouseReleased();
+            }
+        }
+        );
+        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new Event() {
+            public void Event() {
+                OnMouseClicked();
+            }
+        }
+        );
+        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new Event() {
+            public void Event() {
+                OnKeyPressed();
+            }
+        }
+        );
+        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new Event() {
+            public void Event() {
+                OnKeyReleased();
+            }
+        }
+        );
     }
 
     /**
@@ -107,12 +140,18 @@ public final class SceneManager {
     }
 
     private void OnMousePressed() {
+        if (GetActiveScene() != null) {
+        }
     }
 
     private void OnMouseReleased() {
+        if (GetActiveScene() != null) {
+        }
     }
 
     private void OnMouseClicked() {
+        if (GetActiveScene() != null) {
+        }
     }
 
     private void OnMouseWheel() {
@@ -131,9 +170,13 @@ public final class SceneManager {
     }
 
     private void OnKeyPressed() {
+        if (GetActiveScene() != null) {
+        }
     }
 
     private void OnKeyReleased() {
+        if (GetActiveScene() != null) {
+        }
     }
 
     /**
