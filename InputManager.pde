@@ -2,54 +2,164 @@
  キーやマウスの入力の低レベル処理を行うクラス。
  */
 public final class InputManager {
-    private boolean[] _keys;
+    private boolean[] _pressedKeys;
+    private boolean[] GetPressedKeys() {
+        return _pressedKeys;
+    }
+
+    private boolean[] _clickedKeys;
+    private boolean[] GetClickedKeys() {
+        return _clickedKeys;
+    }
+
+
+    private ActionEvent _mousePressedHandler;
+    public ActionEvent GetMousePressedHandler() {
+        return _mousePressedHandler;
+    }
+
+    private ActionEvent _mouseReleasedHandler;
+    public ActionEvent GetMouseReleasedHandler() {
+        return  _mouseReleasedHandler;
+    }
+
+    private ActionEvent _mouseClickedHandler;
+    public ActionEvent GetMouseClickedHandler() {
+        return _mouseClickedHandler;
+    }
+
+    private ActionEvent _mouseWheelHandler;
+    public ActionEvent GetMouseWheelHandler() {
+        return _mouseWheelHandler;
+    }
+
+    private ActionEvent _mouseMovedHandler;
+    public ActionEvent GetMouseMovedHandler() {
+        return _mouseMovedHandler;
+    }
+
+    private ActionEvent _mouseDraggedHandler;
+    public ActionEvent GetMouseDraggedHandler() {
+        return _mouseDraggedHandler;
+    }
+
+    private ActionEvent _mouseEnteredHandler;
+    public ActionEvent GetMouseEnteredHandler() {
+        return _mouseEnteredHandler;
+    }
+
+    private ActionEvent _mouseExitedHandler;
+    public ActionEvent GetMouseExitedHandler() {
+        return _mouseExitedHandler;
+    }
+
+    private ActionEvent _keyPressedHandler;
+    public ActionEvent GetKeyPressedHandler() {
+        return _keyPressedHandler;
+    }
+
+    private ActionEvent _keyReleasedHandler;
+    public ActionEvent GetKeyReleasedHandler() {
+        return _keyReleasedHandler;
+    }
+
+    private ActionEvent _keyClickedHandler;
+    public ActionEvent GetKeyClickedHandler() {
+        return _keyClickedHandler;
+    }
 
 
     public InputManager() {
-        _keys = new boolean[Key.KEY_NUM];
+        _pressedKeys = new boolean[Key.KEY_NUM];
+        _clickedKeys = new boolean[Key.KEY_NUM];
+
+        _mousePressedHandler = new ActionEvent();
+        _mouseReleasedHandler = new ActionEvent();
+        _mouseClickedHandler = new ActionEvent();
+        _mouseWheelHandler = new ActionEvent();
+        _mouseMovedHandler = new ActionEvent();
+        _mouseDraggedHandler = new ActionEvent();
+        _mouseEnteredHandler = new ActionEvent();
+        _mouseExitedHandler = new ActionEvent();
+        _keyPressedHandler = new ActionEvent();
+        _keyReleasedHandler = new ActionEvent();
+        _keyClickedHandler = new ActionEvent();
+
+        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new Event() { 
+            public void Event() {
+                println("Mouse Enterd on Window!");
+            }
+        }
+        );
+
+        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new Event() {
+            public void Event() {
+                println("Mouse Exited from Window!");
+            }
+        }
+        );
     }
 
-    // 何かしらのキーが押されたら呼ばれる。
     public void KeyPressed() {
         int code = KeyCode2Key();
-        if (code >= 0) {
-            _keys[code] = true;
+        if (code >= 0 && code < Key.KEY_NUM) {
+            GetPressedKeys()[code] = true;
         }
+
+        GetKeyPressedHandler().InvokeAllEvents();
     }
 
-    // 何かしらのキーが離されたら呼ばれる。
     public void KeyReleased() {
         int code = KeyCode2Key();
-        if (code >= 0) {
-            _keys[code] = false;
+        if (code >= 0 && code < Key.KEY_NUM) {
+            GetPressedKeys()[code] = false;
+            GetClickedKeys()[code] = true;
+        }
+
+        GetKeyReleasedHandler().InvokeAllEvents();
+        GetKeyClickedHandler().InvokeAllEvents();
+
+        // クリックされたキーの判定は同フレームで消滅させる
+        if (code >= 0 && code < Key.KEY_NUM) {
+            GetClickedKeys()[code] = false;
         }
     }
 
     public void MousePressed() {
+        GetMousePressedHandler().InvokeAllEvents();
     }
 
     public void MouseReleased() {
+        GetMouseReleasedHandler().InvokeAllEvents();
     }
 
     public void MouseClicked() {
+        GetMouseClickedHandler().InvokeAllEvents();
     }
 
     public void MouseWheel() {
+        GetMouseWheelHandler().InvokeAllEvents();
     }
 
     public void MouseMoved() {
+        GetMouseMovedHandler().InvokeAllEvents();
     }
 
     public void MouseDragged() {
+        GetMouseDraggedHandler().InvokeAllEvents();
     }
 
     public void MouseEntered() {
+        GetMouseEnteredHandler().InvokeAllEvents();
     }
 
     public void MouseExited() {
+        GetMouseExitedHandler().InvokeAllEvents();
     }
 
-    // これを呼び出した時点で押されている最後のキーのキーコードをKey列挙定数に変換して返す。
+    /**
+     これを呼び出した時点で押されている最後のキーのキーコードをKey列挙定数に変換して返す。
+     */
     public int KeyCode2Key() {
         switch(keyCode) {
         case UP:
@@ -62,8 +172,6 @@ public final class InputManager {
             return Key._LEFT;
         case ENTER:
             return Key._ENTER;
-        case ESC:
-            return Key._ESC;
         case BACKSPACE:
             return Key._BACK;
         case DELETE:
@@ -84,19 +192,147 @@ public final class InputManager {
         }
     }
 
+    private boolean _CheckOutOfKeyBounds(int i) {
+        return i < 0 || i >= Key.KEY_NUM;
+    }
+
+    /**
+     引数で与えられた列挙定数のキーが押されている状態ならtrueを、そうでなければfalseを返す。
+     通常の判定処理よりも高速である。
+     */
+    public boolean IsPressedKey(int input) {
+        if (_CheckOutOfKeyBounds(input)) {
+            return false;
+        }
+        return GetPressedKeys()[input];
+    }
+
+    /**
+     引数で与えられた列挙定数のキーだけが押されている状態ならtrueを、そうでなければfalseを返す。
+     通常の判定処理よりも高速である。
+     */
+    public boolean IsPressedKeyOnly(int input) {
+        if (_CheckOutOfKeyBounds(input)) {
+            return false;
+        }
+        for (int i=0; i<Key.KEY_NUM; i++) {
+            if (i == input) {
+                continue;
+            } else if (GetPressedKeys()[i]) {
+                return false;
+            }
+        }
+        return GetPressedKeys()[input];
+    }
+
+    /**
+     引数で与えられた列挙定数のキーがクリックされた状態ならtrueを、そうでなければfalseを返す。
+     通常の判定処理よりも高速である。
+     */
+    public boolean IsClickedKey(int input) {
+        if (_CheckOutOfKeyBounds(input)) {
+            return false;
+        }
+        return GetClickedKeys()[input];
+    }
+
+    /**
+     引数で与えられた列挙定数のキーだけがクリックされた状態ならtrueを、そうでなければfalseを返す。
+     通常の判定処理よりも高速である。
+     */
+    public boolean IsClickedKeyOnly(int input) {
+        if (_CheckOutOfKeyBounds(input)) {
+            return false;
+        }
+        for (int i=0; i<Key.KEY_NUM; i++) {
+            if (i == input) {
+                continue;
+            } else if (GetClickedKeys()[i]) {
+                return false;
+            }
+        }
+        return GetClickedKeys()[input];
+    }
+
     /* 
      引数で与えられた列挙定数に対して、全てのキーが押されている状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsPressedKey(int... inputs) {
+    public boolean IsPressedKeys(int... inputs) {
+        if (inputs == null) {
+            return false;
+        }
         for (int i=0; i<inputs.length; i++) {
-            if (inputs[i] < 0 || inputs[i] >= Key.KEY_NUM) {
+            if (_CheckOutOfKeyBounds(inputs[i])) {
                 return false;
-            }
-            if (!_keys[inputs[i]]) {
+            } else if (!GetPressedKeys()[inputs[i]]) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     引数で与えられた列挙定数に対して、その列挙されたものだけが押されている状態ならばtrueを、そうでなければfalseを返す。
+     引数が列挙定数の範囲外の場合は、必ずfalseが返される。
+     */
+    public boolean IsPressedKeysOnly(int... inputs) {
+        if (inputs == null) {
+            return false;
+        }
+        sort(inputs);
+        int inputIndex = 0;
+        for (int i=0; i<Key.KEY_NUM; i++) {
+            if (!GetPressedKeys()[i]) {
+                continue;
+            } else if (inputIndex >= inputs.length) {
+                return false;
+            } else if (i != inputs[inputIndex]) {
+                return false;
+            }
+            inputIndex++;
+        }
+        return inputIndex == inputs.length;
+    }
+
+    /* 
+     引数で与えられた列挙定数に対して、全てのキーがクリックされた状態ならばtrueを、そうでなければfalseを返す。
+     引数が列挙定数の範囲外の場合は、必ずfalseが返される。
+     */
+    public boolean IsClickedKeys(int... inputs) {
+        if (inputs == null) {
+            return false;
+        }
+        for (int i=0; i<inputs.length; i++) {
+            if (_CheckOutOfKeyBounds(inputs[i])) {
+                return false;
+            } else if (!GetClickedKeys()[inputs[i]]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     引数で与えられた列挙定数に対して、その列挙されたものだけがクリックされた状態ならばtrueを、そうでなければfalseを返す。
+     引数が列挙定数の範囲外の場合は、必ずfalseが返される。
+     */
+    public boolean IsClickedKeysOnly(int... inputs) {
+        if (inputs == null) {
+            return false;
+        }
+        sort(inputs);
+        int inputIndex = 0;
+        for (int i=0; i<Key.KEY_NUM; i++) {
+            if (!GetClickedKeys()[i]) {
+                continue;
+            } else if (inputIndex >= inputs.length) {
+                return false;
+            } else if (i != inputs[inputIndex]) {
+                return false;
+            }
+            inputIndex++;
+        }
+        return inputIndex == inputs.length;
     }
 }

@@ -90,7 +90,7 @@ public class Scene extends SceneObject {
         _Draw();
     }
 
-    
+
 
     protected void _ResetBackGround() {
         background(GetDrawBack().GetBackColorInfo().GetColor());
@@ -182,7 +182,6 @@ public class Scene extends SceneObject {
         if (!_isNeedSorting) {
             return;
         }
-
         _isNeedSorting = false;
         Collections.sort(_objects);
     }
@@ -192,15 +191,30 @@ public class Scene extends SceneObject {
      */
     protected void _CheckMAO() {
         SceneObject s;
+        boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.GetBehavior(SceneObjectInputListener.class) != null) {
+            if (s.IsEnable() && s.IsAbleMAO()) {
+                if (s == _activeObject) {
+                    // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
+                    return;
+                }
+                f = true;
+
                 if (_activeObject != null) {
                     _activeObject.OnDisabledActive();
                 }
                 _activeObject = s;
                 _activeObject.OnEnabledActive();
+                return;
             }
+        }
+        // 何もアクティブにならなければアクティブオブジェクトも無効化する
+        if (!f) {
+            if (_activeObject != null) {
+                _activeObject.OnDisabledActive();
+            }
+            _activeObject = null;
         }
     }
 
@@ -215,6 +229,48 @@ public class Scene extends SceneObject {
                 s.Draw();
             }
         }
+    }
+
+    private boolean _CheckDisableMAO() {
+        if (GetActiveObject() == null) {
+            return true;
+        }
+        return !GetActiveObject().IsEnable();
+    }
+
+    public void OnMousePressed() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnMousePressed();
+    }
+
+    public void OnMouseReleased() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnMouseReleased();
+    }
+
+    public void OnMouseClicked() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnMouseClicked();
+    }
+
+    public void OnKeyPressed() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnKeyPressed();
+    }
+
+    public void OnKeyReleased() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnKeyReleased();
     }
 
     /**

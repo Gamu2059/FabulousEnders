@@ -220,10 +220,11 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         if (!inv.invert()) {
             println(this);
             println("逆アフィン変換ができません。");
+            return false;
         }
 
         float[] in, out;
-        in = new float[]{x, y};
+        in = new float[]{y, x};
         out = new float[2];
         inv.mult(in, out);
         return 0 <= out[0] && out[0] < _size.x && 0 <= out[1] && out[1] < _size.y;

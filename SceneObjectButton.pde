@@ -2,26 +2,24 @@
  オブジェクトにボタンクリックイベントを与える振る舞い。
  */
 public class SceneObjectButton extends Abs_SceneObjectBehavior {
-    private ActionEvent _clickHandler;
-    public ActionEvent GetClickHandler() {
-        return _clickHandler;
+    private ActionEvent _decideHandler;
+    public ActionEvent GetDicideHandler() {
+        return _decideHandler;
     }
 
     public SceneObjectButton(SceneObject obj) {
         super(obj);
 
-        _clickHandler = new ActionEvent();
+        _decideHandler = new ActionEvent();
     }
 
-    public void OnEnabledActive() {
-        println("enabled");
+    public void OnMouseClicked() {
+        GetDicideHandler().InvokeAllEvents();
     }
 
-    public void OnDisabledActive() {
-        println("disabled");
-    }
-
-    public void OnDecided() {
-        println("clicked");
+    public void OnKeyReleased() {
+        if (inputManager.IsClickedKey(Key._ENTER)) {
+            GetDicideHandler().InvokeAllEvents();
+        }
     }
 }

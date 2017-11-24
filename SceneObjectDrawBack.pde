@@ -121,11 +121,4 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
         }
         rect(0, 0, size.x, size.y);
     }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(super.toString());
-
-        return b.toString();
-    }
 }
