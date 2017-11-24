@@ -188,13 +188,18 @@ public class Scene extends SceneObject {
 
     /**
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
+     ただし、マウス操作している時だけしか判定しない。
      */
     protected void _CheckMAO() {
+        if (!inputManager.IsMouseMode()) {
+            return;
+        }
+
         SceneObject s;
         boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsAbleMAO()) {
+            if (s.IsEnable() && s.IsAbleAO()) {
                 if (s == _activeObject) {
                     // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
                     return;

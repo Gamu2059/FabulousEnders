@@ -188,7 +188,7 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    public boolean IsAbleMAO() {
+    public boolean IsAbleAO() {
         return IsActivatable() && _transform.IsInRegion(mouseX, mouseY);
     }
 

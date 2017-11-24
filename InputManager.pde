@@ -68,6 +68,18 @@ public final class InputManager {
         return _keyClickedHandler;
     }
 
+    /**
+     マウス操作を何かしら行った場合、trueになる。
+     キー操作を何かしら行った場合、falseになる。
+     */
+    private boolean _isMouseMode;
+    public boolean IsMouseMode() {
+        return _isMouseMode;
+    }
+    private void SetMouseMode(boolean value) {
+        _isMouseMode = value;
+    }
+
 
     public InputManager() {
         _pressedKeys = new boolean[Key.KEY_NUM];
@@ -101,6 +113,7 @@ public final class InputManager {
     }
 
     public void KeyPressed() {
+        SetMouseMode(false);
         int code = KeyCode2Key();
         if (code >= 0 && code < Key.KEY_NUM) {
             GetPressedKeys()[code] = true;
@@ -110,6 +123,7 @@ public final class InputManager {
     }
 
     public void KeyReleased() {
+        SetMouseMode(false);
         int code = KeyCode2Key();
         if (code >= 0 && code < Key.KEY_NUM) {
             GetPressedKeys()[code] = false;
@@ -126,34 +140,42 @@ public final class InputManager {
     }
 
     public void MousePressed() {
+        SetMouseMode(true);
         GetMousePressedHandler().InvokeAllEvents();
     }
 
     public void MouseReleased() {
+        SetMouseMode(true);
         GetMouseReleasedHandler().InvokeAllEvents();
     }
 
     public void MouseClicked() {
+        SetMouseMode(true);
         GetMouseClickedHandler().InvokeAllEvents();
     }
 
     public void MouseWheel() {
+        SetMouseMode(true);
         GetMouseWheelHandler().InvokeAllEvents();
     }
 
     public void MouseMoved() {
+        SetMouseMode(true);
         GetMouseMovedHandler().InvokeAllEvents();
     }
 
     public void MouseDragged() {
+        SetMouseMode(true);
         GetMouseDraggedHandler().InvokeAllEvents();
     }
 
     public void MouseEntered() {
+        SetMouseMode(true);
         GetMouseEnteredHandler().InvokeAllEvents();
     }
 
     public void MouseExited() {
+        SetMouseMode(true);
         GetMouseExitedHandler().InvokeAllEvents();
     }
 
