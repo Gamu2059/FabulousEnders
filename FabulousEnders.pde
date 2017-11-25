@@ -61,18 +61,36 @@ void SetText(SceneObject o) {
  用意されたマネージャオブジェクトを自動的に生成する。
  */
 void InitManager() {
-    inputManager = new InputManager();
-    sceneManager = new SceneManager();
-    matrixManager = new MatrixManager();
-    imageManager = new ImageManager();
-    fontManager = new FontManager();
+    Field[] fields = getClass().getDeclaredFields();
+    Field f;
+
+    try {
+        for (int i=0; i<fields.length; i++) {
+            f = fields[i];
+            if (GeneralJudge.IsImplemented(f.getType(), Abs_Manager.class)) {
+                f.setAccessible(true);
+                f.set(this, f.getType().getDeclaredConstructor(getClass()).newInstance(this));
+            }
+        }
+    } 
+    catch(NoSuchMethodException nse) {
+        println(nse);
+    } 
+    catch(InstantiationException ie) {
+        println(ie);
+    } 
+    catch(IllegalAccessException iae) {
+        println(iae);
+    } 
+    catch(InvocationTargetException ite) {
+        println(ite);
+    }
 }
 
 void draw() {
     surface.setTitle("Game Maker fps : " + frameRate);
     try {
         sceneManager.Update();
-        
     } 
     catch(Exception e) {
         println(e);
