@@ -1,4 +1,4 @@
-public final class SceneManager {
+public final class SceneManager extends Abs_Manager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {
         return _scenes;
