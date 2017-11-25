@@ -91,6 +91,7 @@ public class SceneObject implements Comparable<SceneObject> {
     protected SceneObject(String name) {
         _name = name;
         _scene = (Scene) this;
+
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
 
         _transform = new SceneObjectTransform(this);
@@ -104,11 +105,12 @@ public class SceneObject implements Comparable<SceneObject> {
      */
     public SceneObject(String name, Scene scene) {
         _name = name;
+
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
         _scene = scene;
         _transform = new SceneObjectTransform(this);
         _drawBack = new SceneObjectDrawBack(this);
-
+        
         scene.AddObject(this);
 
         // トランスフォームが設定されてからでないと例外を発生させてしまう

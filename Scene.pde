@@ -33,9 +33,26 @@ public class Scene extends SceneObject {
         _isNeedSorting = value;
     }
 
+    /**
+     シーンにのみ特別にスケール値を与える。
+     */
+    private PVector _sceneScale;
+    public PVector GetSceneScale() {
+        return _sceneScale;
+    }
+    public void SetSceneScale(PVector value) {
+        if (value != null) {
+            _sceneScale = value;
+        }
+    }
+    public void SetSceneScale(float value1, float value2) {
+        _sceneScale.set(value1, value2);
+    }
+
     public Scene (String name) {
         super(name);
         _objects = new ArrayList<SceneObject>();
+        _sceneScale = new PVector(1, 1);
         sceneManager.AddScene(this);
     }
 
@@ -80,10 +97,8 @@ public class Scene extends SceneObject {
         _Draw();
     }
 
-
-
     protected void _ResetBackGround() {
-        background(GetDrawBack().GetBackColorInfo().GetColor());
+        background(0);
     }
 
     /**
@@ -150,11 +165,28 @@ public class Scene extends SceneObject {
     }
 
     /**
+     シーンの平行移動と回転を行う。
+     */
+    public void TransformScene() {
+        PVector p = GetTransform().GetPosition();
+        resetMatrix();
+        translate(p.x, p.y);
+        rotate(GetTransform().GetRotate());
+    }
+
+    public void TransformWithScene(SceneObject o) {
+        scale(GetSceneScale().x, GetSceneScale().y);
+        setMatrix(o.GetTransform().GetMatrix());
+    }
+
+    /**
      オブジェクトを移動させる。
      ここまでに指示されたトランスフォームの移動は、全てここで処理される。
      それ以降のトランスフォーム処理は無視される。
      */
     protected void _Transform() {
+        TransformScene();
+
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -217,13 +249,26 @@ public class Scene extends SceneObject {
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
     protected void _Draw() {
+        _DrawScene();
+
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable()) {
+                TransformWithScene(s);
                 s.Draw();
             }
         }
+    }
+
+    /**
+     シーン背景を描画する。
+     */
+    private void _DrawScene() {
+        fill(GetDrawBack().GetBackColorInfo().GetColor());
+        TransformScene();
+        PVector s = GetTransform().GetSize();
+        rect(0, 0, s.x * GetSceneScale().x, s.y * GetSceneScale().y);
     }
 
     private boolean _CheckDisableMAO() {
