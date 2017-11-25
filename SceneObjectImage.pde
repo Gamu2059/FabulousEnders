@@ -1,6 +1,3 @@
-/**
- オブジェクトに画像描画を提供する振る舞い。
- */
 public class SceneObjectImage extends Abs_SceneObjectDrawBase {
     private String _usingImageName;
     public String GetUsingImageName() {

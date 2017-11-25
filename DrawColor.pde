@@ -1,34 +1,10 @@
-/**
- 色情報をまとめて管理するクラス。
- */
 public final class DrawColor {
-    /**
-     RGBモードでの赤色の最大値。
-     */
     public static final int MAX_RED = 255;
-    /**
-     RGBモードでの緑色の最大値。
-     */
     public static final int MAX_GREEN = 255;
-    /**
-     RGBモードでの青色の最大値。
-     */
     public static final int MAX_BLUE = 255;
-    /**
-     HSBモードでの色相の最大値。
-     */
     public static final int MAX_HUE = 360;
-    /**
-     HSBモードでの彩度の最大値。
-     */
     public static final int MAX_SATURATION = 100;
-    /**
-     HSBモードでの明度の最大値。
-     */
     public static final int MAX_BRIGHTNESS = 100;
-    /**
-     RGB, HSBモードでのアルファの最大値。
-     */
     public static final int MAX_ALPHA = 255;
 
     private boolean _isRGB;
@@ -48,10 +24,6 @@ public final class DrawColor {
     public float GetRedOrHue() {
         return _p1;
     }
-    /**
-     第一パラメータを設定する。
-     値は最大値によって剰余を計算され、保持される。
-     */
     public void SetRedOrHue(float value) {
         if (_isRGB && value > MAX_RED) {
             value %= MAX_RED;
@@ -64,10 +36,6 @@ public final class DrawColor {
     public float GetGreenOrSaturation() {
         return _p2;
     }
-    /**
-     第二パラメータを設定する。
-     値は最大値によって剰余を計算され、保持される。
-     */
     public void SetGreenOrSaturation(float value) {
         if (_isRGB && value > MAX_GREEN) {
             value %= MAX_GREEN;
@@ -80,10 +48,6 @@ public final class DrawColor {
     public float GetBlueOrBrightness() {
         return _p3;
     }
-    /**
-     第三パラメータを設定する。
-     値は最大値によって剰余を計算され、保持される。
-     */
     public void SetBlueOrBrightness(float value) {
         if (_isRGB && value > MAX_BLUE) {
             value %= MAX_BLUE;
@@ -96,10 +60,6 @@ public final class DrawColor {
     public float GetAlpha() {
         return _alpha;
     }
-    /**
-     アルファパラメータを設定する。
-     値は最大値によって剰余を計算され、保持される。
-     */
     public void SetAlpha(float value) {
         if (value > MAX_ALPHA) {
             value %= MAX_ALPHA;
@@ -112,7 +72,7 @@ public final class DrawColor {
      */
     public color GetColor() {
         _ChangeColorMode();
-        return color(_p1, _p2, _p3, _alpha);
+        return color(GetRedOrHue(), GetGreenOrSaturation(), GetBlueOrBrightness(), GetAlpha());
     }
     public void SetColor(float p1, float p2, float p3) {
         SetRedOrHue(p1);
@@ -145,7 +105,7 @@ public final class DrawColor {
     }
 
     private void _InitParameterOnConstructor(boolean isRGB, float p1, float p2, float p3, float p4) {
-        _isRGB = isRGB;
+        SetColorMode(isRGB);
         SetColor(p1, p2, p3, p4);
     }
 
@@ -160,11 +120,9 @@ public final class DrawColor {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        }
-        if (o == null) {
+        } else if (o == null) {
             return false;
-        }
-        if (!(o instanceof DrawColor)) {
+        } else if (!(o instanceof DrawColor)) {
             return false;
         }
         DrawColor d = (DrawColor) o;

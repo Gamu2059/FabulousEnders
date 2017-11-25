@@ -1,6 +1,3 @@
-/**
- オブジェクトにボタンクリックイベントを与える振る舞い。
- */
 public class SceneObjectButton extends Abs_SceneObjectBehavior {
     private ActionEvent _decideHandler;
     public ActionEvent GetDicideHandler() {

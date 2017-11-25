@@ -1,5 +1,6 @@
 import java.util.*;
 import java.lang.reflect.*;
+import java.io.*;
 
 // マネージャインスタンス
 InputManager inputManager;
@@ -15,24 +16,23 @@ void setup() {
         InitManager();
 
         Scene scene = new Scene("main");
+        scene.GetDrawBack().GetBackColorInfo().SetColor(200, 200, 200);
 
         SceneObjectTransform objT;
 
         SceneObject o = new SceneObject("camera?", scene);
-        o.GetDrawBack().GetBackColorInfo().SetBlueOrBrightness(200);
         SetText(o);
-        SetButton(o);
         objT = o.GetTransform();
         objT.SetSize(100, 100);
-        objT.SetRotate(1);
         objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        objT.SetSelfAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
-        o = new SceneObject("Overlapped", scene);
-        o.GetDrawBack().GetBackColorInfo().SetColor(200, 200, 200);
-        SetText(o);
-        objT = o.GetTransform();
+        SceneObject o1 = new SceneObject("Overlapped", scene);
+        o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
+        SetImage(o1);
+        objT = o1.GetTransform();
+        objT.SetParent(o.GetTransform(), true);
         objT.SetSize(100, 140);
-        objT.SetPriority(2);
         objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
         sceneManager.Start("main");
@@ -52,10 +52,6 @@ void SetText(SceneObject o) {
     t.SetDrawInOrder(true);
     t.SetDrawSpeed(10);
     t.GetColorInfo().SetColor(0, 0, 200);
-}
-
-void SetButton(SceneObject o) {
-    new SceneObjectButton(o);
 }
 
 /**

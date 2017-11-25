@@ -1,6 +1,3 @@
-/**
- オブジェクトに描画処理を与える抽象的な振る舞い
- */
 public abstract class Abs_SceneObjectDrawBase extends Abs_SceneObjectBehavior {
     private DrawColor _colorInfo;
     public DrawColor GetColorInfo() {
