@@ -1,9 +1,3 @@
-import java.io.*;
-
-/**
- フォントを一元管理するマネージャ。
- 一度読み込まれたものは再度読み込むことをしないようにする。
- */
 public final class FontManager {
     private HashMap<String, PFont> _fonts;
     private HashMap<String, PFont> GetFontHash() {

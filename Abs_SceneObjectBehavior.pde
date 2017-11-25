@@ -1,6 +1,3 @@
-/**
- シーンオブジェクトにアタッチする振る舞いの抽象クラス。
- */
 public abstract class Abs_SceneObjectBehavior {
     private String[] _classNames;
     protected String[] GetClassNames() {
@@ -75,7 +72,7 @@ public abstract class Abs_SceneObjectBehavior {
      */
     public final boolean IsSameBehavior(Abs_SceneObjectBehavior behavior) {
         String[] a, b;
-        a = _classNames;
+        a = GetClassNames();
         b = behavior.GetClassNames();
         for (int i=0; i<a.length; i++) {
             for (int j=0; j<b.length; j++) {
@@ -91,7 +88,7 @@ public abstract class Abs_SceneObjectBehavior {
      指定した名前と一致する振る舞いであるか、もしくはそれを継承している場合、trueを返す。
      */
     public final boolean IsBehaviorAs(String behavior) {
-        String[] a = _classNames;
+        String[] a = GetClassNames();
         for (int i=0; i<a.length; i++) {
             if (a[i].equals(behavior)) {
                 return true;
@@ -189,11 +186,9 @@ public abstract class Abs_SceneObjectBehavior {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        }
-        if (o == null) {
+        } else if (o == null) {
             return false;
-        }
-        if (o instanceof String) {
+        } else if (o instanceof String) {
             String s = (String) o;
             return IsBehaviorAs(s);
         } else if (o instanceof Abs_SceneObjectBehavior) {

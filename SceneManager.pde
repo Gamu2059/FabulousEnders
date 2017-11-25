@@ -1,6 +1,3 @@
-/**
- シーンを管理するためのマネージャクラス。
- */
 public final class SceneManager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {

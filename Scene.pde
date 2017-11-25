@@ -1,17 +1,9 @@
-import java.util.*;
-
-/**
- SceneObjectをまとめるクラス。
- */
 public class Scene extends SceneObject {
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
         return _objects;
     }
 
-    /**
-     マウスやカーソルによって選択されているオブジェクトを返す。
-     */
     private SceneObject _activeObject;
     public SceneObject GetActiveObject() {
         return _activeObject;
@@ -43,9 +35,7 @@ public class Scene extends SceneObject {
 
     public Scene (String name) {
         super(name);
-
         _objects = new ArrayList<SceneObject>();
-
         sceneManager.AddScene(this);
     }
 
@@ -288,7 +278,7 @@ public class Scene extends SceneObject {
         if (GetObject(object.GetName()) != null) {
             return false;
         }
-        object.GetTransform().SetParent(GetTransform());
+        object.GetTransform().SetParent(GetTransform(), true);
         return _objects.add(object);
     }
 

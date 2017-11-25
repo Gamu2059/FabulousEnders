@@ -1,6 +1,3 @@
-/**
- オブジェクトにカーソルクリックイベントを与える振る舞い。
- */
 public class SceneObjectCursor extends Abs_SceneObjectBehavior {
     /**
      漠然とカーソルが押された時にイベントを発生させる。

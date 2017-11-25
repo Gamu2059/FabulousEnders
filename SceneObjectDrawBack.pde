@@ -1,7 +1,4 @@
-/**
- オブジェクトの背景色を管理するクラス。
- */
-public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
+public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
     /**
      背景の色情報。
      */
@@ -64,6 +61,8 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
         _borderType = value;
     }
 
+    private PVector _size;
+
     public SceneObjectDrawBack(SceneObject obj) {
         super(obj);
 
@@ -99,13 +98,14 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
         _borderType = borderType;
     }
 
+    public void Start() {
+        _size = GetObject().GetTransform().GetSize();
+    }
+
     public void Draw() {
-        // DrawBackは強制呼び出しなので、カットする
-        if (!IsEnable()) {
+        if (_size == null) {
             return;
         }
-
-        PVector size = GetObject().GetTransform().GetSize();
 
         if (_enableBorder) {
             stroke(_borderColorInfo.GetColor());
@@ -119,6 +119,6 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior {
         } else {
             fill(0, 0);
         }
-        rect(0, 0, size.x, size.y);
+        rect(0, 0, _size.x, _size.y);
     }
 }

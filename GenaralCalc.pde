@@ -1,7 +1,4 @@
-/**
- 汎用計算処理クラス。
- */
-public static class GeneralCalc {
+public final static class GeneralCalc {
     /**
      指定した座標同士のラジアン角を返す。
      座標2から座標1に向けての角度になるので注意。

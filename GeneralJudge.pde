@@ -1,11 +1,8 @@
-/**
- 汎用判定処理クラス。
- */
-public static class GeneralJudge {
+public final static class GeneralJudge {
     /**
     指定したクラスが指定したインターフェースを実装しているかどうか。
     */
-    public static boolean isImplemented(Class<?> clazz, Class<?> intrfc) {
+    public static boolean IsImplemented(Class<?> clazz, Class<?> intrfc) {
         if (clazz == null || intrfc == null) {
             return false;
         }

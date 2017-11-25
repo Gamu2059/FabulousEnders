@@ -1,6 +1,3 @@
-/**
- オブジェクトに文字列描画処理を与える振る舞い。
- */
 public class SceneObjectText extends Abs_SceneObjectDrawBase {
     private String _text;
     public String GetText() {

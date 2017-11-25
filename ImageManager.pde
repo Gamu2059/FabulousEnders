@@ -1,9 +1,3 @@
-import java.io.*;
-
-/**
- 画像を一元管理するマネージャ。
- 一度読み込まれたものは再度読み込むことをしないようにする。
- */
 public final class ImageManager {
     public static final String IMAGEPATH = "image/";
     

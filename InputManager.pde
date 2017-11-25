@@ -1,6 +1,3 @@
-/**
- キーやマウスの入力の低レベル処理を行うクラス。
- */
 public final class InputManager {
     private boolean[] _pressedKeys;
     private boolean[] GetPressedKeys() {

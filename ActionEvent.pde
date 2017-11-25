@@ -1,4 +1,4 @@
-public class ActionEvent {
+public final class ActionEvent {
     private HashMap<String, Event> _events;
     private HashMap<String, Event> GetEventHash() {
         return _events;

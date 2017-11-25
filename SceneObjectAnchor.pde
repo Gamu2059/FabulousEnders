@@ -1,6 +1,3 @@
-/**
- SceneObjectの基準位置を指定する情報のクラス。
- */
 public final class SceneObjectAnchor {
     public final static int LEFT_TOP = 0; 
     public final static int LEFT_MIDDLE = 1; 

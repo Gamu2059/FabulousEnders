@@ -1,6 +1,3 @@
-/**
- シーンを構成するオブジェクトのクラス。
- */
 public class SceneObject implements Comparable<SceneObject> {
     private String _name;
     public String GetName() {
@@ -123,9 +120,6 @@ public class SceneObject implements Comparable<SceneObject> {
      シーンがアクティブになってから最初の一度だけ呼び出される。
      */
     public void Start() {
-        _transform.Start();
-        _drawBack.Start();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -140,9 +134,6 @@ public class SceneObject implements Comparable<SceneObject> {
      振る舞いの有効フラグに関わらず必ず呼び出す。
      */
     public void Stop() {
-        _transform.Stop();
-        _drawBack.Stop();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -153,9 +144,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Update() {
-        _transform.Update();
-        _drawBack.Update();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -176,9 +164,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Draw() {
-        _transform.Draw();
-        _drawBack.Draw();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -193,9 +178,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     protected void _OnEnable() {
-        _transform.OnEnabled();
-        _drawBack.OnEnabled();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -206,9 +188,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     protected void _OnDisable() {
-        _transform.OnDisabled();
-        _drawBack.OnDisabled();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -219,9 +198,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnEnabledActive() {
-        _transform.OnEnabledActive();
-        _drawBack.OnEnabledActive();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -232,9 +208,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnDisabledActive() {
-        _transform.OnDisabledActive();
-        _drawBack.OnDisabledActive();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -245,9 +218,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnMousePressed() {
-        _transform.OnMousePressed();
-        _drawBack.OnMousePressed();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -258,9 +228,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnMouseReleased() {
-        _transform.OnMouseReleased();
-        _drawBack.OnMouseReleased();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -271,9 +238,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnMouseClicked() {
-        _transform.OnMouseClicked();
-        _drawBack.OnMouseClicked();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -284,9 +248,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnKeyPressed() {
-        _transform.OnKeyPressed();
-        _drawBack.OnKeyPressed();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -297,9 +258,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnKeyReleased() {
-        _transform.OnKeyReleased();
-        _drawBack.OnKeyReleased();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
