@@ -10,6 +10,7 @@ ImageManager imageManager;
 FontManager fontManager;
 
 Scene scene;
+SceneObjectTransform objT;
 float x;
 void setup() {
     size(1066, 600);
@@ -21,8 +22,6 @@ void setup() {
         scene.GetTransform().SetPosition(100, 100);
         scene.SetSceneScale(0.5, 1);
         scene.GetDrawBack().GetBackColorInfo().SetColor(100, 0, 100);
-
-        SceneObjectTransform objT;
 
         SceneObject o = new SceneObject("camera?", scene);
         SetText(o);
@@ -73,6 +72,7 @@ void draw() {
     surface.setTitle("Game Maker fps : " + frameRate);
     try {
         sceneManager.Update();
+        
     } 
     catch(Exception e) {
         println(e);

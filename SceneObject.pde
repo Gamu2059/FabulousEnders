@@ -110,7 +110,7 @@ public class SceneObject implements Comparable<SceneObject> {
         _scene = scene;
         _transform = new SceneObjectTransform(this);
         _drawBack = new SceneObjectDrawBack(this);
-        
+
         scene.AddObject(this);
 
         // トランスフォームが設定されてからでないと例外を発生させてしまう
@@ -166,6 +166,9 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Draw() {
+        // 自身のトランスフォームをセットする
+        setMatrix(GetTransform().GetMatrix());
+
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);

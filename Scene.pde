@@ -170,13 +170,9 @@ public class Scene extends SceneObject {
     public void TransformScene() {
         PVector p = GetTransform().GetPosition();
         resetMatrix();
+        scale(GetSceneScale().x, GetSceneScale().y);
         translate(p.x, p.y);
         rotate(GetTransform().GetRotate());
-    }
-
-    public void TransformWithScene(SceneObject o) {
-        scale(GetSceneScale().x, GetSceneScale().y);
-        setMatrix(o.GetTransform().GetMatrix());
     }
 
     /**
@@ -255,7 +251,6 @@ public class Scene extends SceneObject {
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
             if (s.IsEnable()) {
-                TransformWithScene(s);
                 s.Draw();
             }
         }
@@ -268,7 +263,7 @@ public class Scene extends SceneObject {
         fill(GetDrawBack().GetBackColorInfo().GetColor());
         TransformScene();
         PVector s = GetTransform().GetSize();
-        rect(0, 0, s.x * GetSceneScale().x, s.y * GetSceneScale().y);
+        rect(0, 0, s.x, s.y);
     }
 
     private boolean _CheckDisableMAO() {
