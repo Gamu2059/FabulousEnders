@@ -18,7 +18,7 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
             return;
         }
 
-        SceneObjectTransform t = GetObject().GetScene().GetTransform();
+        SceneObjectTransform t = GetScene().GetTransform();
         if (_parent != null) {
             _parent.RemoveChild(this);
         }
@@ -83,7 +83,7 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         if (value >= 0 && _priority != value) {
             _priority = value;
             if (!(GetObject() instanceof Scene)) {
-                GetObject().GetScene().SetNeedSorting(true);
+                GetScene().SetNeedSorting(true);
             }
         }
     }
@@ -182,8 +182,8 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         if (_isRelative) {
             parent = _parent;
         } else {
-            parent = GetObject().GetScene().GetTransform();
-            resetMatrix();
+            parent = GetScene().GetTransform();
+            GetScene().TransformScene();
         }
 
         float par1, par2;
@@ -298,11 +298,6 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
             index += _children.size();
         }
         return _children.remove(index);
-    }
-
-    public void Draw() {
-        resetMatrix();
-        setMatrix(_matrix);
     }
 
     /**

@@ -14,6 +14,13 @@ public abstract class Abs_SceneObjectBehavior {
         return _object;
     }
 
+    public Scene GetScene() {
+        if (GetObject() == null) {
+            return null;
+        }
+        return GetObject().GetScene();
+    }
+
     private boolean _enable;
     public boolean IsEnable() {
         return _enable;

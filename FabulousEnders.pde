@@ -9,16 +9,19 @@ MatrixManager matrixManager;
 ImageManager imageManager;
 FontManager fontManager;
 
+Scene scene;
+SceneObjectTransform objT;
+float x;
 void setup() {
-    size(1024, 600);
+    size(1066, 600);
     surface.setLocation(0, 0);
     try {
         InitManager();
 
-        Scene scene = new Scene("main");
-        scene.GetDrawBack().GetBackColorInfo().SetColor(200, 200, 200);
-
-        SceneObjectTransform objT;
+        scene = new Scene("main");
+        scene.GetTransform().SetPosition(100, 100);
+        scene.SetSceneScale(0.5, 1);
+        scene.GetDrawBack().GetBackColorInfo().SetColor(100, 0, 100);
 
         SceneObject o = new SceneObject("camera?", scene);
         SetText(o);
@@ -69,6 +72,7 @@ void draw() {
     surface.setTitle("Game Maker fps : " + frameRate);
     try {
         sceneManager.Update();
+        
     } 
     catch(Exception e) {
         println(e);
