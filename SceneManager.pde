@@ -1,6 +1,3 @@
-/**
- シーンを管理するためのマネージャクラス。
- */
 public final class SceneManager {
     private ArrayList<Scene> _scenes;
     public ArrayList<Scene> GetScenes() {
@@ -11,6 +8,9 @@ public final class SceneManager {
      現在描画されているシーン。
      */
     private Scene _activeScene;
+    public Scene GetActiveScene() {
+        return _activeScene;
+    }
     /**
      次にアクティブになるシーン。
      */
@@ -23,6 +23,43 @@ public final class SceneManager {
 
     public SceneManager () {
         _scenes = new ArrayList<Scene>();
+        _InitSceneEvent();
+    }
+
+    private void _InitSceneEvent() {
+        if (inputManager == null) {
+            inputManager = new InputManager();
+        }
+        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new Event() { 
+            public void Event() {
+                OnMousePressed();
+            }
+        }
+        );
+        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new Event() {
+            public void Event() {
+                OnMouseReleased();
+            }
+        }
+        );
+        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new Event() {
+            public void Event() {
+                OnMouseClicked();
+            }
+        }
+        );
+        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new Event() {
+            public void Event() {
+                OnKeyPressed();
+            }
+        }
+        );
+        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new Event() {
+            public void Event() {
+                OnKeyReleased();
+            }
+        }
+        );
     }
 
     /**
@@ -30,7 +67,7 @@ public final class SceneManager {
      setup関数の一番最後に呼び出す必要がある。
      */
     public void Start(String sceneName) {
-
+        _InitScenes();
         LoadScene(sceneName);
         Update();
     }
@@ -59,10 +96,9 @@ public final class SceneManager {
      アクティブシーンのみ処理される。
      */
     public void Update() {
-        if (_activeScene == null) {
-            return;
+        if (_activeScene != null) {
+            _activeScene.Update();
         }
-        _activeScene.Update();
         if (_loadFlag) {
             _ChangeScene();
         }
@@ -75,8 +111,12 @@ public final class SceneManager {
     private void _ChangeScene() {
         _loadFlag = false;
 
-        _activeScene.Disabled();
-        _nextScene.Enabled();
+        if (_activeScene != null) {
+            _activeScene.Disabled();
+        }
+        if (_nextScene != null) {
+            _nextScene.Enabled();
+        }
 
         _activeScene = _nextScene;
         _nextScene = null;
@@ -92,6 +132,52 @@ public final class SceneManager {
         }
 
         for (int i=0; i<_scenes.size(); i++) {
+            _scenes.get(i).InitScene();
+        }
+    }
+
+    private void OnMousePressed() {
+        if (GetActiveScene() != null) {
+            GetActiveScene().OnMousePressed();
+        }
+    }
+
+    private void OnMouseReleased() {
+        if (GetActiveScene() != null) {
+            GetActiveScene().OnMouseReleased();
+        }
+    }
+
+    private void OnMouseClicked() {
+        if (GetActiveScene() != null) {
+            GetActiveScene().OnMouseClicked();
+        }
+    }
+
+    private void OnMouseWheel() {
+    }
+
+    private void OnMouseMoved() {
+    }
+
+    private void OnMouseDragged() {
+    }
+
+    private void OnMouseEntered() {
+    }
+
+    private void OnMouseExited() {
+    }
+
+    private void OnKeyPressed() {
+        if (GetActiveScene() != null) {
+            GetActiveScene().OnKeyPressed();
+        }
+    }
+
+    private void OnKeyReleased() {
+        if (GetActiveScene() != null) {
+            GetActiveScene().OnKeyReleased();
         }
     }
 

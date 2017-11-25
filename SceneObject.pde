@@ -1,10 +1,4 @@
-/**
- シーンを構成するオブジェクトのクラス。
- */
 public class SceneObject implements Comparable<SceneObject> {
-    /**
-     名前。
-     */
     private String _name;
     public String GetName() {
         return _name;
@@ -45,15 +39,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     /**
-     自身のインプットリスナ。
-     振る舞いリストとは独立して呼び出しやすいようにした。
-     */
-    private SceneObjectInputListener _inputListener;
-    public SceneObjectInputListener GetInputListener() {
-        return _inputListener;
-    }
-
-    /**
      オブジェクトとして有効かどうかを管理するフラグ。
      */
     private boolean _enable;
@@ -64,8 +49,14 @@ public class SceneObject implements Comparable<SceneObject> {
      有効フラグを設定する。
      ただし、自身の親の有効フラグがfalseの場合、設定は反映されない。
      さらに、自身の設定を行うと同時に、階層構造的に子となる全てのオブジェクトの設定にも影響を与える。
+     
+     自身がシーンインスタンスであった場合は無視する。
      */
     public void SetEnable(boolean value) {
+        if (this instanceof Scene) {
+            return;
+        }
+
         if (GetParent() == null) {
             return;
         }
@@ -78,14 +69,20 @@ public class SceneObject implements Comparable<SceneObject> {
         for (int i=0; i<list.size(); i++) {
             list.get(i).GetObject().RecursiveSetEnable(value);
         }
+
+        if (_enable) {
+            _OnEnable();
+        } else {
+            _OnDisable();
+        }
     }
 
-    /**
-     Start関数を呼び出しても良い場合、trueになっている。
-     */
-    private boolean _startFlag;
-    public boolean IsStartFlag() {
-        return _startFlag;
+    private boolean _isActivatable;
+    public boolean IsActivatable() {
+        return _isActivatable;
+    }
+    public void SetActivatable(boolean value) {
+        _isActivatable = value;
     }
 
     /**
@@ -93,14 +90,14 @@ public class SceneObject implements Comparable<SceneObject> {
      */
     protected SceneObject(String name) {
         _name = name;
-        _scene = null;
+        _scene = (Scene) this;
+
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
 
         _transform = new SceneObjectTransform(this);
         _transform.SetSize(width, height);
         _transform.SetPriority(0);
-
-        AddBehavior(_transform);
+        _drawBack = new SceneObjectDrawBack(this);
     }
 
     /**
@@ -108,21 +105,23 @@ public class SceneObject implements Comparable<SceneObject> {
      */
     public SceneObject(String name, Scene scene) {
         _name = name;
+
         _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
         _scene = scene;
         _transform = new SceneObjectTransform(this);
         _drawBack = new SceneObjectDrawBack(this);
 
         scene.AddObject(this);
+
+        // トランスフォームが設定されてからでないと例外を発生させてしまう
+        SetEnable(true);
+        SetActivatable(true);
     }
 
     /**
      シーンがアクティブになってから最初の一度だけ呼び出される。
      */
     public void Start() {
-        _transform.Start();
-        _drawBack.Start();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -137,9 +136,6 @@ public class SceneObject implements Comparable<SceneObject> {
      振る舞いの有効フラグに関わらず必ず呼び出す。
      */
     public void Stop() {
-        _transform.Stop();
-        _drawBack.Stop();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -150,9 +146,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Update() {
-        _transform.Update();
-        _drawBack.Update();
-
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -173,8 +166,8 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Draw() {
-        _transform.Draw();
-        _drawBack.Draw();
+        // 自身のトランスフォームをセットする
+        setMatrix(GetTransform().GetMatrix());
 
         Abs_SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
@@ -185,30 +178,98 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    /**
-     mouse active objectになれる場合、trueを返す。
-     */
-    public boolean IsAbleMAO() {
-        if (_inputListener == null) {
-            return false;
-        }
-        if (!_inputListener.IsEnable()) {
-            return false;
-        }
-
-        return _transform.IsInRegion(mouseX, mouseY);
+    public boolean IsAbleAO() {
+        return IsActivatable() && _transform.IsInRegion(mouseX, mouseY);
     }
 
-    /**
-     active objectになった時に呼び出される。
-     */
+    protected void _OnEnable() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnEnabled();
+            }
+        }
+    }
+
+    protected void _OnDisable() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnDisabled();
+            }
+        }
+    }
+
     public void OnEnabledActive() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnEnabledActive();
+            }
+        }
     }
 
-    /**
-     active objectでなくなった時に呼び出される。
-     */
     public void OnDisabledActive() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnDisabledActive();
+            }
+        }
+    }
+
+    public void OnMousePressed() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnMousePressed();
+            }
+        }
+    }
+
+    public void OnMouseReleased() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnMouseReleased();
+            }
+        }
+    }
+
+    public void OnMouseClicked() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnMouseClicked();
+            }
+        }
+    }
+
+    public void OnKeyPressed() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnKeyPressed();
+            }
+        }
+    }
+
+    public void OnKeyReleased() {
+        Abs_SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            if (b.IsEnable()) {
+                b.OnKeyReleased();
+            }
+        }
     }
 
     /**
@@ -220,10 +281,6 @@ public class SceneObject implements Comparable<SceneObject> {
     public boolean AddBehavior(Abs_SceneObjectBehavior behavior) {
         if (IsHaveBehavior(behavior)) {
             return false;
-        }
-        // inputListener系統ならば、バッファリングする
-        if (behavior.IsBehaviorAs(SceneObjectInputListener.class)) {
-            _inputListener = (SceneObjectInputListener) behavior;
         }
         return _behaviors.add(behavior);
     }

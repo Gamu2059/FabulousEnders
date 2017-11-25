@@ -1,6 +1,3 @@
-/**
- SceneObjectの基準位置を指定する情報のクラス。
- */
 public final class SceneObjectAnchor {
     public final static int LEFT_TOP = 0; 
     public final static int LEFT_MIDDLE = 1; 
@@ -12,13 +9,13 @@ public final class SceneObjectAnchor {
     public final static int RIGHT_MIDDLE = 7; 
     public final static int RIGHT_BOTTOM = 8;
 
-    public final static float LEFT = 0;
-    public final static float CENTER = 0.5;
-    public final static float RIGHT = 1;
+    private final static float _LEFT = 0;
+    private final static float _CENTER = 0.5;
+    private final static float _RIGHT = 1;
 
-    public final static float TOP = 0;
-    public final static float MIDDLE = 0.5;
-    public final static float BOTTOM = 1;
+    private final static float _TOP = 0;
+    private final static float _MIDDLE = 0.5;
+    private final static float _BOTTOM = 1;
 
     private int _anchor;
     public int GetAnchor() {
@@ -47,26 +44,26 @@ public final class SceneObjectAnchor {
     }
 
     public boolean IsLeft() {
-        return GetHorizontal() == LEFT;
+        return GetHorizontal() == _LEFT;
     }
 
     public boolean IsCenter() {
-        return GetHorizontal() == CENTER;
+        return GetHorizontal() == _CENTER;
     }
 
     public boolean IsRight() {
-        return GetHorizontal() == RIGHT;
+        return GetHorizontal() == _RIGHT;
     }
 
     public boolean IsTop() {
-        return GetVertical() == TOP;
+        return GetVertical() == _TOP;
     }
 
     public boolean IsMiddle() {
-        return GetVertical() == MIDDLE;
+        return GetVertical() == _MIDDLE;
     }
 
     public boolean IsBottom() {
-        return GetVertical() == BOTTOM;
+        return GetVertical() == _BOTTOM;
     }
 }

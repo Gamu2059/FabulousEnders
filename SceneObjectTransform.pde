@@ -1,7 +1,3 @@
-/**
- トランスフォームコンポーネント。
- 保持されている変化量は、回転の後に平行移動することを前提としています。
- */
 public final class SceneObjectTransform extends Abs_SceneObjectBehavior implements Comparable<SceneObjectTransform> {
     /**
      親トランスフォーム。
@@ -15,22 +11,26 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
      自動的に前の親との親子関係は絶たれる。
      ただし、指定したトランスフォームがnullの場合は、シーンインスタンスが親になる。
      
-     さらに、自身がシーンインスタンスのトランスフォームであった場合、この処理は無視される。
+     isPriorityChangeがtrueの場合、自動的に親の優先度より1だけ高い優先度がつけられる。
      */
-    public void SetParent(SceneObjectTransform value) {
-        Scene s = GetObject().GetScene();
-        if (s == null) {
-            // シーンインスタンスがnullになるのは、シーンインスタンスだけ
+    public void SetParent(SceneObjectTransform value, boolean isPriorityChange) {
+        if (GetObject() instanceof Scene) {
             return;
         }
 
-        _parent.RemoveChild(this);
+        SceneObjectTransform t = GetScene().GetTransform();
+        if (_parent != null) {
+            _parent.RemoveChild(this);
+        }
         if (value == null) {
-            _parent = s.GetTransform();
-            s.GetTransform()._AddChild(this);
+            _parent = t;
+            t._AddChild(this);
         } else {
             _parent = value;
             _parent._AddChild(this);
+        }
+        if (isPriorityChange) {
+            SetPriority(GetParent().GetPriority() + 1);
         }
     }
 
@@ -80,8 +80,11 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         return _priority;
     }
     public void SetPriority(int value) {
-        if (value >= 0) {
+        if (value >= 0 && _priority != value) {
             _priority = value;
+            if (!(GetObject() instanceof Scene)) {
+                GetScene().SetNeedSorting(true);
+            }
         }
     }
 
@@ -136,7 +139,6 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
 
     /**
      図形の描画領域。
-     相対量という概念は無い。
      */
     private PVector _size;
     public PVector GetSize() {
@@ -180,7 +182,8 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         if (_isRelative) {
             parent = _parent;
         } else {
-            parent = GetObject().GetScene().GetTransform();
+            parent = GetScene().GetTransform();
+            GetScene().TransformScene();
         }
 
         float par1, par2;
@@ -200,7 +203,6 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
 
         // 再帰的に計算していく
         if (_children != null) {
-            Abs_UIBase base;
             for (int i=0; i<_children.size(); i++) {
                 _children.get(i).Transform();
             }
@@ -217,10 +219,11 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         if (!inv.invert()) {
             println(this);
             println("逆アフィン変換ができません。");
+            return false;
         }
 
         float[] in, out;
-        in = new float[]{x, y};
+        in = new float[]{y, x};
         out = new float[2];
         inv.mult(in, out);
         return 0 <= out[0] && out[0] < _size.x && 0 <= out[1] && out[1] < _size.y;
@@ -248,7 +251,7 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
      @return 追加に成功した場合はtrueを返す
      */
     private boolean _AddChild(SceneObjectTransform t) {
-        if (IsParentOf(t)) {
+        if (GetChildren().contains(t)) {
             return false;
         }
         return _children.add(t);

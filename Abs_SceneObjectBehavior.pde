@@ -1,6 +1,3 @@
-/**
- シーンオブジェクトにアタッチする振る舞いの抽象クラス。
- */
 public abstract class Abs_SceneObjectBehavior {
     private String[] _classNames;
     protected String[] GetClassNames() {
@@ -17,18 +14,39 @@ public abstract class Abs_SceneObjectBehavior {
         return _object;
     }
 
+    public Scene GetScene() {
+        if (GetObject() == null) {
+            return null;
+        }
+        return GetObject().GetScene();
+    }
+
     private boolean _enable;
     public boolean IsEnable() {
         return _enable;
     }
     public void SetEnable(boolean value) {
         _enable = value;
+        if (_enable) {
+            OnEnabled();
+        } else {
+            OnDisabled();
+        }
+    }
+
+    /**
+     振る舞いとしてスタート関数が呼び出されたかどうか。
+     既に呼び出された場合はtrueになる。
+     */
+    private boolean _isStart;
+    public boolean IsStart() {
+        return _isStart;
     }
 
     public Abs_SceneObjectBehavior(SceneObject object) {
         _name = getClass().getSimpleName();
         _object = object;
-        _enable = true;
+        SetEnable(true);
 
         // 自身も含めた継承しているクラスを全て列挙
         ArrayList<String> list = new ArrayList<String>();
@@ -49,6 +67,8 @@ public abstract class Abs_SceneObjectBehavior {
     /**
      ClassNames配列を生成する際に、"自身の振る舞いを特定できない最も古い振る舞い"を返す。
      基本的な振る舞いは、全て "Abs_SceneObjectBehavior" を返す。
+     
+     返り値に指定したクラスを継承する振る舞いはオブジェクトに複数存在することが許可される。
      */
     protected String _OldestClassName() {
         return "Abs_SceneObjectBehavior";
@@ -59,7 +79,7 @@ public abstract class Abs_SceneObjectBehavior {
      */
     public final boolean IsSameBehavior(Abs_SceneObjectBehavior behavior) {
         String[] a, b;
-        a = _classNames;
+        a = GetClassNames();
         b = behavior.GetClassNames();
         for (int i=0; i<a.length; i++) {
             for (int j=0; j<b.length; j++) {
@@ -75,7 +95,7 @@ public abstract class Abs_SceneObjectBehavior {
      指定した名前と一致する振る舞いであるか、もしくはそれを継承している場合、trueを返す。
      */
     public final boolean IsBehaviorAs(String behavior) {
-        String[] a = _classNames;
+        String[] a = GetClassNames();
         for (int i=0; i<a.length; i++) {
             if (a[i].equals(behavior)) {
                 return true;
@@ -96,6 +116,7 @@ public abstract class Abs_SceneObjectBehavior {
      これが呼び出される段階では、全てのオブジェクトが揃っているので、自身以外への参照の保持などを行える。
      */
     public void Start() {
+        _isStart = true;
     }
 
     /**
@@ -128,45 +149,39 @@ public abstract class Abs_SceneObjectBehavior {
     }
 
     /**
-     オブジェクトがアクティブになったフレームで呼び出される。
+     オブジェクトが有効化されたフレームで呼び出される。
+     振る舞い単体でも呼び出される可能性はある。
      */
+    public void OnEnabled() {
+        _isStart = false;
+    }
+
+    /**
+     オブジェクトが無効化されたフレームで呼び出される。
+     振る舞い単体でも呼び出される可能性はある。
+     */
+    public void OnDisabled() {
+    }
+
     public void OnEnabledActive() {
     }
 
-    /**
-     オブジェクトがノンアクティブになったフレームで呼び出される。
-     */
     public void OnDisabledActive() {
     }
 
-    /**
-     オブジェクトがアクティブの状態でマウスクリックか決定キーを押された時に呼び出される。
-     */
-    public void OnDecided() {
+    public void OnMousePressed() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で上キーを押された時に呼び出される。
-     */
-    public void OnUpCursor() {
+    public void OnMouseReleased() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で下キーを押された時に呼び出される。
-     */
-    public void OnDownCursor() {
+    public void OnMouseClicked() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で左キーを押された時に呼び出される。
-     */
-    public void OnLeftCursor() {
+    public void OnKeyPressed() {
     }
 
-    /**
-     オブジェクトがアクティブの状態で右キーを押された時に呼び出される。
-     */
-    public void OnRightCursor() {
+    public void OnKeyReleased() {
     }
 
     /**
@@ -178,11 +193,9 @@ public abstract class Abs_SceneObjectBehavior {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        }
-        if (o == null) {
+        } else if (o == null) {
             return false;
-        }
-        if (o instanceof String) {
+        } else if (o instanceof String) {
             String s = (String) o;
             return IsBehaviorAs(s);
         } else if (o instanceof Abs_SceneObjectBehavior) {

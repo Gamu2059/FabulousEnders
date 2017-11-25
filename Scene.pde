@@ -1,17 +1,9 @@
-import java.util.*;
-
-/**
- SceneObjectをまとめるクラス。
- */
 public class Scene extends SceneObject {
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
         return _objects;
     }
 
-    /**
-     マウスやカーソルによって選択されているオブジェクトを返す。
-     */
     private SceneObject _activeObject;
     public SceneObject GetActiveObject() {
         return _activeObject;
@@ -37,12 +29,30 @@ public class Scene extends SceneObject {
      これがtrueでなければソートはされない。
      */
     private boolean _isNeedSorting;
+    public void SetNeedSorting(boolean value) {
+        _isNeedSorting = value;
+    }
+
+    /**
+     シーンにのみ特別にスケール値を与える。
+     */
+    private PVector _sceneScale;
+    public PVector GetSceneScale() {
+        return _sceneScale;
+    }
+    public void SetSceneScale(PVector value) {
+        if (value != null) {
+            _sceneScale = value;
+        }
+    }
+    public void SetSceneScale(float value1, float value2) {
+        _sceneScale.set(value1, value2);
+    }
 
     public Scene (String name) {
         super(name);
-
         _objects = new ArrayList<SceneObject>();
-
+        _sceneScale = new PVector(1, 1);
         sceneManager.AddScene(this);
     }
 
@@ -88,6 +98,7 @@ public class Scene extends SceneObject {
     }
 
     protected void _ResetBackGround() {
+        background(0);
     }
 
     /**
@@ -98,7 +109,7 @@ public class Scene extends SceneObject {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsStartFlag()) {
+            if (s.IsEnable()) {
                 s.Start();
             }
         }
@@ -154,11 +165,24 @@ public class Scene extends SceneObject {
     }
 
     /**
+     シーンの平行移動と回転を行う。
+     */
+    public void TransformScene() {
+        PVector p = GetTransform().GetPosition();
+        resetMatrix();
+        scale(GetSceneScale().x, GetSceneScale().y);
+        translate(p.x, p.y);
+        rotate(GetTransform().GetRotate());
+    }
+
+    /**
      オブジェクトを移動させる。
      ここまでに指示されたトランスフォームの移動は、全てここで処理される。
      それ以降のトランスフォーム処理は無視される。
      */
     protected void _Transform() {
+        TransformScene();
+
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -176,25 +200,44 @@ public class Scene extends SceneObject {
         if (!_isNeedSorting) {
             return;
         }
-
         _isNeedSorting = false;
         Collections.sort(_objects);
     }
 
     /**
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
+     ただし、マウス操作している時だけしか判定しない。
      */
     protected void _CheckMAO() {
+        if (!inputManager.IsMouseMode()) {
+            return;
+        }
+
         SceneObject s;
+        boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.GetBehavior(SceneObjectInputListener.class) != null) {
+            if (s.IsEnable() && s.IsAbleAO()) {
+                if (s == _activeObject) {
+                    // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
+                    return;
+                }
+                f = true;
+
                 if (_activeObject != null) {
                     _activeObject.OnDisabledActive();
                 }
                 _activeObject = s;
                 _activeObject.OnEnabledActive();
+                return;
             }
+        }
+        // 何もアクティブにならなければアクティブオブジェクトも無効化する
+        if (!f) {
+            if (_activeObject != null) {
+                _activeObject.OnDisabledActive();
+            }
+            _activeObject = null;
         }
     }
 
@@ -202,13 +245,67 @@ public class Scene extends SceneObject {
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
     protected void _Draw() {
+        _DrawScene();
+
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsChildOf(this)) {
+            if (s.IsEnable()) {
                 s.Draw();
             }
         }
+    }
+
+    /**
+     シーン背景を描画する。
+     */
+    private void _DrawScene() {
+        fill(GetDrawBack().GetBackColorInfo().GetColor());
+        TransformScene();
+        PVector s = GetTransform().GetSize();
+        rect(0, 0, s.x, s.y);
+    }
+
+    private boolean _CheckDisableMAO() {
+        if (GetActiveObject() == null) {
+            return true;
+        }
+        return !GetActiveObject().IsEnable();
+    }
+
+    public void OnMousePressed() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnMousePressed();
+    }
+
+    public void OnMouseReleased() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnMouseReleased();
+    }
+
+    public void OnMouseClicked() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnMouseClicked();
+    }
+
+    public void OnKeyPressed() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnKeyPressed();
+    }
+
+    public void OnKeyReleased() {
+        if (_CheckDisableMAO()) {
+            return;
+        }
+        GetActiveObject().OnKeyReleased();
     }
 
     /**
@@ -221,6 +318,7 @@ public class Scene extends SceneObject {
         if (GetObject(object.GetName()) != null) {
             return false;
         }
+        object.GetTransform().SetParent(GetTransform(), true);
         return _objects.add(object);
     }
 

@@ -1,7 +1,3 @@
-/**
- キーの列挙定数を定義するクラス。
- 列挙型としないのは、名前そのものを値として使用しないためである。
- */
 public class Key {
     // 使用するキーの総数
     public final static int KEY_NUM = 45;
@@ -56,7 +52,7 @@ public class Key {
     public final static int _RIGHT = 38;
     public final static int _LEFT = 39;
     public final static int _ENTER = 40;
-    public final static int _ESC = 41;
+    //public final static int _ESC = 41;
     public final static int _DEL = 42;
     public final static int _BACK = 43;
     public final static int _SHIFT = 44;
