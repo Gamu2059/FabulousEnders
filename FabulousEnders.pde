@@ -27,8 +27,8 @@ void setup() {
         SetText(o);
         objT1 = o.GetTransform();
         objT1.SetSize(100, 100);
-        objT1.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
-        objT1.SetSelfAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        objT1.SetParentAnchor(Anchor.CENTER_MIDDLE);
+        objT1.SetSelfAnchor(Anchor.CENTER_MIDDLE);
 
         SceneObject o1 = new SceneObject("Overlapped", scene);
         o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
@@ -37,7 +37,7 @@ void setup() {
         objT2 = o1.GetTransform();
         objT2.SetParent(o.GetTransform(), true);
         objT2.SetSize(100, 140);
-        objT2.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        objT2.SetParentAnchor(Anchor.CENTER_MIDDLE);
 
         sceneManager.Start("main");
     } 
