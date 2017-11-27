@@ -15,7 +15,6 @@ float x;
 boolean isRotate;
 void setup() {
     size(1066, 600);
-    surface.setLocation(0, 0);
     try {
         InitManager();
 
@@ -33,7 +32,7 @@ void setup() {
 
         SceneObject o1 = new SceneObject("Overlapped", scene);
         o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
-        SetImage(o1);
+        //SetImage(o1);
         SetButton(o1);
         objT2 = o1.GetTransform();
         objT2.SetParent(o.GetTransform(), true);
@@ -91,10 +90,9 @@ void draw() {
  用意されたマネージャオブジェクトを自動的に生成する。
  */
 void InitManager() {
-    Field[] fields = getClass().getDeclaredFields();
-    Field f;
-
     try {
+        Field[] fields = getClass().getDeclaredFields();
+        Field f;
         for (int i=0; i<fields.length; i++) {
             f = fields[i];
             if (GeneralJudge.IsImplemented(f.getType(), Abs_Manager.class)) {
