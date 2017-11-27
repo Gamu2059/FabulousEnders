@@ -46,8 +46,8 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
      親へのアンカー。
      親のどの箇所を基準にするのかを定める。
      */
-    private SceneObjectAnchor _parentAnchor;
-    public SceneObjectAnchor GetParentAnchor() {
+    private Anchor _parentAnchor;
+    public Anchor GetParentAnchor() {
         return _parentAnchor;
     }
     public void SetParentAnchor(int value) {
@@ -60,8 +60,8 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
      自身のアンカー。
      親の基準に対して、自身のどの箇所を基準にするのかを定める。
      */
-    private SceneObjectAnchor _selfAnchor;
-    public SceneObjectAnchor GetSelfAnchor() {
+    private Anchor _selfAnchor;
+    public Anchor GetSelfAnchor() {
         return _selfAnchor;
     }
     public void SetSelfAnchor(int value) {
@@ -156,8 +156,8 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         _position = new PVector();
         _rotate = 0;
         _size = new PVector();
-        _parentAnchor = new SceneObjectAnchor();
-        _selfAnchor = new SceneObjectAnchor();
+        _parentAnchor = new Anchor();
+        _selfAnchor = new Anchor();
         _priority = 1;
         _isRelative = true;
 
