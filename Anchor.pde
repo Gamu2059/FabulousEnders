@@ -1,4 +1,4 @@
-public final class Anchor {
+public class Anchor {
     private PVector _anchor;
     public PVector GetAnchor() {
         return _anchor;
