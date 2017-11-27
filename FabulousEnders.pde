@@ -10,33 +10,34 @@ ImageManager imageManager;
 FontManager fontManager;
 
 Scene scene;
-SceneObjectTransform objT;
+SceneObjectTransform objT1, objT2;
 float x;
+boolean isRotate;
 void setup() {
     size(1066, 600);
-    surface.setLocation(0, 0);
     try {
         InitManager();
 
         scene = new Scene("main");
-        scene.GetTransform().SetPosition(100, 100);
+        scene.GetTransform().SetPosition(width * 0.5, 0);
         scene.SetSceneScale(0.5, 1);
         scene.GetDrawBack().GetBackColorInfo().SetColor(100, 0, 100);
 
         SceneObject o = new SceneObject("camera?", scene);
         SetText(o);
-        objT = o.GetTransform();
-        objT.SetSize(100, 100);
-        objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
-        objT.SetSelfAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        objT1 = o.GetTransform();
+        objT1.SetSize(100, 100);
+        objT1.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        objT1.SetSelfAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
         SceneObject o1 = new SceneObject("Overlapped", scene);
         o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
-        SetImage(o1);
-        objT = o1.GetTransform();
-        objT.SetParent(o.GetTransform(), true);
-        objT.SetSize(100, 140);
-        objT.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        //SetImage(o1);
+        SetButton(o1);
+        objT2 = o1.GetTransform();
+        objT2.SetParent(o.GetTransform(), true);
+        objT2.SetSize(100, 140);
+        objT2.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
 
         sceneManager.Start("main");
     } 
@@ -57,14 +58,41 @@ void SetText(SceneObject o) {
     t.GetColorInfo().SetColor(0, 0, 200);
 }
 
+void SetButton(SceneObject o) {
+    SceneObjectButton b = new SceneObjectButton(o);
+    b.GetDicideHandler().AddEvent("pushed", new Event() {
+        public void Event() {
+            OnDecide();
+        }
+    }
+    );
+}
+
+void OnDecide() {
+    isRotate = !isRotate;
+}
+
+void draw() {
+    surface.setTitle("Game Maker fps : " + frameRate);
+    try {
+        sceneManager.Update();
+        if (isRotate) {
+            objT1.SetRotate(x += 1/frameRate);
+            objT2.SetRotate(x += 1/frameRate);
+        }
+    } 
+    catch(Exception e) {
+        println(e);
+    }
+}
+
 /**
  用意されたマネージャオブジェクトを自動的に生成する。
  */
 void InitManager() {
-    Field[] fields = getClass().getDeclaredFields();
-    Field f;
-
     try {
+        Field[] fields = getClass().getDeclaredFields();
+        Field f;
         for (int i=0; i<fields.length; i++) {
             f = fields[i];
             if (GeneralJudge.IsImplemented(f.getType(), Abs_Manager.class)) {
@@ -84,16 +112,6 @@ void InitManager() {
     } 
     catch(InvocationTargetException ite) {
         println(ite);
-    }
-}
-
-void draw() {
-    surface.setTitle("Game Maker fps : " + frameRate);
-    try {
-        sceneManager.Update();
-    } 
-    catch(Exception e) {
-        println(e);
     }
 }
 

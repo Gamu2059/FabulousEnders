@@ -277,7 +277,7 @@ public final class InputManager extends Abs_Manager {
      引数で与えられた列挙定数に対して、全てのキーが押されている状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsPressedKeys(int... inputs) {
+    public boolean IsPressedKeys(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -295,7 +295,7 @@ public final class InputManager extends Abs_Manager {
      引数で与えられた列挙定数に対して、その列挙されたものだけが押されている状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsPressedKeysOnly(int... inputs) {
+    public boolean IsPressedKeysOnly(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -318,7 +318,7 @@ public final class InputManager extends Abs_Manager {
      引数で与えられた列挙定数に対して、全てのキーがクリックされた状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsClickedKeys(int... inputs) {
+    public boolean IsClickedKeys(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -336,7 +336,7 @@ public final class InputManager extends Abs_Manager {
      引数で与えられた列挙定数に対して、その列挙されたものだけがクリックされた状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsClickedKeysOnly(int... inputs) {
+    public boolean IsClickedKeysOnly(int[] inputs) {
         if (inputs == null) {
             return false;
         }
