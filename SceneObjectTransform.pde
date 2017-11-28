@@ -189,16 +189,16 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         float par1, par2;
 
         // 親の基準へ移動
-        par1 = _parentAnchor.GetHorizontal();
-        par2 = _parentAnchor.GetVertical();
+        par1 = _parentAnchor.GetX();
+        par2 = _parentAnchor.GetY();
         translate(par1 * parent.GetSize().x, par2 * parent.GetSize().y);
 
         // 自身の基準での回転
         rotate(_rotate);
 
         // 自身の基準へ移動
-        par1 = _selfAnchor.GetHorizontal();
-        par2 = _selfAnchor.GetVertical();
+        par1 = _selfAnchor.GetX();
+        par2 = _selfAnchor.GetY();
         translate(-par1 * _size.x + _position.x, -par2 * _size.y + _position.y);
 
         // 再帰的に計算していく

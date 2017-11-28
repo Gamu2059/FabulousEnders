@@ -1,14 +1,18 @@
+/**
+ アフィン変換一回分の情報に責任を持つ。
+ サイズは持たない。
+ */
 public class Transform {
-    private PVector _position;
-    public PVector GetPosition() {
-        return _position;
+    private PVector _translation;
+    public PVector GetTranslation() {
+        return _translation;
     }
-    public void SetPosition(PVector value) {
+    public void SetTranslation(PVector value) {
         if (value == null) return;
-        _position = value;
+        _translation = value;
     }
-    public void SetPosition(float x, float y) {
-        _position.set(x, y);
+    public void SetTranslation(float x, float y) {
+        _translation.set(x, y);
     }
 
     private PVector _scale;
@@ -23,18 +27,6 @@ public class Transform {
         _scale.set(x, y);
     }
 
-    private PVector _size;
-    public PVector GetSize() {
-        return _size;
-    }
-    public void SetSize(PVector value) {
-        if (value == null) return;
-        _size = value;
-    }
-    public void SetSize(float x, float y) {
-        _size.set(x, y);
-    }
-
     private float _rotate;
     public float GetRotate() {
         return _rotate;
@@ -44,31 +36,27 @@ public class Transform {
     }
 
     public Transform() {
-        _InitParametersOnConstructor(null, null, null, 0);
+        _InitParametersOnConstructor(null, null, 0);
     }
 
-    public Transform(PVector position, PVector scale, PVector size, float rotate) {
-        _InitParametersOnConstructor(position, scale, size, rotate);
+    public Transform(PVector position, PVector scale, float rotate) {
+        _InitParametersOnConstructor(position, scale, rotate);
     }
 
-    public Transform(float posX, float posY, float scaleX, float scaleY, float sizeX, float sizeY, float rotate) {
-        _InitParametersOnConstructor(new PVector(posX, posY), new PVector(scaleX, scaleY), new PVector(sizeX, sizeY), rotate);
+    public Transform(float posX, float posY, float scaleX, float scaleY, float rotate) {
+        _InitParametersOnConstructor(new PVector(posX, posY), new PVector(scaleX, scaleY), rotate);
     }
 
-    private void _InitParametersOnConstructor(PVector position, PVector scale, PVector size, float rotate) {
+    private void _InitParametersOnConstructor(PVector position, PVector scale, float rotate) {
         if (position == null) {
             position = new PVector();
         }
         if (scale == null) {
             scale = new PVector(1, 1);
         }
-        if (size == null) {
-            size = new PVector();
-        }
 
-        SetPosition(position);
+        SetTranslation(position);
         SetScale(scale);
-        SetSize(size);
         SetRotate(rotate);
     }
 }
