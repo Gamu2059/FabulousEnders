@@ -1,4 +1,4 @@
-public final class MatrixManager {
+public final class MatrixManager extends Abs_Manager {
     public final static int MAX_STACK = 32;
 
     private int _stackNum;
