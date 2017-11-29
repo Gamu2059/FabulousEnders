@@ -1,67 +1,57 @@
 /**
- 平面上のある領域の二か所の基準点を保持する責任を持つ。
+ 平面上のある領域の基準点を保持する責任を持つ。
  */
 public class Pivot {
-    private Anchor _min;
-    public PVector GetMin() {
-        return _min.GetAnchor();
+    private PVector _pivot;
+    public PVector GetPivot() {
+        return _pivot;
     }
-    public void SetMin(PVector value) {
+    public void SetPivot(PVector value) {
         if (value == null) return;
-        SetMin(value.x, value.y);
+        _pivot.set(value.x, value.y);
     }
-    public void SetMin(float x, float y) {
-        if (x > GetMax().x || y > GetMax().y) return;
-        _min.SetAnchor(x, y);
+    public void SetPivot(float x, float y) {
+        if (x < 0 || 1 < x || y < 0 || 1 < y) return;
+        _pivot.set(x, y);
     }
 
-    private Anchor _max;
-    public PVector GetMax() {
-        return _max.GetAnchor();
-    }
-    public void SetMax(PVector value) {
-        if (value == null) return;
-        SetMax(value.x, value.y);
-    }
-    public void SetMax(float x, float y) {
-        if (x < GetMin().x || y < GetMin().y) return;
-        _max.SetAnchor(x, y);
-    }
+    public final static float P_LEFT = 0;
+    public final static float P_CENTER = 0.5;
+    public final static float P_RIGHT = 1;
+    public final static float P_TOP = 0;
+    public final static float P_BOTTOM = 1;
 
     public Pivot() {
-        _InitParametersOnConstructor(null, null);
+        _InitParametersOnConstructor(null);
     }
 
-    public Pivot(PVector min, PVector max) {
-        _InitParametersOnConstructor(min, max);
+    public Pivot(PVector value) {
+        _InitParametersOnConstructor(value);
     }
 
-    public Pivot(float minX, float minY, float maxX, float maxY) {
-        _InitParametersOnConstructor(new PVector(minX, minY), new PVector(maxX, maxY));
+    public Pivot(float x, float y) {
+        _InitParametersOnConstructor(new PVector(x, y));
     }
 
-    private void _InitParametersOnConstructor(PVector min, PVector max) {
-        _min = new Anchor(Anchor.ANCHOR_LEFT, Anchor.ANCHOR_TOP);
-        _max = new Anchor(Anchor.ANCHOR_RIGHT, Anchor.ANCHOR_BOTTOM);
-        if (min == null) min = new PVector(Anchor.ANCHOR_LEFT, Anchor.ANCHOR_TOP);
-        if (max == null) max = new PVector(Anchor.ANCHOR_RIGHT, Anchor.ANCHOR_BOTTOM);
-        SetMin(min);
-        SetMax(max);
+    private void _InitParametersOnConstructor(PVector pivot) {
+        _pivot = new PVector(P_LEFT, P_TOP);
+        if (pivot == null) pivot = new PVector(P_LEFT, P_TOP);
+        SetPivot(pivot);
     }
 
-    public float GetMinX() {
-        return GetMin().x;
+    public float GetX() {
+        return GetPivot().x;
     }
 
-    public float GetMinY() {
-        return GetMin().y;
+    public float GetY() {
+        return GetPivot().y;
     }
 
-    public float GetMaxX() {
-        return GetMax().x;
+    public void SetX(float value) {
+        SetPivot(value, GetY());
     }
 
-    public float GetMaxY() {
-        return GetMax().y;
+    public void SetY(float value) {
+        SetPivot(GetX(), value);
     }
 }
