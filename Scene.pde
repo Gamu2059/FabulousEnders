@@ -1,4 +1,9 @@
-public class Scene extends SceneObject {
+public class Scene {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
         return _objects;
@@ -12,6 +17,11 @@ public class Scene extends SceneObject {
     private SceneObjectTransform _transform;
     public SceneObjectTransform GetTransform() {
         return _transform;
+    }
+
+    private SceneObjectDrawBack _drawBack;
+    public SceneObjectDrawBack GetDrawBack() {
+        return _drawBack;
     }
 
     /**
@@ -39,7 +49,7 @@ public class Scene extends SceneObject {
     }
 
     public Scene (String name) {
-        super(name);
+        _name = name;
         _objects = new ArrayList<SceneObject>();
         _transform = new SceneObjectTransform();
         sceneManager.AddScene(this);
@@ -55,42 +65,31 @@ public class Scene extends SceneObject {
     }
 
     /**
-     　アクティブシーンになる直前のフレームの一番最後に呼び出される。
+     シーンマネージャの描画リストに追加された時に呼び出される。
      */
-    public void Enabled() {
+    public void OnEnabled() {
         _enabledFlag = false;
     }
 
     /**
-     ノンアクティブシーンになる直前のフレームの一番最後に呼び出される。
+     シーンマネージャの描画リストから外された時に呼び出される。
      */
-    public void Disabled() {
+    public void OnDisabled() {
         _disabledFlag = false;
-        _Stop();
+        Stop();
     }
 
-    /**
-     毎フレームのシーン更新処理。
-     */
-    public void Update() {
-        _ResetBackGround();
-        _Start();
-        _Update();
-        _Transform();
-        _Sorting();
-        _CheckMAO();
-        _Draw();
+    public void OnEnableActive() {
     }
 
-    protected void _ResetBackGround() {
-        background(0);
+    public void OnDisableActive() {
     }
 
     /**
      フレームの最初に呼び出される。
-     _Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
+     Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
      */
-    protected void _Start() {
+    protected void Start() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -105,7 +104,7 @@ public class Scene extends SceneObject {
      一度しか呼び出されない。
      オブジェクトの有効フラグに関わらず必ず呼び出す。
      */
-    protected void _Stop() {
+    protected void Stop() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -117,7 +116,7 @@ public class Scene extends SceneObject {
      毎フレーム呼び出される。
      入力待ちやオブジェクトのアニメーション処理を行う。
      */
-    protected void _Update() {
+    protected void Update() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -128,18 +127,10 @@ public class Scene extends SceneObject {
     }
 
     /**
-     オブジェクトを移動させる。
-     ここまでに指示されたトランスフォームの移動は、全てここで処理される。
-     それ以降のトランスフォーム処理は無視される。
-     */
-    protected void _Transform() {
-    }
-
-    /**
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
-    protected void _Sorting() {
+    protected void Sorting() {
         if (!_isNeedSorting) {
             return;
         }
@@ -151,7 +142,7 @@ public class Scene extends SceneObject {
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
      ただし、マウス操作している時だけしか判定しない。
      */
-    protected void _CheckMAO() {
+    protected void CheckMAO() {
         if (!inputManager.IsMouseMode()) {
             return;
         }
@@ -187,7 +178,7 @@ public class Scene extends SceneObject {
     /**
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
-    protected void _Draw() {
+    protected void Draw() {
         _DrawScene();
 
         SceneObject s;

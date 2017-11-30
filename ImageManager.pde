@@ -1,4 +1,4 @@
-public final class ImageManager extends Abs_Manager {
+public final class ImageManager {
     public static final String IMAGEPATH = "image/";
     
     private HashMap<String, PImage> _images;

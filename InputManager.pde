@@ -1,4 +1,4 @@
-public final class InputManager extends Abs_Manager {
+public final class InputManager {
     private boolean[] _pressedKeys;
     private boolean[] GetPressedKeys() {
         return _pressedKeys;

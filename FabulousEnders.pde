@@ -5,7 +5,6 @@ import java.io.*;
 // マネージャインスタンス
 InputManager inputManager;
 SceneManager sceneManager;
-MatrixManager matrixManager;
 ImageManager imageManager;
 FontManager fontManager;
 
@@ -16,8 +15,6 @@ boolean isRotate;
 void setup() {
     size(1066, 600, P3D);
     try {
-        InitManager();
-
         scene = new Scene("main");
         scene.GetTransform().SetPosition(width * 0.5, 0);
         scene.SetSceneScale(0.5, 1);
@@ -86,34 +83,6 @@ void draw() {
     }
 }
 
-/**
- 用意されたマネージャオブジェクトを自動的に生成する。
- */
-void InitManager() {
-    try {
-        Field[] fields = getClass().getDeclaredFields();
-        Field f;
-        for (int i=0; i<fields.length; i++) {
-            f = fields[i];
-            if (GeneralJudge.IsImplemented(f.getType(), Abs_Manager.class)) {
-                f.setAccessible(true);
-                f.set(this, f.getType().getDeclaredConstructor(getClass()).newInstance(this));
-            }
-        }
-    } 
-    catch(NoSuchMethodException nse) {
-        println(nse);
-    } 
-    catch(InstantiationException ie) {
-        println(ie);
-    } 
-    catch(IllegalAccessException iae) {
-        println(iae);
-    } 
-    catch(InvocationTargetException ite) {
-        println(ite);
-    }
-}
 
 public void SetAffineMatrix(float[] e) {
     if (e == null) return;
