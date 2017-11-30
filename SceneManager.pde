@@ -144,7 +144,7 @@ public final class SceneManager extends Abs_Manager {
 
     private void OnMouseReleased() {
         if (GetActiveScene() != null) {
-            GetActiveScene().OnMouseReleased();
+ SceneObjectBehaviorMouseReleased();
         }
     }
 

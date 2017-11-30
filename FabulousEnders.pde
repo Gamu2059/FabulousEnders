@@ -14,7 +14,7 @@ SceneObjectTransform objT1, objT2;
 float x;
 boolean isRotate;
 void setup() {
-    size(1066, 600);
+    size(1066, 600, P3D);
     try {
         InitManager();
 
@@ -114,6 +114,19 @@ void InitManager() {
         println(ite);
     }
 }
+
+public void SetAffineMatrix(float[] e) {
+    if (e == null) return;
+    if (e.length < 6) return;
+    resetMatrix();
+    applyMatrix(
+        e[0], e[1], 0, e[2] - width/2f, 
+        e[3], e[4], 0, e[5] - height/2f, 
+        0, 0, 1, -0.866 * height, 
+        0, 0, 0, 1
+        );
+}
+
 
 void keyPressed() {
     inputManager.KeyPressed();

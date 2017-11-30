@@ -62,4 +62,29 @@ public class Anchor {
         _min = new Pivot(minX, minY);
         _max = new Pivot(maxX, maxY);
     }
+
+    public float GetMinX() {
+        return GetMin().x;
+    }
+    public float GetMinY() {
+        return GetMin().y;
+    }
+    public float GetMaxX() {
+        return GetMax().x;
+    }
+    public float GetMaxY() {
+        return GetMax().y;
+    }
+    public void SetMinX(float value) {
+        SetMin(value, GetMinY());
+    }
+    public void SetMinY(float value) {
+        SetMin(GetMinX(), value);
+    }
+    public void SetMaxX(float value) {
+        SetMax(value, GetMaxY());
+    }
+    public void SetMaxY(float value) {
+        SetMax(GetMaxX(), value);
+    }
 }
