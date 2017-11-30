@@ -1,4 +1,8 @@
 public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> {
+    public int GetID() {
+        return ClassID.TRANSFORM;
+    }
+
     private SceneObjectTransform _parent;
     public SceneObjectTransform GetParent() {
         return _parent;
@@ -83,19 +87,51 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         }
     }
 
-    private PMatrix2D _matrix;
-    public PMatrix2D GetMatrix() {
-        return _matrix;
+    /**
+     グローバルトランスフォーム行列。
+     */
+    private float[] _matrix;
+    public void SetAffine() {
+        SetAffineMatrix(_matrix);
     }
 
+    /**
+     マウス判定用行列。
+     */
+    private PMatrix2D _mouseMatrix;
+
+    /**
+     親空間での相対移動量、自空間での回転量、自空間でのスケール量を保持する。
+     */
     private Transform _transform;
+    public Transform GetTransform() {
+        return _transform;
+    }
+
+    public PVector GetTranslation() {
+        return _transform.GetTranslation();
+    }
+    public void SetTranslation(float x, float y) {
+        _transform.SetTranslation(x, y);
+    }
+
+    public float GetRotate() {
+        return _transform.GetRotate();
+    }
+    public void SetRotate(float rad) {
+        _transform.SetRotate(rad);
+    }
+
+    public PVector GetScale() {
+        return _transform.GetScale();
+    }
+    public void SetScale(float x, float y) {
+        _transform.SetScale(x, y);
+    }
 
     private PVector _size;
     public PVector GetSize() {
         return _size;
-    }
-    public void SetSize(PVector value) {
-        _size = value;
     }
     public void SetSize(float x, float y) {
         _size.set(x, y);
@@ -109,75 +145,82 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
         _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
-        _matrix = new PMatrix2D();
+        _mouseMatrix = new PMatrix2D();
+        _matrix = new float[6];
     }
 
     /**
      オブジェクトのトランスフォーム処理を実行する。
      */
-    public void Transform() {
-        if (!GetObject().IsEnable()) {
-            return;
+    public void Transform(float[] mat) {
+        if (!GetObject().IsEnable()) return;
+        // 親から継承した行列を複製
+        Matrix2D.Copy(mat, _matrix);
+
+        float x, y;
+        x = GetTranslation().x;
+        y = GetTranslation().y;
+        if (GetParent() != null) {
+            // アンカーの座標へ移動
+            float aX, aY;
+            aX = (GetAnchor().GetMaxX() + GetAnchor().GetMinX()) / 2;
+            aY = (GetAnchor().GetMaxY() + GetAnchor().GetMinY()) / 2;
+            Matrix2D.Translate(_matrix, aX * GetParent().GetSize().x, aY * GetParent().GetSize().y);
+
+            if (GetAnchor().GetMaxX() == GetAnchor().GetMinX()) {
+                aX = (GetAnchor().GetMaxX() - GetAnchor().GetMinX()) * GetParent().GetSize().x;
+                x = 0;
+                SetSize(aX, GetSize().y);
+            }
+            if (GetAnchor().GetMaxY() == GetAnchor().GetMinY()) {
+                aY = (GetAnchor().GetMaxY() - GetAnchor().GetMinY()) * GetParent().GetSize().y;
+                y = 0;
+                SetSize(GetSize().x, aY);
+            }
         }
-        
-        // 保存の限界でないかどうか
-        if (!matrixManager.PushMatrix()) {
-            return;
-        }
 
-        _matrix.reset();
-        float par1, par2;
-        // 親の基準へ移動
-        par1 = _parentAnchor.GetX();
-        par2 = _parentAnchor.GetY();
-        translate(par1 * parent.GetSize().x, par2 * parent.GetSize().y);
+        // 親空間での相対座標へ移動
+        Matrix2D.Translate(_matrix, x, y);
 
-        // 自身の基準での回転
-        rotate(_rotate);
+        // 自空間での回転
+        Matrix2D.Rotate(_matrix, GetRotate());
 
-        // 自身の基準へ移動
-        par1 = _selfAnchor.GetX();
-        par2 = _selfAnchor.GetY();
-        translate(-par1 * _size.x + _position.x, -par2 * _size.y + _position.y);
+        // 自空間でのスケーリング
+        Matrix2D.Scale(_matrix, GetScale().x, GetScale().y);
+
+        // ピボットの座標へ移動
+        Matrix2D.Translate(_matrix, GetPivot().GetX() * GetSize().x, GetPivot().GetY() * GetSize().y);
 
         // 再帰的に計算していく
         if (_children != null) {
             for (int i=0; i<_children.size(); i++) {
-                _children.get(i).Transform();
+                _children.get(i).Transform(_matrix);
             }
         }
-        _PushMatrix();
-        matrixManager.PopMatrix();
     }
 
     /**
      指定座標がトランスフォームの領域内であればtrueを返す。
      */
     public boolean IsInRegion(float y, float x) {
-        PMatrix2D inv = GetMatrix().get();
-        if (!inv.invert()) {
+        Matrix2D.Get(_matrix, _mouseMatrix);
+        if (!_mouseMatrix.invert()) {
             println(this);
             println("逆アフィン変換ができません。");
             return false;
         }
 
-        float[] in, out;
-        in = new float[]{y, x};
-        out = new float[2];
-        inv.mult(in, out);
-        return 0 <= out[0] && out[0] < _size.x && 0 <= out[1] && out[1] < _size.y;
+        float[] _in, _out;
+        _in = new float[]{y, x};
+        _out = new float[2];
+        _mouseMatrix.mult(_in, _out);
+        return 0 <= _out[0] && _out[0] < _size.x && 0 <= _out[1] && _out[1] < _size.y;
     }
 
-    /**
-     自身が指定されたトランスフォームの親の場合、trueを返す。
-     */
     public boolean IsParentOf(SceneObjectTransform t) {
         return this == t.GetParent();
     }
 
-    /**
-     自身が指定されたトランスフォームの子の場合、trueを返す。
-     */
     public boolean IsChildOf(SceneObjectTransform t) {
         return _parent == t;
     }
@@ -185,7 +228,6 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     /**
      自身の子としてトランスフォームを追加する。
      ただし、既に子として存在している場合は追加できない。
-     基本的に、親トランスフォームから親子関係を構築するのは禁止する。
      
      @return 追加に成功した場合はtrueを返す
      */
@@ -194,6 +236,11 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
             return false;
         }
         return _children.add(t);
+    }
+
+    public void AddChild(SceneObjectTransform t, boolean isChangePriority) {
+        if (t == null) return;
+        t.SetParent(this, isChangePriority);
     }
 
     /**
@@ -243,10 +290,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
      自分以外の場合、falseを返す。
      */
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        return false;
+        return this == o;
     }
 
     /**
@@ -254,12 +298,5 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
      */
     public int compareTo(SceneObjectTransform t) {
         return _priority - t.GetPriority();
-    }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(super.toString());
-
-        return b.toString();
     }
 }

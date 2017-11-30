@@ -79,7 +79,6 @@ public class SceneObjectBehavior {
     }
 
     public boolean equals(Object o) {
-        if (o == this) return true;
-        return false;
+        return this == o;
     }
 }

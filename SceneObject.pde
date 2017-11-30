@@ -65,8 +65,11 @@ public class SceneObject implements Comparable<SceneObject> {
         _name = name;
 
         _behaviors = new ArrayList<SceneObjectBehavior>();
-        _transform = new SceneObjectTransform(this);
-        _drawBack = new SceneObjectDrawBack(this);
+        _transform = new SceneObjectTransform();
+        AddBehavior(_transform);
+        
+        _drawBack = new SceneObjectDrawBack();
+        AddBehavior(_drawBack);
 
         // トランスフォームが設定されてからでないと例外を発生させてしまう
         SetEnable(true);
@@ -102,9 +105,6 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Draw() {
-        // 自身のトランスフォームをセットする
-        setMatrix(GetTransform().GetMatrix());
-
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -271,8 +271,7 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public boolean equals(Object o) {
-        if (o == this) return true;
-        return false;
+        return this == o;
     }
 
     public int compareTo(SceneObject s) {

@@ -9,6 +9,11 @@ public class Scene extends SceneObject {
         return _activeObject;
     }
 
+    private SceneObjectTransform _transform;
+    public SceneObjectTransform GetTransform() {
+        return _transform;
+    }
+
     /**
      次のフレームからアクティブになる場合にtrueになる。
      */
@@ -33,29 +38,12 @@ public class Scene extends SceneObject {
         _isNeedSorting = value;
     }
 
-    /**
-     シーンにのみ特別にスケール値を与える。
-     */
-    private PVector _sceneScale;
-    public PVector GetSceneScale() {
-        return _sceneScale;
-    }
-    public void SetSceneScale(PVector value) {
-        if (value != null) {
-            _sceneScale = value;
-        }
-    }
-    public void SetSceneScale(float value1, float value2) {
-        _sceneScale.set(value1, value2);
-    }
-
     public Scene (String name) {
         super(name);
         _objects = new ArrayList<SceneObject>();
-        _sceneScale = new PVector(1, 1);
+        _transform = new SceneObjectTransform();
         sceneManager.AddScene(this);
     }
-
 
     /**
      シーンの初期化を行う。
@@ -81,7 +69,6 @@ public class Scene extends SceneObject {
         _Stop();
     }
 
-
     /**
      毎フレームのシーン更新処理。
      */
@@ -89,8 +76,6 @@ public class Scene extends SceneObject {
         _ResetBackGround();
         _Start();
         _Update();
-        _Animation();
-        _ResetMatrix();
         _Transform();
         _Sorting();
         _CheckMAO();
@@ -143,53 +128,11 @@ public class Scene extends SceneObject {
     }
 
     /**
-     _Updateとは異なり、AnimationBehaviorによる高度なフレームアニメーションを行う。
-     主に子オブジェクトのアニメーションや画像連番表示を処理するのに用いる。
-     */
-    protected void _Animation() {
-        SceneObject s;
-        for (int i=0; i<_objects.size(); i++) {
-            s = _objects.get(i);
-            if (s.IsEnable() && s.GetBehavior(SceneObjectAnimationController.class) != null) {
-                s.Animation();
-            }
-        }
-    }
-
-    /**
-     アフィン行列を初期化する。
-     */
-    protected void _ResetMatrix() {
-        while (matrixManager.PopMatrix());
-        resetMatrix();
-    }
-
-    /**
-     シーンの平行移動と回転を行う。
-     */
-    public void TransformScene() {
-        PVector p = GetTransform().GetPosition();
-        resetMatrix();
-        scale(GetSceneScale().x, GetSceneScale().y);
-        translate(p.x, p.y);
-        rotate(GetTransform().GetRotate());
-    }
-
-    /**
      オブジェクトを移動させる。
      ここまでに指示されたトランスフォームの移動は、全てここで処理される。
      それ以降のトランスフォーム処理は無視される。
      */
     protected void _Transform() {
-        TransformScene();
-
-        SceneObject s;
-        for (int i=0; i<_objects.size(); i++) {
-            s = _objects.get(i);
-            if (s.IsEnable() && s.IsChildOf(this)) {
-                s.GetTransform().Transform();
-            }
-        }
     }
 
     /**
@@ -261,51 +204,9 @@ public class Scene extends SceneObject {
      */
     private void _DrawScene() {
         fill(GetDrawBack().GetBackColorInfo().GetColor());
-        TransformScene();
+        GetTransform().SetAffine();
         PVector s = GetTransform().GetSize();
         rect(0, 0, s.x, s.y);
-    }
-
-    private boolean _CheckDisableMAO() {
-        if (GetActiveObject() == null) {
-            return true;
-        }
-        return !GetActiveObject().IsEnable();
-    }
-
-    public void OnMousePressed() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMousePressed();
-    }
-
-    public void OnMouseReleased() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMouseReleased();
-    }
-
-    public void OnMouseClicked() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMouseClicked();
-    }
-
-    public void OnKeyPressed() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnKeyPressed();
-    }
-
-    public void OnKeyReleased() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnKeyReleased();
     }
 
     /**
@@ -409,15 +310,5 @@ public class Scene extends SceneObject {
         }
         Scene s = (Scene) o;
         return GetName().equals(s.GetName());
-    }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" \n");
-        b.append("  name : ").append(GetName()).append(" \n");
-        b.append("  objects :\n");
-        b.append(_objects).append(" \n");
-
-        return b.toString();
     }
 }

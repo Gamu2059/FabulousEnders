@@ -115,6 +115,19 @@ void InitManager() {
     }
 }
 
+public void SetAffineMatrix(float[] e) {
+    if (e == null) return;
+    if (e.length < 6) return;
+    resetMatrix();
+    applyMatrix(
+        e[0], e[1], 0, e[2] - width/2f, 
+        e[3], e[4], 0, e[5] - height/2f, 
+        0, 0, 1, -0.866 * height, 
+        0, 0, 0, 1
+        );
+}
+
+
 void keyPressed() {
     inputManager.KeyPressed();
 }
