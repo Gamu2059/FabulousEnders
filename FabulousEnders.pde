@@ -14,7 +14,7 @@ SceneObjectTransform objT1, objT2;
 float x;
 boolean isRotate;
 void setup() {
-    size(1066, 600);
+    size(1066, 600, P3D);
     try {
         InitManager();
 

@@ -59,9 +59,6 @@ public class SceneObjectBehavior {
     public void Update() {
     }
 
-    public void Animation() {
-    }
-
     public void Draw() {
     }
 

@@ -1,7 +1,4 @@
-public final class SceneObjectTransform extends Abs_SceneObjectBehavior implements Comparable<SceneObjectTransform> {
-    /**
-     親トランスフォーム。
-     */
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> {
     private SceneObjectTransform _parent;
     public SceneObjectTransform GetParent() {
         return _parent;
@@ -14,15 +11,13 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
      isPriorityChangeがtrueの場合、自動的に親の優先度より1だけ高い優先度がつけられる。
      */
     public void SetParent(SceneObjectTransform value, boolean isPriorityChange) {
-        if (GetObject() instanceof Scene) {
-            return;
-        }
+        if (!_isSettableParent) return;
 
-        SceneObjectTransform t = GetScene().GetTransform();
         if (_parent != null) {
             _parent.RemoveChild(this);
         }
         if (value == null) {
+            SceneObjectTransform t = GetScene().GetTransform();
             _parent = t;
             t._AddChild(this);
         } else {
@@ -35,39 +30,41 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     }
 
     /**
-     子トランスフォームリスト。
+     親トランスフォームを設定可能である場合は、trueとなる。
      */
+    private boolean _isSettableParent;
+
     private ArrayList<SceneObjectTransform> _children;
     public ArrayList<SceneObjectTransform> GetChildren() {
         return _children;
     }
 
-    /**
-     親へのアンカー。
-     親のどの箇所を基準にするのかを定める。
-     */
-    private Anchor _parentAnchor;
-    public Anchor GetParentAnchor() {
-        return _parentAnchor;
+    private Anchor _anchor;
+    public Anchor GetAnchor() {
+        return _anchor;
     }
-    public void SetParentAnchor(int value) {
-        if (_parentAnchor != null) {
-            _parentAnchor.SetAnchor(value);
-        }
+    public void SetAnchor(PVector min, PVector max) {
+        if (_anchor == null) return;
+        _anchor.SetMin(min);
+        _anchor.SetMax(max);
+    }
+    public void SetAnchor(float minX, float minY, float maxX, float maxY) {
+        if (_anchor == null) return;
+        _anchor.SetMin(minX, minY);
+        _anchor.SetMax(maxX, maxY);
     }
 
-    /**
-     自身のアンカー。
-     親の基準に対して、自身のどの箇所を基準にするのかを定める。
-     */
-    private Anchor _selfAnchor;
-    public Anchor GetSelfAnchor() {
-        return _selfAnchor;
+    private Pivot _pivot;
+    public Pivot GetPivot() {
+        return _pivot;
     }
-    public void SetSelfAnchor(int value) {
-        if (_selfAnchor != null) {
-            _selfAnchor.SetAnchor(value);
-        }
+    public void SetPivot(PVector value) {
+        if (_pivot == null) return;
+        _pivot.SetPivot(value);
+    }
+    public void SetPivot(float x, float y) {
+        if (_pivot == null) return;
+        _pivot.SetPivot(x, y);
     }
 
     /**
@@ -82,64 +79,17 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
-            if (!(GetObject() instanceof Scene)) {
-                GetScene().SetNeedSorting(true);
-            }
+            GetScene().SetNeedSorting(true);
         }
     }
 
-    /**
-     絶対変化量行列。
-     これを変換行列としてから描画することで絶対変化量が表現する図形として描画される。
-     */
     private PMatrix2D _matrix;
     public PMatrix2D GetMatrix() {
         return _matrix;
     }
-    private void _PushMatrix() {
-        getMatrix(_matrix);
-    }
 
-    /**
-     平行移動量と回転量の表現しているものが、親トランスフォームの相対量なのか、シーンからの絶対量なのかを決める。
-     trueの場合、相対量となる。
-     */
-    private boolean _isRelative;
-    public boolean IsRelative() {
-        return _isRelative;
-    }
-    public void SetRelative(boolean value) {
-        _isRelative = value;
-    }
+    private Transform _transform;
 
-    /**
-     平行移動量。
-     */
-    private PVector _position;
-    public PVector GetPosition() {
-        return _position;
-    }
-    public void SetPosition(PVector value) { 
-        _position = value;
-    }
-    public void SetPosition(float x, float y) {
-        _position.set(x, y);
-    }
-
-    /**
-     回転量。
-     */
-    private float _rotate;
-    public float GetRotate() { 
-        return _rotate;
-    }
-    public void SetRotate(float value) { 
-        _rotate = value;
-    }
-
-    /**
-     図形の描画領域。
-     */
     private PVector _size;
     public PVector GetSize() {
         return _size;
@@ -151,16 +101,13 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         _size.set(x, y);
     }
 
-    public SceneObjectTransform(SceneObject obj) {
-        super(obj);
-        _position = new PVector();
-        _rotate = 0;
-        _size = new PVector();
-        _parentAnchor = new Anchor();
-        _selfAnchor = new Anchor();
-        _priority = 1;
-        _isRelative = true;
+    public SceneObjectTransform() {
+        super();
 
+        _transform = new Transform();
+        _size = new PVector();
+
+        _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
     }
@@ -172,22 +119,14 @@ public final class SceneObjectTransform extends Abs_SceneObjectBehavior implemen
         if (!GetObject().IsEnable()) {
             return;
         }
+        
         // 保存の限界でないかどうか
         if (!matrixManager.PushMatrix()) {
             return;
         }
 
-        // 相対量か絶対量かを指定
-        SceneObjectTransform parent;
-        if (_isRelative) {
-            parent = _parent;
-        } else {
-            parent = GetScene().GetTransform();
-            GetScene().TransformScene();
-        }
-
+        _matrix.reset();
         float par1, par2;
-
         // 親の基準へ移動
         par1 = _parentAnchor.GetX();
         par2 = _parentAnchor.GetY();

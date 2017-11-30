@@ -1,4 +1,4 @@
-public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>// //<>//
+public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>// //<>// //<>//
     /**
      背景の色情報。
      */
