@@ -1,28 +1,29 @@
-public final class SceneManager {
-    private ArrayList<Scene> _scenes;
-    public ArrayList<Scene> GetScenes() {
-        return _scenes;
-    }
+public class SceneManager {
+    /**
+    保持しているシーン。
+    */
+    private HashMap<String, Scene> _scenes;
 
     /**
-     現在描画されているシーン。
-     */
+    描画するシーン。
+    シーンの優先度によって描画順が替わる。
+    */
+    private ArrayList<Scene> _drawScenes;
+
     private Scene _activeScene;
     public Scene GetActiveScene() {
         return _activeScene;
     }
-    /**
-     次にアクティブになるシーン。
-     */
     private Scene _nextScene;
 
-    /**
-     シーンの読込要求が出された場合にtrueになる。
-     */
+    private Collection<Scene> _collection;
+
     private boolean _loadFlag;
 
     public SceneManager () {
-        _scenes = new ArrayList<Scene>();
+        _scenes = new HashMap<String, Scene>();
+        _drawScenes = new ArrayList<Scene>();
+        _collection = new Collection<Scene>();
         _InitSceneEvent();
     }
 
@@ -30,31 +31,31 @@ public final class SceneManager {
         if (inputManager == null) {
             inputManager = new InputManager();
         }
-        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new Event() { 
+        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new IEvent() { 
             public void Event() {
                 OnMousePressed();
             }
         }
         );
-        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new Event() {
+        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new IEvent() {
             public void Event() {
                 OnMouseReleased();
             }
         }
         );
-        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new Event() {
+        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new IEvent() {
             public void Event() {
                 OnMouseClicked();
             }
         }
         );
-        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new Event() {
+        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new IEvent() {
             public void Event() {
                 OnKeyPressed();
             }
         }
         );
-        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new Event() {
+        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new IEvent() {
             public void Event() {
                 OnKeyReleased();
             }
@@ -111,15 +112,15 @@ public final class SceneManager {
     private void _ChangeScene() {
         _loadFlag = false;
 
-        if (_activeScene != null) {
-            _activeScene.Disabled();
-        }
-        if (_nextScene != null) {
-            _nextScene.Enabled();
-        }
+        //if (_activeScene != null) {
+        //    _activeScene.Disabled();
+        //}
+        //if (_nextScene != null) {
+        //    _nextScene.Enabled();
+        //}
 
-        _activeScene = _nextScene;
-        _nextScene = null;
+        //_activeScene = _nextScene;
+        //_nextScene = null;
     }
 
     /**
@@ -137,21 +138,12 @@ public final class SceneManager {
     }
 
     private void OnMousePressed() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnMousePressed();
-        }
     }
 
     private void OnMouseReleased() {
-        if (GetActiveScene() != null) {
- SceneObjectBehaviorMouseReleased();
-        }
     }
 
     private void OnMouseClicked() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnMouseClicked();
-        }
     }
 
     private void OnMouseWheel() {
@@ -170,15 +162,9 @@ public final class SceneManager {
     }
 
     private void OnKeyPressed() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnKeyPressed();
-        }
     }
 
     private void OnKeyReleased() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnKeyReleased();
-        }
     }
 
     /**
@@ -188,10 +174,10 @@ public final class SceneManager {
      @return 追加に成功した場合はtrueを返す
      */
     public boolean AddScene(Scene scene) {
-        if (GetScene(scene.GetName()) != null) {
+        //if (GetScene(scene.GetName()) != null) {
             return false;
-        }
-        return _scenes.add(scene);
+        //}
+        //return _scenes.add(scene);
     }
 
     /**
@@ -232,9 +218,9 @@ public final class SceneManager {
      
      @return 削除に成功した場合はtrueを返す。
      */
-    public boolean RemoveScene(Scene scene) {
-        return _scenes.remove(scene);
-    }
+    //public boolean RemoveScene(Scene scene) {
+        //return _scenes.remove(scene);
+    //}
 
     /**
      自身のリストのindex番目のシーンを削除する。
@@ -267,22 +253,5 @@ public final class SceneManager {
             }
         }
         return null;
-    }
-
-    /**
-     自分以外は全てfalseを返す。
-     */
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        return false;
-    }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
-        b.append(_scenes);
-        return b.toString();
     }
 }

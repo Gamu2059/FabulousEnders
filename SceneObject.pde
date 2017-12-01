@@ -273,8 +273,8 @@ public class SceneObject implements Comparable<SceneObject> {
     public boolean equals(Object o) {
         return this == o;
     }
-
-    public int compareTo(SceneObject s) {
-        return _transform.compareTo(s.GetTransform());
+    
+    public int compareTo(SceneObject o) {
+        return GetTransform().compareTo(o.GetTransform());
     }
 }

@@ -94,14 +94,14 @@ public final class InputManager {
         _keyReleasedHandler = new ActionEvent();
         _keyClickedHandler = new ActionEvent();
 
-        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new Event() { 
+        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 println("Mouse Enterd on Window!");
             }
         }
         );
 
-        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new Event() {
+        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
             public void Event() {
                 println("Mouse Exited from Window!");
             }

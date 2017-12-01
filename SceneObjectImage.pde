@@ -1,4 +1,4 @@
-public class SceneObjectImage extends Abs_SceneObjectDrawBase {
+public class SceneObjectImage extends SceneObjectDrawBase {
     private String _usingImageName;
     public String GetUsingImageName() {
         return _usingImageName;
@@ -11,12 +11,12 @@ public class SceneObjectImage extends Abs_SceneObjectDrawBase {
 
     private PVector _objSize;
 
-    public SceneObjectImage(SceneObject obj) {
-        super(obj);
+    public SceneObjectImage() {
+        super();
     }
 
-    public SceneObjectImage(SceneObject obj, String imagePath) {
-        super(obj);
+    public SceneObjectImage(String imagePath) {
+        super();
         SetUsingImageName(imagePath);
     }
 

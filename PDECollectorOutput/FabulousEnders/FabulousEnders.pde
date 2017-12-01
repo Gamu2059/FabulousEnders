@@ -5,7 +5,6 @@ import java.io.*;
 // マネージャインスタンス
 InputManager inputManager;
 SceneManager sceneManager;
-MatrixManager matrixManager;
 ImageManager imageManager;
 FontManager fontManager;
 
@@ -14,59 +13,65 @@ SceneObjectTransform objT1, objT2;
 float x;
 boolean isRotate;
 void setup() {
-    size(1066, 600);
-    surface.setLocation(0, 0);
+    size(1066, 600, P3D);
     try {
         InitManager();
 
-        scene = new Scene("main");
-        scene.GetTransform().SetPosition(width * 0.5, 0);
-        scene.SetSceneScale(0.5, 1);
-        scene.GetDrawBack().GetBackColorInfo().SetColor(100, 0, 100);
+        //scene = new Scene("main");
+        //scene.GetTransform().SetPosition(width * 0.5, 0);
+        //scene.SetSceneScale(0.5, 1);
+        //scene.GetDrawBack().GetBackColorInfo().SetColor(100, 0, 100);
 
-        SceneObject o = new SceneObject("camera?", scene);
-        SetText(o);
-        objT1 = o.GetTransform();
-        objT1.SetSize(100, 100);
-        objT1.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
-        objT1.SetSelfAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        //SceneObject o = new SceneObject("camera?", scene);
+        //SetText(o);
+        //objT1 = o.GetTransform();
+        //objT1.SetSize(100, 100);
+        //objT1.SetParentAnchor(Anchor.CENTER_MIDDLE);
+        //objT1.SetSelfAnchor(Anchor.CENTER_MIDDLE);
 
-        SceneObject o1 = new SceneObject("Overlapped", scene);
-        o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
-        //SetImage(o1);
-        SetButton(o1);
-        objT2 = o1.GetTransform();
-        objT2.SetParent(o.GetTransform(), true);
-        objT2.SetSize(100, 140);
-        objT2.SetParentAnchor(SceneObjectAnchor.CENTER_MIDDLE);
+        //SceneObject o1 = new SceneObject("Overlapped", scene);
+        //o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
+        ////SetImage(o1);
+        //SetButton(o1);
+        //objT2 = o1.GetTransform();
+        //objT2.SetParent(o.GetTransform(), true);
+        //objT2.SetSize(100, 140);
+        //objT2.SetParentAnchor(Anchor.CENTER_MIDDLE);
 
-        sceneManager.Start("main");
+        //sceneManager.Start("main");
     } 
     catch(Exception e) {
         println(e);
     }
 }
 
+void InitManager() {
+    inputManager = new InputManager();
+    sceneManager = new SceneManager();
+    imageManager = new ImageManager();
+    fontManager = new FontManager();
+}
+
 void SetImage(SceneObject o) {
-    SceneObjectImage i = new SceneObjectImage(o);
-    i.SetUsingImageName("icon.png");
+    //SceneObjectImage i = new SceneObjectImage(o);
+    //i.SetUsingImageName("icon.png");
 }
 
 void SetText(SceneObject o) {
-    SceneObjectText t = new SceneObjectText(o, "TestTestTestTestTestTestTestTest");
-    t.SetDrawInOrder(true);
-    t.SetDrawSpeed(10);
-    t.GetColorInfo().SetColor(0, 0, 200);
+    //SceneObjectText t = new SceneObjectText(o, "TestTestTestTestTestTestTestTest");
+    //t.SetDrawInOrder(true);
+    //t.SetDrawSpeed(10);
+    //t.GetColorInfo().SetColor(0, 0, 200);
 }
 
 void SetButton(SceneObject o) {
-    SceneObjectButton b = new SceneObjectButton(o);
-    b.GetDicideHandler().AddEvent("pushed", new Event() {
-        public void Event() {
-            OnDecide();
-        }
-    }
-    );
+    //SceneObjectButton b = new SceneObjectButton(o);
+    //b.GetDicideHandler().AddEvent("pushed", new Event() {
+    //    public void Event() {
+    //        OnDecide();
+    //    }
+    //}
+    //);
 }
 
 void OnDecide() {
@@ -87,35 +92,19 @@ void draw() {
     }
 }
 
-/**
- 用意されたマネージャオブジェクトを自動的に生成する。
- */
-void InitManager() {
-    Field[] fields = getClass().getDeclaredFields();
-    Field f;
 
-    try {
-        for (int i=0; i<fields.length; i++) {
-            f = fields[i];
-            if (GeneralJudge.IsImplemented(f.getType(), Abs_Manager.class)) {
-                f.setAccessible(true);
-                f.set(this, f.getType().getDeclaredConstructor(getClass()).newInstance(this));
-            }
-        }
-    } 
-    catch(NoSuchMethodException nse) {
-        println(nse);
-    } 
-    catch(InstantiationException ie) {
-        println(ie);
-    } 
-    catch(IllegalAccessException iae) {
-        println(iae);
-    } 
-    catch(InvocationTargetException ite) {
-        println(ite);
-    }
+public void SetAffineMatrix(float[] e) {
+    if (e == null) return;
+    if (e.length < 6) return;
+    resetMatrix();
+    applyMatrix(
+        e[0], e[1], 0, e[2] - width/2f, 
+        e[3], e[4], 0, e[5] - height/2f, 
+        0, 0, 1, -0.866 * height, 
+        0, 0, 0, 1
+        );
 }
+
 
 void keyPressed() {
     inputManager.KeyPressed();
@@ -155,281 +144,258 @@ void mouseEntered() {
 
 void mouseExited() {
     inputManager.MouseExited();
-}public abstract class Abs_Manager {
-    public Abs_Manager() {
-        println("Created " + getClass().getSimpleName());
-    }
-}public abstract class Abs_SceneObjectBehavior {
-    private String[] _classNames;
-    protected String[] GetClassNames() {
-        return _classNames;
-    }
-
-    private String _name;
-    public String GetName() {
-        return _name;
-    }
-
-    private SceneObject _object;
-    public SceneObject GetObject() {
-        return _object;
-    }
-
-    public Scene GetScene() {
-        if (GetObject() == null) {
-            return null;
-        }
-        return GetObject().GetScene();
-    }
-
-    private boolean _enable;
-    public boolean IsEnable() {
-        return _enable;
-    }
-    public void SetEnable(boolean value) {
-        _enable = value;
-        if (_enable) {
-            OnEnabled();
-        } else {
-            OnDisabled();
-        }
-    }
-
-    /**
-     振る舞いとしてスタート関数が呼び出されたかどうか。
-     既に呼び出された場合はtrueになる。
-     */
-    private boolean _isStart;
-    public boolean IsStart() {
-        return _isStart;
-    }
-
-    public Abs_SceneObjectBehavior(SceneObject object) {
-        _name = getClass().getSimpleName();
-        _object = object;
-        SetEnable(true);
-
-        // 自身も含めた継承しているクラスを全て列挙
-        ArrayList<String> list = new ArrayList<String>();
-        Class<?> c = getClass();
-        while (c != null) {
-            if (c.getSimpleName().equals(_OldestClassName())) {
-                break;
-            }
-            list.add(c.getSimpleName());
-            c = c.getSuperclass();
-        }
-        _classNames = new String[list.size()];
-        list.toArray(_classNames);
-
-        object.AddBehavior(this);
-    }
-
-    /**
-     ClassNames配列を生成する際に、"自身の振る舞いを特定できない最も古い振る舞い"を返す。
-     基本的な振る舞いは、全て "Abs_SceneObjectBehavior" を返す。
-     
-     返り値に指定したクラスを継承する振る舞いはオブジェクトに複数存在することが許可される。
-     */
-    protected String _OldestClassName() {
-        return "Abs_SceneObjectBehavior";
-    }
-
-    /**
-     同じ系統の振る舞いであった場合、trueを返す。
-     */
-    public final boolean IsSameBehavior(Abs_SceneObjectBehavior behavior) {
-        String[] a, b;
-        a = GetClassNames();
-        b = behavior.GetClassNames();
-        for (int i=0; i<a.length; i++) {
-            for (int j=0; j<b.length; j++) {
-                if (a[i].equals(b[j])) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     指定した名前と一致する振る舞いであるか、もしくはそれを継承している場合、trueを返す。
-     */
-    public final boolean IsBehaviorAs(String behavior) {
-        String[] a = GetClassNames();
-        for (int i=0; i<a.length; i++) {
-            if (a[i].equals(behavior)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     指定した振る舞いに該当する場合、trueを返す。
-     */
-    public final boolean IsBehaviorAs(Class<?> c) {
-        return IsBehaviorAs(c.getSimpleName());
-    }
-
-    /**
-     シーンがアクティブになってからの最初のフレームで呼び出される。
-     これが呼び出される段階では、全てのオブジェクトが揃っているので、自身以外への参照の保持などを行える。
-     */
-    public void Start() {
-        _isStart = true;
-    }
-
-    /**
-     シーンがアクティブの時、毎フレーム呼び出される。
-     初回フレームでは、全ての振る舞いのStartが呼び出された後に呼び出される。
-     アニメーションやキー判定などは、基本的にここで処理する。
-     */
-    public void Update() {
-    }
-
-    /**
-     シーンがアクティブの時、毎フレーム呼び出される。
-     アニメーションコントローラ以外は基本的に何も処理しない。
-     */
-    public void Animation() {
-    }
-
-    /**
-     シーンがアクティブの時、毎フレーム呼び出される。
-     ドロービヘイビア以外は基本的に何も処理しない。
-     */
-    public void Draw() {
-    }
-
-    /**
-     シーンがノンアクティブになったフレームで呼び出される。
-     Destroyとは異なり、オブジェクトの破壊などを行うためのメソッドではないので注意。
-     */
-    public void Stop() {
-    }
-
-    /**
-     オブジェクトが有効化されたフレームで呼び出される。
-     振る舞い単体でも呼び出される可能性はある。
-     */
-    public void OnEnabled() {
-        _isStart = false;
-    }
-
-    /**
-     オブジェクトが無効化されたフレームで呼び出される。
-     振る舞い単体でも呼び出される可能性はある。
-     */
-    public void OnDisabled() {
-    }
-
-    public void OnEnabledActive() {
-    }
-
-    public void OnDisabledActive() {
-    }
-
-    public void OnMousePressed() {
-    }
-
-    public void OnMouseReleased() {
-    }
-
-    public void OnMouseClicked() {
-    }
-
-    public void OnKeyPressed() {
-    }
-
-    public void OnKeyReleased() {
-    }
-
-    /**
-     指定したオブジェクトが次のいずれかの場合、trueを返す。
-     ・自身そのもの。
-     ・文字列であり、かつ自身の振る舞いのいづれかに該当する。
-     ・振る舞いであり、かつ自身と同系統の振る舞い。
-     */
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o == null) {
-            return false;
-        } else if (o instanceof String) {
-            String s = (String) o;
-            return IsBehaviorAs(s);
-        } else if (o instanceof Abs_SceneObjectBehavior) {
-            Abs_SceneObjectBehavior b = (Abs_SceneObjectBehavior) o;
-            return IsSameBehavior(b);
-        }
-        return false;
-    }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" :\n");
-        b.append("  name : ").append(_name).append(" \n");
-        return b.toString();
-    }
-}public abstract class Abs_SceneObjectDrawBase extends Abs_SceneObjectBehavior {
-    private DrawColor _colorInfo;
-    public DrawColor GetColorInfo() {
-        return _colorInfo;
-    }
-
-    public Abs_SceneObjectDrawBase(SceneObject obj) {
-        super(obj);
-
-        _colorInfo = new DrawColor();
-    }
-}public final class ActionEvent {
-    private HashMap<String, Event> _events;
-    private HashMap<String, Event> GetEventHash() {
+}
+/**
+ IEventインスタンスをHashMapで管理することに責任を持つ。
+ */
+public final class ActionEvent {
+    private HashMap<String, IEvent> _events;
+    private HashMap<String, IEvent> GetEventHash() {
         return _events;
     }
 
     public ActionEvent() {
-        _events = new HashMap<String, Event>();
+        _events = new HashMap<String, IEvent>();
     }
 
-    public void AddEvent(String eventLabel, Event event) {
+    public void AddEvent(String eventLabel, IEvent event) {
         if (!GetEventHash().containsKey(eventLabel) && event != null) {
             GetEventHash().put(eventLabel, event);
         }
     }
-    
-    public void SetEvent(String eventLabel, Event event) {
+
+    public void SetEvent(String eventLabel, IEvent event) {
         if (event != null) {
             GetEventHash().put(eventLabel, event);
         }
     }
-    
-    public Event GetEvent(String eventLabel) {
+
+    public IEvent GetEvent(String eventLabel) {
         return GetEventHash().get(eventLabel);
     }
-    
-    public Event RemoveEvent(String eventLabel) {
+
+    public IEvent RemoveEvent(String eventLabel) {
         return GetEventHash().remove(eventLabel);
     }
-    
+
     public void RemoveAllEvents() {
         GetEventHash().clear();
     }
-    
+
     public void InvokeEvent(String eventLabel) {
-        Event e = GetEvent(eventLabel);
+        IEvent e = GetEvent(eventLabel);
         if (e != null) {
             e.Event();
         }
     }
-    
+
     public void InvokeAllEvents() {
         for (String label : GetEventHash().keySet()) {
             InvokeEvent(label);
         }
     }
-}public final class DrawColor {
+}
+/**
+ 平面上のある領域の基準点を二つ保持する責任を持つ。
+ */
+public class Anchor {
+    private Pivot _min, _max;
+
+    public PVector GetMin() {
+        return _min.GetPivot();
+    }
+    public void SetMin(PVector value) {
+        if (value == null) return;
+        SetMin(value.x, value.y);
+    }
+
+    public void SetMin(float x, float y) {
+        float temp;
+        if (x > GetMax().x) {
+            temp = GetMax().x;
+            _max.SetX(x);
+            x = temp;
+        }
+        if (y > GetMax().y) {
+            temp = GetMax().y;
+            _max.SetY(y);
+            y = temp;
+        }
+        _min.SetPivot(x, y);
+    }
+
+    public PVector GetMax() {
+        return _max.GetPivot();
+    }
+    public void SetMax(PVector value) {
+        if (value == null) return;
+        SetMax(value.x, value.y);
+    }
+
+    public void SetMax(float x, float y) {
+        float temp;
+        if (x < GetMin().x) {
+            temp = GetMin().x;
+            _min.SetX(x);
+            x = temp;
+        }
+        if (y < GetMin().y) {
+            temp = GetMin().y;
+            _min.SetY(y);
+            y = temp;
+        }
+        _max.SetPivot(x, y);
+    }
+
+    public Anchor() {
+        _InitParametersOnConstructor(Pivot.P_LEFT, Pivot.P_TOP, Pivot.P_RIGHT, Pivot.P_BOTTOM);
+    }
+
+    public Anchor(float minX, float minY, float maxX, float maxY) {
+        _InitParametersOnConstructor(minX, minY, maxX, maxY);
+    }
+
+    private void _InitParametersOnConstructor(float minX, float minY, float maxX, float maxY) {
+        _min = new Pivot(minX, minY);
+        _max = new Pivot(maxX, maxY);
+    }
+
+    public float GetMinX() {
+        return GetMin().x;
+    }
+    public float GetMinY() {
+        return GetMin().y;
+    }
+    public float GetMaxX() {
+        return GetMax().x;
+    }
+    public float GetMaxY() {
+        return GetMax().y;
+    }
+    public void SetMinX(float value) {
+        SetMin(value, GetMinY());
+    }
+    public void SetMinY(float value) {
+        SetMin(GetMinX(), value);
+    }
+    public void SetMaxX(float value) {
+        SetMax(value, GetMaxY());
+    }
+    public void SetMaxY(float value) {
+        SetMax(GetMaxX(), value);
+    }
+}
+/**
+ObjectBehavior及びサブクラスを特定するためのIDを定義する責任を持つ。
+*/
+public final class ClassID {
+    public static final int BEHAVIOR = 0;
+    public static final int TRANSFORM = 1;
+    public static final int DRAW_BACK = 2;
+}
+public class Collection<R extends Comparable> {
+    /**
+     配列のソートを行う。
+     */
+    public void SortArray(R[] o) {
+        if (o == null) return;
+        _QuickSort(o, 0, o.length-1);
+    }
+
+    /**
+     リストのソートを行う。
+     */
+    public void SortList(ArrayList<R> o) {
+        if (o == null) return;
+        _QuickSort(o, 0, o.size()-1);
+    }
+
+    /**
+     軸要素の選択
+     順に見て、最初に見つかった異なる2つの要素のうち、
+     大きいほうの番号を返します。
+     全部同じ要素の場合は -1 を返します。
+     */
+    private int _Pivot(R[] o, int i, int j) {
+        int k = i+1;
+        while (k <= j && o[i].compareTo(o[k]) == 0) k++;
+        if (k > j) return -1;
+        if (o[i].compareTo(o[k]) >= 0) return i;
+        return k;
+    }
+
+    private int _Pivot(ArrayList<R> o, int i, int j) {
+        int k = i+1;
+        while (k <= j && o.get(i).compareTo(o.get(k)) == 0) k++;
+        if (k > j) return -1;
+        if (o.get(i).compareTo(o.get(k)) >= 0) return i;
+        return k;
+    }
+
+    /**
+     クイックソート
+     配列oの、o[i]からo[j]を並べ替えます。
+     */
+    private void _QuickSort(R[] o, int i, int j) {
+        if (i == j) return;
+        int p = _Pivot(o, i, j);
+        if (p != -1) {
+            int k = _Partition(o, i, j, o[p]);
+            _QuickSort(o, i, k-1);
+            _QuickSort(o, k, j);
+        }
+    }
+
+    private void _QuickSort(ArrayList<R> o, int i, int j) {
+        if (i == j) return;
+        int p = _Pivot(o, i, j);
+        if (p != -1) {
+            int k = _Partition(o, i, j, o.get(p));
+            _QuickSort(o, i, k-1);
+            _QuickSort(o, k, j);
+        }
+    }
+
+    /**
+     パーティション分割
+     o[i]～o[j]の間で、x を軸として分割します。
+     x より小さい要素は前に、大きい要素はうしろに来ます。
+     大きい要素の開始番号を返します。
+     */
+    private int _Partition(R[] o, int i, int j, R x) {
+        int l=i, r=j;
+        // 検索が交差するまで繰り返します
+        while (l<=r) {
+            // 軸要素以上のデータを探します
+            while (l<=j && o[l].compareTo(x) < 0)  l++;
+            // 軸要素未満のデータを探します
+            while (r>=i && o[r].compareTo(x) >= 0) r--;
+            if (l>r) break;
+            R t=o[l];
+            o[l]=o[r];
+            o[r]=t;
+            l++; 
+            r--;
+        }
+        return l;
+    }
+
+    private int _Partition(ArrayList<R> o, int i, int j, R x) {
+        int l=i, r=j;
+        while (l<=r) {
+            while (l<=j && o.get(l).compareTo(x) < 0)  l++;
+            while (r>=i && o.get(r).compareTo(x) >= 0) r--;
+            if (l>r) break;
+            R t=o.get(l);
+            o.set(l, o.get(r));
+            o.set(r, t);
+            l++; 
+            r--;
+        }
+        return l;
+    }
+}
+public final class DrawColor {
     public static final int MAX_RED = 255;
     public static final int MAX_GREEN = 255;
     public static final int MAX_BLUE = 255;
@@ -564,18 +530,8 @@ void mouseExited() {
             GetBlueOrBrightness() == d.GetBlueOrBrightness() && 
             GetAlpha() == d.GetAlpha();
     }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" :\n");
-        b.append("  is RGB : ").append(IsRGB()).append(" \n");
-        b.append("  parameter : ").append(GetRedOrHue()).append(", ").append(GetGreenOrSaturation()).append(", ").append(GetBlueOrBrightness()).append(", ").append(GetAlpha());
-
-        return b.toString();
-    }
-}public interface Event {
-    public void Event();
-}public final class FontManager extends Abs_Manager {
+}
+public final class FontManager {
     private HashMap<String, PFont> _fonts;
     private HashMap<String, PFont> GetFontHash() {
         return _fonts;
@@ -595,41 +551,42 @@ void mouseExited() {
         }
         return font;
     }
-}public final static class GeneralCalc {
+}
+public final static class GeneralCalc {
     /**
      指定した座標同士のラジアン角を返す。
      座標2から座標1に向けての角度になるので注意。
      */
-    public static float getRad(float x1, float y1, float x2, float y2) {
+    public static float GetRad(float x1, float y1, float x2, float y2) {
         float y, x;
         y = y1 - y2;
         x = x1 - x2;
-        if (y == 0 && x == 0) {
-            return 0;
-        }
+        if (y == 0 && x == 0) return 0;
         float a = atan(y/x);
-        if (x < 0) {
-            // 左向きの時
-            a = PI + a;
-        }
+        if (x < 0) a += PI;
         return a;
     }
-}public final static class GeneralJudge {
+}
+public final static class GeneralJudge {
     /**
     指定したクラスが指定したインターフェースを実装しているかどうか。
     */
-    public static boolean IsImplemented(Class<?> clazz, Class<?> intrfc) {
-        if (clazz == null || intrfc == null) {
-            return false;
-        }
-        // インターフェースを実装したクラスであるかどうかをチェック
-        if (!clazz.isInterface() && intrfc.isAssignableFrom(clazz)
-                && !Modifier.isAbstract(clazz.getModifiers())) {
-            return true;
-        }
-        return false;
-    }
-}public final class ImageManager extends Abs_Manager {
+    //public static boolean IsImplemented(Class<?> clazz, Class<?> intrfc) {
+    //    if (clazz == null || intrfc == null) {
+    //        return false;
+    //    }
+    //    // インターフェースを実装したクラスであるかどうかをチェック
+    //    if (!clazz.isInterface() && intrfc.isAssignableFrom(clazz)
+    //            && !Modifier.isAbstract(clazz.getModifiers())) {
+    //        return true;
+    //    }
+    //    return false;
+    //}
+}
+public interface IEvent {
+    public void Event();
+}
+public final class ImageManager {
     public static final String IMAGEPATH = "image/";
     
     private HashMap<String, PImage> _images;
@@ -652,7 +609,8 @@ void mouseExited() {
         }
         return image;
     }
-}public final class InputManager extends Abs_Manager {
+}
+public final class InputManager {
     private boolean[] _pressedKeys;
     private boolean[] GetPressedKeys() {
         return _pressedKeys;
@@ -748,14 +706,14 @@ void mouseExited() {
         _keyReleasedHandler = new ActionEvent();
         _keyClickedHandler = new ActionEvent();
 
-        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new Event() { 
+        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 println("Mouse Enterd on Window!");
             }
         }
         );
 
-        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new Event() {
+        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
             public void Event() {
                 println("Mouse Exited from Window!");
             }
@@ -931,7 +889,7 @@ void mouseExited() {
      引数で与えられた列挙定数に対して、全てのキーが押されている状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsPressedKeys(int... inputs) {
+    public boolean IsPressedKeys(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -949,7 +907,7 @@ void mouseExited() {
      引数で与えられた列挙定数に対して、その列挙されたものだけが押されている状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsPressedKeysOnly(int... inputs) {
+    public boolean IsPressedKeysOnly(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -972,7 +930,7 @@ void mouseExited() {
      引数で与えられた列挙定数に対して、全てのキーがクリックされた状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsClickedKeys(int... inputs) {
+    public boolean IsClickedKeys(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -990,7 +948,7 @@ void mouseExited() {
      引数で与えられた列挙定数に対して、その列挙されたものだけがクリックされた状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
      */
-    public boolean IsClickedKeysOnly(int... inputs) {
+    public boolean IsClickedKeysOnly(int[] inputs) {
         if (inputs == null) {
             return false;
         }
@@ -1008,7 +966,8 @@ void mouseExited() {
         }
         return inputIndex == inputs.length;
     }
-}public class Key {
+}
+public class Key {
     // 使用するキーの総数
     public final static int KEY_NUM = 45;
 
@@ -1066,36 +1025,138 @@ void mouseExited() {
     public final static int _DEL = 42;
     public final static int _BACK = 43;
     public final static int _SHIFT = 44;
-}public final class MatrixManager extends Abs_Manager {
-    public final static int MAX_STACK = 32;
-
-    private int _stackNum;
-    public int GetStackNum() {
-        return _stackNum;
-    }
-
-    public MatrixManager() {
-        _stackNum = 0;
-    }
-
-    public boolean PushMatrix() {
-        if (_stackNum < MAX_STACK) {
-            _stackNum++;
-            pushMatrix();
-            return true;
-        }
+}
+public static class Matrix2D {
+    private static boolean _CheckInvalid(float[] e) {
+        if (e == null) return true;
+        if (e.length < 6) return true;
         return false;
     }
 
-    public boolean PopMatrix() {
-        if (_stackNum > 0) {
-            _stackNum--;
-            popMatrix();
-            return true;
+    public static void Reset(float[] e) {
+        if (_CheckInvalid(e)) return;
+        for (int i=0; i<6; i++) {
+            if (i == 0 || i == 4) {
+                e[i] = 1;
+            } else {
+                e[i] = 0;
+            }
         }
-        return false;
     }
-}public class Scene extends SceneObject {
+
+    public static void Translate(float[] e, float x, float y) {
+        if (_CheckInvalid(e)) return;
+        e[2] += e[0] * x + e[1] * y;
+        e[5] += e[3] * x + e[4] * y;
+    }
+
+    public static void Rotate(float[] e, float rad) {
+        if (_CheckInvalid(e)) return;
+        float e0, e1, e3, e4, s, c;
+        e0 = e[0];
+        e1 = e[1];
+        e3 = e[3];
+        e4 = e[4];
+        s = sin(rad);
+        c = cos(rad);
+        e[0] = e0 * c + e1 * s;
+        e[1] = e0 * s - e1 * c;
+        e[3] = e3 * c + e4 * s;
+        e[4] = e3 * s - e4 * c;
+    }
+
+    public static void Scale(float[] e, float x, float y) {
+        if (_CheckInvalid(e)) return;
+        e[0] *= x;
+        e[1] *= y;
+        e[3] *= x;
+        e[4] *= y;
+    }
+
+    public static void Get(float[] e, PMatrix2D matrix) {
+        if (_CheckInvalid(e)) return;
+        if (matrix == null) return;
+        matrix.apply(
+            e[0], e[1], e[2], 
+            e[3], e[4], e[5]
+            );
+    }
+
+    public static void Copy(float[] _in, float[] _out) {
+        if (_CheckInvalid(_in) || _CheckInvalid(_out)) return;
+        for (int i=0; i<6; i++) {
+            _out[i] = _in[i];
+        }
+    }
+}
+/**
+ 平面上のある領域の基準点を保持する責任を持つ。
+ */
+public class Pivot {
+    private PVector _pivot;
+    public PVector GetPivot() {
+        return _pivot;
+    }
+    public void SetPivot(PVector value) {
+        if (value == null) return;
+        _pivot.set(value.x, value.y);
+    }
+    public void SetPivot(float x, float y) {
+        if (x < 0 || 1 < x || y < 0 || 1 < y) return;
+        _pivot.set(x, y);
+    }
+
+    public final static float P_LEFT = 0;
+    public final static float P_CENTER = 0.5;
+    public final static float P_RIGHT = 1;
+    public final static float P_TOP = 0;
+    public final static float P_BOTTOM = 1;
+
+    public Pivot() {
+        _InitParametersOnConstructor(null);
+    }
+
+    public Pivot(PVector value) {
+        _InitParametersOnConstructor(value);
+    }
+
+    public Pivot(float x, float y) {
+        _InitParametersOnConstructor(new PVector(x, y));
+    }
+
+    private void _InitParametersOnConstructor(PVector pivot) {
+        _pivot = new PVector(P_LEFT, P_TOP);
+        if (pivot == null) pivot = new PVector(P_LEFT, P_TOP);
+        SetPivot(pivot);
+    }
+
+    public float GetX() {
+        return GetPivot().x;
+    }
+
+    public float GetY() {
+        return GetPivot().y;
+    }
+
+    public void SetX(float value) {
+        SetPivot(value, GetY());
+    }
+
+    public void SetY(float value) {
+        SetPivot(GetX(), value);
+    }
+}
+public class Scene implements Comparable<Scene> {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    /**
+     ソートするのに用いる。
+     */
+    private Collection<SceneObject> _collection;
+
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
         return _objects;
@@ -1104,6 +1165,28 @@ void mouseExited() {
     private SceneObject _activeObject;
     public SceneObject GetActiveObject() {
         return _activeObject;
+    }
+
+    private SceneObjectTransform _transform;
+    public SceneObjectTransform GetTransform() {
+        return _transform;
+    }
+
+    private SceneObjectDrawBack _drawBack;
+    public SceneObjectDrawBack GetDrawBack() {
+        return _drawBack;
+    }
+
+    /**
+    描画優先度。
+    トランスフォームのものとは使用用途が異なるので分けている。
+    */
+    private int _scenePriority;
+    public int GetScenePriority() {
+     return _scenePriority;   
+    }
+    public void SetScenePriority(int value) {
+        _scenePriority = value;
     }
 
     /**
@@ -1130,29 +1213,13 @@ void mouseExited() {
         _isNeedSorting = value;
     }
 
-    /**
-     シーンにのみ特別にスケール値を与える。
-     */
-    private PVector _sceneScale;
-    public PVector GetSceneScale() {
-        return _sceneScale;
-    }
-    public void SetSceneScale(PVector value) {
-        if (value != null) {
-            _sceneScale = value;
-        }
-    }
-    public void SetSceneScale(float value1, float value2) {
-        _sceneScale.set(value1, value2);
-    }
-
     public Scene (String name) {
-        super(name);
+        _name = name;
+        _collection = new Collection<SceneObject>();
         _objects = new ArrayList<SceneObject>();
-        _sceneScale = new PVector(1, 1);
+        _transform = new SceneObjectTransform();
         sceneManager.AddScene(this);
     }
-
 
     /**
      シーンの初期化を行う。
@@ -1160,49 +1227,35 @@ void mouseExited() {
      */
     public void InitScene() {
         _isNeedSorting = true;
-        _Sorting();
+        Sorting();
     }
 
     /**
-     　アクティブシーンになる直前のフレームの一番最後に呼び出される。
+     シーンマネージャの描画リストに追加された時に呼び出される。
      */
-    public void Enabled() {
+    public void OnEnabled() {
         _enabledFlag = false;
     }
 
     /**
-     ノンアクティブシーンになる直前のフレームの一番最後に呼び出される。
+     シーンマネージャの描画リストから外された時に呼び出される。
      */
-    public void Disabled() {
+    public void OnDisabled() {
         _disabledFlag = false;
-        _Stop();
+        Stop();
     }
 
-
-    /**
-     毎フレームのシーン更新処理。
-     */
-    public void Update() {
-        _ResetBackGround();
-        _Start();
-        _Update();
-        _Animation();
-        _ResetMatrix();
-        _Transform();
-        _Sorting();
-        _CheckMAO();
-        _Draw();
+    public void OnEnableActive() {
     }
 
-    protected void _ResetBackGround() {
-        background(0);
+    public void OnDisableActive() {
     }
 
     /**
      フレームの最初に呼び出される。
-     _Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
+     Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
      */
-    protected void _Start() {
+    protected void Start() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -1217,7 +1270,7 @@ void mouseExited() {
      一度しか呼び出されない。
      オブジェクトの有効フラグに関わらず必ず呼び出す。
      */
-    protected void _Stop() {
+    protected void Stop() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -1229,7 +1282,7 @@ void mouseExited() {
      毎フレーム呼び出される。
      入力待ちやオブジェクトのアニメーション処理を行う。
      */
-    protected void _Update() {
+    protected void Update() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -1240,85 +1293,30 @@ void mouseExited() {
     }
 
     /**
-     _Updateとは異なり、AnimationBehaviorによる高度なフレームアニメーションを行う。
-     主に子オブジェクトのアニメーションや画像連番表示を処理するのに用いる。
-     */
-    protected void _Animation() {
-        SceneObject s;
-        for (int i=0; i<_objects.size(); i++) {
-            s = _objects.get(i);
-            if (s.IsEnable() && s.GetBehavior(SceneObjectAnimationController.class) != null) {
-                s.Animation();
-            }
-        }
-    }
-
-    /**
-     アフィン行列を初期化する。
-     */
-    protected void _ResetMatrix() {
-        while (matrixManager.PopMatrix());
-        resetMatrix();
-    }
-
-    /**
-     シーンの平行移動と回転を行う。
-     */
-    public void TransformScene() {
-        PVector p = GetTransform().GetPosition();
-        resetMatrix();
-        scale(GetSceneScale().x, GetSceneScale().y);
-        translate(p.x, p.y);
-        rotate(GetTransform().GetRotate());
-    }
-
-    /**
-     オブジェクトを移動させる。
-     ここまでに指示されたトランスフォームの移動は、全てここで処理される。
-     それ以降のトランスフォーム処理は無視される。
-     */
-    protected void _Transform() {
-        TransformScene();
-
-        SceneObject s;
-        for (int i=0; i<_objects.size(); i++) {
-            s = _objects.get(i);
-            if (s.IsEnable() && s.IsChildOf(this)) {
-                s.GetTransform().Transform();
-            }
-        }
-    }
-
-    /**
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
-    protected void _Sorting() {
-        if (!_isNeedSorting) {
-            return;
-        }
+    protected void Sorting() {
+        if (!_isNeedSorting) return;
         _isNeedSorting = false;
-        Collections.sort(_objects);
+        _collection.SortList(GetObjects());
     }
 
     /**
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
      ただし、マウス操作している時だけしか判定しない。
      */
-    protected void _CheckMAO() {
-        if (!inputManager.IsMouseMode()) {
-            return;
-        }
+    protected void CheckMAO() {
+        if (!inputManager.IsMouseMode()) return;
 
         SceneObject s;
         boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
             if (s.IsEnable() && s.IsAbleAO()) {
-                if (s == _activeObject) {
-                    // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
-                    return;
-                }
+                // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
+                if (s == _activeObject) return;
+
                 f = true;
 
                 if (_activeObject != null) {
@@ -1341,7 +1339,7 @@ void mouseExited() {
     /**
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
-    protected void _Draw() {
+    protected void Draw() {
         _DrawScene();
 
         SceneObject s;
@@ -1358,51 +1356,9 @@ void mouseExited() {
      */
     private void _DrawScene() {
         fill(GetDrawBack().GetBackColorInfo().GetColor());
-        TransformScene();
+        GetTransform().SetAffine();
         PVector s = GetTransform().GetSize();
         rect(0, 0, s.x, s.y);
-    }
-
-    private boolean _CheckDisableMAO() {
-        if (GetActiveObject() == null) {
-            return true;
-        }
-        return !GetActiveObject().IsEnable();
-    }
-
-    public void OnMousePressed() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMousePressed();
-    }
-
-    public void OnMouseReleased() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMouseReleased();
-    }
-
-    public void OnMouseClicked() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMouseClicked();
-    }
-
-    public void OnKeyPressed() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnKeyPressed();
-    }
-
-    public void OnKeyReleased() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnKeyReleased();
     }
 
     /**
@@ -1507,41 +1463,37 @@ void mouseExited() {
         Scene s = (Scene) o;
         return GetName().equals(s.GetName());
     }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" \n");
-        b.append("  name : ").append(GetName()).append(" \n");
-        b.append("  objects :\n");
-        b.append(_objects).append(" \n");
-
-        return b.toString();
+    
+    public int compareTo(Scene o) {
+        return GetScenePriority() - o.GetScenePriority();
     }
-}public final class SceneManager extends Abs_Manager {
-    private ArrayList<Scene> _scenes;
-    public ArrayList<Scene> GetScenes() {
-        return _scenes;
-    }
+}
+public class SceneManager {
+    /**
+    保持しているシーン。
+    */
+    private HashMap<String, Scene> _scenes;
 
     /**
-     現在描画されているシーン。
-     */
+    描画するシーン。
+    シーンの優先度によって描画順が替わる。
+    */
+    private ArrayList<Scene> _drawScenes;
+
     private Scene _activeScene;
     public Scene GetActiveScene() {
         return _activeScene;
     }
-    /**
-     次にアクティブになるシーン。
-     */
     private Scene _nextScene;
 
-    /**
-     シーンの読込要求が出された場合にtrueになる。
-     */
+    private Collection<Scene> _collection;
+
     private boolean _loadFlag;
 
     public SceneManager () {
-        _scenes = new ArrayList<Scene>();
+        _scenes = new HashMap<String, Scene>();
+        _drawScenes = new ArrayList<Scene>();
+        _collection = new Collection<Scene>();
         _InitSceneEvent();
     }
 
@@ -1549,31 +1501,31 @@ void mouseExited() {
         if (inputManager == null) {
             inputManager = new InputManager();
         }
-        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new Event() { 
+        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new IEvent() { 
             public void Event() {
                 OnMousePressed();
             }
         }
         );
-        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new Event() {
+        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new IEvent() {
             public void Event() {
                 OnMouseReleased();
             }
         }
         );
-        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new Event() {
+        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new IEvent() {
             public void Event() {
                 OnMouseClicked();
             }
         }
         );
-        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new Event() {
+        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new IEvent() {
             public void Event() {
                 OnKeyPressed();
             }
         }
         );
-        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new Event() {
+        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new IEvent() {
             public void Event() {
                 OnKeyReleased();
             }
@@ -1630,15 +1582,15 @@ void mouseExited() {
     private void _ChangeScene() {
         _loadFlag = false;
 
-        if (_activeScene != null) {
-            _activeScene.Disabled();
-        }
-        if (_nextScene != null) {
-            _nextScene.Enabled();
-        }
+        //if (_activeScene != null) {
+        //    _activeScene.Disabled();
+        //}
+        //if (_nextScene != null) {
+        //    _nextScene.Enabled();
+        //}
 
-        _activeScene = _nextScene;
-        _nextScene = null;
+        //_activeScene = _nextScene;
+        //_nextScene = null;
     }
 
     /**
@@ -1656,21 +1608,12 @@ void mouseExited() {
     }
 
     private void OnMousePressed() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnMousePressed();
-        }
     }
 
     private void OnMouseReleased() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnMouseReleased();
-        }
     }
 
     private void OnMouseClicked() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnMouseClicked();
-        }
     }
 
     private void OnMouseWheel() {
@@ -1689,15 +1632,9 @@ void mouseExited() {
     }
 
     private void OnKeyPressed() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnKeyPressed();
-        }
     }
 
     private void OnKeyReleased() {
-        if (GetActiveScene() != null) {
-            GetActiveScene().OnKeyReleased();
-        }
     }
 
     /**
@@ -1707,10 +1644,10 @@ void mouseExited() {
      @return 追加に成功した場合はtrueを返す
      */
     public boolean AddScene(Scene scene) {
-        if (GetScene(scene.GetName()) != null) {
+        //if (GetScene(scene.GetName()) != null) {
             return false;
-        }
-        return _scenes.add(scene);
+        //}
+        //return _scenes.add(scene);
     }
 
     /**
@@ -1751,9 +1688,9 @@ void mouseExited() {
      
      @return 削除に成功した場合はtrueを返す。
      */
-    public boolean RemoveScene(Scene scene) {
-        return _scenes.remove(scene);
-    }
+    //public boolean RemoveScene(Scene scene) {
+        //return _scenes.remove(scene);
+    //}
 
     /**
      自身のリストのindex番目のシーンを削除する。
@@ -1787,58 +1724,38 @@ void mouseExited() {
         }
         return null;
     }
-
-    /**
-     自分以外は全てfalseを返す。
-     */
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        return false;
-    }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append("\n").append(getClass().getSimpleName()).append(" :\n");
-        b.append(_scenes);
-        return b.toString();
-    }
-}public class SceneObject implements Comparable<SceneObject> {
+}
+public class SceneObject implements Comparable<SceneObject> {
     private String _name;
     public String GetName() {
         return _name;
     }
 
-    /**
-     振る舞いリスト。
-     */
-    private ArrayList<Abs_SceneObjectBehavior> _behaviors;
-    public ArrayList<Abs_SceneObjectBehavior> GetBehaviors() {
+    private ArrayList<SceneObjectBehavior> _behaviors;
+    public ArrayList<SceneObjectBehavior> GetBehaviors() {
         return _behaviors;
     }
 
     /**
-     自身が所属するシーンインスタンス。
+     オブジェクトは一回だけシーンを設定することができる。
      */
     private Scene _scene;
     public Scene GetScene() {
         return _scene;
     }
+    public void SetScene(Scene value) {
+        if (_isSettedScene) return;
+        if (value == null) return;
+        _isSettedScene = true;
+        _scene = value;
+    }
+    private boolean _isSettedScene;
 
-    /**
-     自身のトランスフォーム。
-     振る舞いリストとは独立して呼び出しやすいようにした。
-     */
     private SceneObjectTransform _transform;
     public SceneObjectTransform GetTransform() {
         return _transform;
     }
 
-    /**
-     自身の背景描画ビヘイビア。
-     振る舞いリストとは独立して呼び出しやすいようにした。
-     */
     private SceneObjectDrawBack _drawBack;
     public SceneObjectDrawBack GetDrawBack() {
         return _drawBack;
@@ -1851,31 +1768,8 @@ void mouseExited() {
     public boolean IsEnable() {
         return _enable;
     }
-    /**
-     有効フラグを設定する。
-     ただし、自身の親の有効フラグがfalseの場合、設定は反映されない。
-     さらに、自身の設定を行うと同時に、階層構造的に子となる全てのオブジェクトの設定にも影響を与える。
-     
-     自身がシーンインスタンスであった場合は無視する。
-     */
     public void SetEnable(boolean value) {
-        if (this instanceof Scene) {
-            return;
-        }
-
-        if (GetParent() == null) {
-            return;
-        }
-        RecursiveSetEnable(value);
-    }
-    private void RecursiveSetEnable(boolean value) {
         _enable = value;
-
-        ArrayList<SceneObjectTransform> list = _transform.GetChildren();
-        for (int i=0; i<list.size(); i++) {
-            list.get(i).GetObject().RecursiveSetEnable(value);
-        }
-
         if (_enable) {
             _OnEnable();
         } else {
@@ -1883,6 +1777,9 @@ void mouseExited() {
         }
     }
 
+    /**
+     falseの場合、アクティブオブジェクトになり得ない。
+     */
     private boolean _isActivatable;
     public boolean IsActivatable() {
         return _isActivatable;
@@ -1891,44 +1788,23 @@ void mouseExited() {
         _isActivatable = value;
     }
 
-    /**
-     Sceneインスタンス専用コンストラクタ。
-     */
-    protected SceneObject(String name) {
-        _name = name;
-        _scene = (Scene) this;
-
-        _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
-
-        _transform = new SceneObjectTransform(this);
-        _transform.SetSize(width, height);
-        _transform.SetPriority(0);
-        _drawBack = new SceneObjectDrawBack(this);
-    }
-
-    /**
-     通常のSceneObjectインスタンス用のコンストラクタ。
-     */
-    public SceneObject(String name, Scene scene) {
+    public SceneObject(String name) {
         _name = name;
 
-        _behaviors = new ArrayList<Abs_SceneObjectBehavior>();
-        _scene = scene;
-        _transform = new SceneObjectTransform(this);
-        _drawBack = new SceneObjectDrawBack(this);
-
-        scene.AddObject(this);
+        _behaviors = new ArrayList<SceneObjectBehavior>();
+        _transform = new SceneObjectTransform();
+        AddBehavior(_transform);
+        
+        _drawBack = new SceneObjectDrawBack();
+        AddBehavior(_drawBack);
 
         // トランスフォームが設定されてからでないと例外を発生させてしまう
         SetEnable(true);
         SetActivatable(true);
     }
 
-    /**
-     シーンがアクティブになってから最初の一度だけ呼び出される。
-     */
     public void Start() {
-        Abs_SceneObjectBehavior b;
+        SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
             if (b.IsEnable()) {
@@ -1937,22 +1813,16 @@ void mouseExited() {
         }
     }
 
-    /**
-     シーンがノンアクティブになった時に呼び出される。
-     振る舞いの有効フラグに関わらず必ず呼び出す。
-     */
     public void Stop() {
-        Abs_SceneObjectBehavior b;
+        SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.Stop();
-            }
+            b.Stop();
         }
     }
 
     public void Update() {
-        Abs_SceneObjectBehavior b;
+        SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
             if (b.IsEnable()) {
@@ -1961,21 +1831,8 @@ void mouseExited() {
         }
     }
 
-    public void Animation() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.Animation();
-            }
-        }
-    }
-
     public void Draw() {
-        // 自身のトランスフォームをセットする
-        setMatrix(GetTransform().GetMatrix());
-
-        Abs_SceneObjectBehavior b;
+        SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
             if (b.IsEnable()) {
@@ -1989,27 +1846,13 @@ void mouseExited() {
     }
 
     protected void _OnEnable() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnEnabled();
-            }
-        }
     }
 
     protected void _OnDisable() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnDisabled();
-            }
-        }
     }
 
     public void OnEnabledActive() {
-        Abs_SceneObjectBehavior b;
+        SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
             if (b.IsEnable()) {
@@ -2019,7 +1862,7 @@ void mouseExited() {
     }
 
     public void OnDisabledActive() {
-        Abs_SceneObjectBehavior b;
+        SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
             if (b.IsEnable()) {
@@ -2028,66 +1871,17 @@ void mouseExited() {
         }
     }
 
-    public void OnMousePressed() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnMousePressed();
-            }
-        }
-    }
-
-    public void OnMouseReleased() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnMouseReleased();
-            }
-        }
-    }
-
-    public void OnMouseClicked() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnMouseClicked();
-            }
-        }
-    }
-
-    public void OnKeyPressed() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnKeyPressed();
-            }
-        }
-    }
-
-    public void OnKeyReleased() {
-        Abs_SceneObjectBehavior b;
-        for (int i=0; i<_behaviors.size(); i++) {
-            b = _behaviors.get(i);
-            if (b.IsEnable()) {
-                b.OnKeyReleased();
-            }
-        }
-    }
-
     /**
      自身のリストに振る舞いを追加する。
-     ただし、既に同じ系統の振る舞いが追加されている場合は追加できない。
+     同じものが既に追加されている場合は追加できない。
      
      @return 追加に成功した場合はtrueを返す
      */
-    public boolean AddBehavior(Abs_SceneObjectBehavior behavior) {
-        if (IsHaveBehavior(behavior)) {
+    public boolean AddBehavior(SceneObjectBehavior behavior) {
+        if (IsHaveBehavior(behavior.GetID())) {
             return false;
         }
+        behavior.SetObject(this);
         return _behaviors.add(behavior);
     }
 
@@ -2098,7 +1892,7 @@ void mouseExited() {
      @return index番目の振る舞い 存在しなければnull
      @throws Exception indexがリストのサイズより大きい場合
      */
-    public Abs_SceneObjectBehavior GetBehavior(int index) throws Exception {
+    public SceneObjectBehavior GetBehaviorOnIndex(int index) throws Exception {
         if (index >= _behaviors.size() || -index > _behaviors.size()) {
             throw new Exception("指定されたindexが不正です。 index : " + index);
         }
@@ -2109,15 +1903,15 @@ void mouseExited() {
     }
 
     /**
-     自身のリストの中からbehaviorに該当する振る舞いを返す。
+     自身のリストの中からIDに該当する振る舞いを返す。
      
-     @return behaviorに該当する名前の振る舞い 存在しなければNull
+     @return behaviorに該当するIDの振る舞い 存在しなければNull
      */
-    public Abs_SceneObjectBehavior GetBehavior(String behavior) {
-        Abs_SceneObjectBehavior s;
+    public SceneObjectBehavior GetBehaviorOnID(int id) {
+        SceneObjectBehavior s;
         for (int i=0; i<_behaviors.size(); i++) {
             s = _behaviors.get(i);
-            if (s.equals(behavior)) {
+            if (s.IsBehaviorAs(id)) {
                 return s;
             }
         }
@@ -2125,20 +1919,11 @@ void mouseExited() {
     }
 
     /**
-     自身のリストの中からbehaviorに該当する振る舞いを返す。
-     
-     @return behaviorに該当する名前の振る舞い 存在しなければNull
-     */
-    public Abs_SceneObjectBehavior GetBehavior(Class<? extends Abs_SceneObjectBehavior> behavior) {
-        return GetBehavior(behavior.getSimpleName());
-    }
-
-    /**
      自身のリストに指定した振る舞いが存在すれば削除する。
      
      @return 削除に成功した場合はtrueを返す。
      */
-    public boolean RemoveBehavior(Abs_SceneObjectBehavior behavior) {
+    public boolean RemoveBehavior(SceneObjectBehavior behavior) {
         return _behaviors.remove(behavior);
     }
 
@@ -2149,7 +1934,7 @@ void mouseExited() {
      @return index番目の振る舞い 存在しなければnull
      @throws Exception indexがリストのサイズより大きい場合
      */
-    public Abs_SceneObjectBehavior RemoveBehavior(int index) throws Exception {
+    public SceneObjectBehavior RemoveBehaviorOnIndex(int index) throws Exception {
         if (index >= _behaviors.size() || -index > _behaviors.size()) {
             throw new Exception("指定されたindexが不正です。 index : " + index);
         }
@@ -2160,38 +1945,32 @@ void mouseExited() {
     }
 
     /**
-     自身のリストの中からbehaviorに該当する振る舞いを削除する。
+     自身のリストの中からIDに該当する振る舞いを削除する。
      
-     @return behaviorに該当する名前の振る舞い 存在しなければNull
+     @return behaviorに該当するIDの振る舞い 存在しなければNull
      */
-    public Abs_SceneObjectBehavior RemoveBehavior(String behavior) {
-        Abs_SceneObjectBehavior s;
+    public SceneObjectBehavior RemoveBehaviorOnID(int id) {
+        SceneObjectBehavior s;
         for (int i=0; i<_behaviors.size(); i++) {
             s = _behaviors.get(i);
-            if (s.equals(behavior)) {
+            if (s.IsBehaviorAs(id)) {
                 return _behaviors.remove(i);
             }
         }
         return null;
     }
 
-    /**
-     自身の振る舞いと指定した振る舞いとの間に同系統のものが存在した場合、trueを返す。
-     */
-    public boolean IsHaveBehavior(Abs_SceneObjectBehavior behavior) {
-        Abs_SceneObjectBehavior s;
+    public boolean IsHaveBehavior(int id) {
+        SceneObjectBehavior s;
         for (int i=0; i<_behaviors.size(); i++) {
             s = _behaviors.get(i);
-            if (s.equals(behavior)) {
+            if (s.IsBehaviorAs(id)) {
                 return true;
             }
         }
         return false;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Transfrom generally method
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      自身が指定されたオブジェクトの親の場合、trueを返す。
      */
@@ -2218,120 +1997,106 @@ void mouseExited() {
         return s;
     }
 
-    /**
-     自身以外はfalseを返す。
-     */
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        return false;
+        return this == o;
+    }
+    
+    public int compareTo(SceneObject o) {
+        return GetTransform().compareTo(o.GetTransform());
+    }
+}
+public class SceneObjectBehavior {
+    /**
+     残念ながら全てのビヘイビアクラスがこれを継承して適切な値を返さなければならない。
+     */
+    public int GetID() {
+        return ClassID.BEHAVIOR;
     }
 
     /**
-     Transformに記録されている優先度によって比較する。
+     振る舞いは一回だけオブジェクトを設定することができる。
      */
-    public int compareTo(SceneObject s) {
-        return _transform.compareTo(s.GetTransform());
+    private SceneObject _object;
+    public SceneObject GetObject() {
+        return _object;
+    }
+    public void SetObject(SceneObject value) {
+        if (_isSettedObject) return;
+        if (value == null) return;
+        _isSettedObject = true;
+        _object = value;
+    }
+    private boolean _isSettedObject;
+
+    public Scene GetScene() {
+        if (GetObject() == null) return null;
+        return GetObject().GetScene();
     }
 
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" :\n");
-        b.append("  name : ").append(_name).append(" \n");
-        b.append("  behaviors :\n");
-        b.append(_behaviors).append(" \n");
-
-        return b.toString();
+    private boolean _enable;
+    public boolean IsEnable() {
+        return _enable;
     }
-}public final class SceneObjectAnchor {
-    public final static int LEFT_TOP = 0; 
-    public final static int LEFT_MIDDLE = 1; 
-    public final static int LEFT_BOTTOM = 2;
-    public final static int CENTER_TOP = 3;
-    public final static int CENTER_MIDDLE = 4; 
-    public final static int CENTER_BOTTOM = 5;
-    public final static int RIGHT_TOP = 6;
-    public final static int RIGHT_MIDDLE = 7; 
-    public final static int RIGHT_BOTTOM = 8;
-
-    private final static float _LEFT = 0;
-    private final static float _CENTER = 0.5;
-    private final static float _RIGHT = 1;
-
-    private final static float _TOP = 0;
-    private final static float _MIDDLE = 0.5;
-    private final static float _BOTTOM = 1;
-
-    private int _anchor;
-    public int GetAnchor() {
-        return _anchor;
-    }
-    public void SetAnchor(int value) {
-        if (0 <= value && value < 9) {
-            _anchor = value;
+    public void SetEnable(boolean value) {
+        _enable = value;
+        if (_enable) {
+            _OnEnabled();
+        } else {
+            _OnDisabled();
         }
     }
 
-    public SceneObjectAnchor() {
-        SetAnchor(LEFT_TOP);
+    private boolean _isStart;
+    public boolean IsStart() {
+        return _isStart;
     }
 
-    public SceneObjectAnchor(int anchor) {
-        SetAnchor(anchor);
+    public SceneObjectBehavior() {
+        SetEnable(true);
     }
 
-    public float GetHorizontal() {
-        return (_anchor / 3) / 2f;
+    public final boolean IsBehaviorAs(int id) {
+        return GetID() == id;
     }
 
-    public float GetVertical() {
-        return (_anchor % 3) / 2f;
+    public void Start() {
+        _isStart = true;
     }
 
-    public boolean IsLeft() {
-        return GetHorizontal() == _LEFT;
+    public void Update() {
     }
 
-    public boolean IsCenter() {
-        return GetHorizontal() == _CENTER;
+    public void Draw() {
     }
 
-    public boolean IsRight() {
-        return GetHorizontal() == _RIGHT;
+    public void Stop() {
     }
 
-    public boolean IsTop() {
-        return GetVertical() == _TOP;
+    protected void _OnEnabled() {
+        _isStart = false;
     }
 
-    public boolean IsMiddle() {
-        return GetVertical() == _MIDDLE;
+    protected void _OnDisabled() {
     }
 
-    public boolean IsBottom() {
-        return GetVertical() == _BOTTOM;
-    }
-}public class SceneObjectAnimationController extends Abs_SceneObjectBehavior {
-    public SceneObjectAnimationController(SceneObject obj) {
-        super(obj);
-    }
-}public class SceneObjectBehavior extends Abs_SceneObjectBehavior {
-    public SceneObjectBehavior(SceneObject obj) {
-        super(obj);
+    public void OnEnabledActive() {
     }
 
-    protected String _OldestClassName() {
-        return "SceneObjectBehavior";
+    public void OnDisabledActive() {
     }
-}public class SceneObjectButton extends Abs_SceneObjectBehavior {
+
+    public boolean equals(Object o) {
+        return this == o;
+    }
+}
+public class SceneObjectButton extends SceneObjectBehavior {
     private ActionEvent _decideHandler;
     public ActionEvent GetDicideHandler() {
         return _decideHandler;
     }
 
-    public SceneObjectButton(SceneObject obj) {
-        super(obj);
+    public SceneObjectButton() {
+        super();
 
         _decideHandler = new ActionEvent();
     }
@@ -2345,81 +2110,17 @@ void mouseExited() {
             GetDicideHandler().InvokeAllEvents();
         }
     }
-}public class SceneObjectCursor extends Abs_SceneObjectBehavior {
-    /**
-     漠然とカーソルが押された時にイベントを発生させる。
-     何のキーなのかは問わない。
-     */
-    private ActionEvent _cursorHandler;
-    public ActionEvent GetCursorHandler() {
-        return _cursorHandler;
+}
+public class SceneObjectDrawBack extends SceneObjectBehavior { //<>//
+    public int GetID() {
+        return ClassID.DRAW_BACK;
     }
-
-    private ActionEvent _upCursorHandler;
-    public ActionEvent GetUpCursorHandler() {
-        return _upCursorHandler;
-    }
-
-    private ActionEvent _downCursorHandler;
-    public ActionEvent GetDownCursorHandler() {
-        return _downCursorHandler;
-    }
-
-    private ActionEvent _leftCursorHandler;
-    public ActionEvent GetLeftCursorHandler() {
-        return _leftCursorHandler;
-    }
-
-    private ActionEvent _rightCursorHandler;
-    public ActionEvent GetRightCursorHandler() {
-        return _rightCursorHandler;
-    }
-
-    public SceneObjectCursor(SceneObject obj) {
-        super(obj);
-
-        _cursorHandler = new ActionEvent();
-        _upCursorHandler = new ActionEvent();
-        _downCursorHandler = new ActionEvent();
-        _leftCursorHandler = new ActionEvent();
-        _rightCursorHandler = new ActionEvent();
-    }
-
-    public void OnKeyReleased() {
-        boolean up, down, left, right;
-        up = inputManager.IsClickedKey(Key._UP);
-        down = inputManager.IsClickedKey(Key._DOWN);
-        left = inputManager.IsClickedKey(Key._LEFT);
-        right = inputManager.IsClickedKey(Key._RIGHT);
-
-        if (up || down || left || right) {
-            GetCursorHandler().InvokeAllEvents();
-            if (up) {
-                GetUpCursorHandler().InvokeAllEvents();
-            }
-            if (down) {
-                GetDownCursorHandler().InvokeAllEvents();
-            }
-            if (left) {
-                GetLeftCursorHandler().InvokeAllEvents();
-            }
-            if (right) {
-                GetRightCursorHandler().InvokeAllEvents();
-            }
-        }
-    }
-}public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
-    /**
-     背景の色情報。
-     */
+    
     private DrawColor _backColorInfo;
     public DrawColor GetBackColorInfo() {
         return _backColorInfo;
     }
 
-    /**
-     ボーダの色情報。
-     */
     private DrawColor _borderColorInfo;
     public DrawColor GetBorderColorInfo() {
         return _borderColorInfo;
@@ -2448,10 +2149,6 @@ void mouseExited() {
     public void SetEnableBorder(boolean value) {
         _enableBorder = value;
     }
-
-    /**
-     ボーダの直径。
-     */
     private float _borderSize;
     public float GetBorderSize() {
         return _borderSize;
@@ -2460,9 +2157,6 @@ void mouseExited() {
         _borderSize = value;
     }
 
-    /**
-     ボーダの端の形。
-     */
     private int _borderType;
     public int GetBorderType() {
         return _borderType;
@@ -2473,29 +2167,12 @@ void mouseExited() {
 
     private PVector _size;
 
-    public SceneObjectDrawBack(SceneObject obj) {
-        super(obj);
-
+    public SceneObjectDrawBack() {
         DrawColor backInfo, borderInfo;
         backInfo = new DrawColor(true, 100, 100, 100, 255);
         borderInfo = new DrawColor(true, 0, 0, 0, 255);
 
         _InitParameterOnConstructor(true, backInfo, true, borderInfo, 1, ROUND);
-    }
-
-    public SceneObjectDrawBack(SceneObject obj, boolean enableBack, DrawColor backInfo, boolean enableBorder, DrawColor borderInfo, float borderSize, int borderType) {
-        super(obj);
-        _InitParameterOnConstructor(enableBack, backInfo, enableBorder, borderInfo, borderSize, borderType);
-    }
-
-    public SceneObjectDrawBack(SceneObject obj, boolean enableBack, boolean backColorMode, float ba1, float ba2, float ba3, float ba4, boolean enableBorder, boolean borderColorMode, float bo1, float bo2, float bo3, float bo4) {
-        super(obj);
-
-        DrawColor backInfo, borderInfo;
-        backInfo = new DrawColor(backColorMode, ba1, ba2, ba3, ba4);
-        borderInfo = new DrawColor(borderColorMode, bo1, bo2, bo3, bo4);
-
-        _InitParameterOnConstructor(enableBack, backInfo, enableBorder, borderInfo, 1, ROUND);
     }
 
     private void _InitParameterOnConstructor(boolean enableBack, DrawColor backInfo, boolean enableBorder, DrawColor borderInfo, float borderSize, int borderType) {
@@ -2513,9 +2190,7 @@ void mouseExited() {
     }
 
     public void Draw() {
-        if (_size == null) {
-            return;
-        }
+        if (_size == null) return;
 
         if (_enableBorder) {
             stroke(_borderColorInfo.GetColor());
@@ -2531,7 +2206,18 @@ void mouseExited() {
         }
         rect(0, 0, _size.x, _size.y);
     }
-}public class SceneObjectImage extends Abs_SceneObjectDrawBase {
+}
+public class SceneObjectDrawBase extends SceneObjectBehavior {
+    private DrawColor _colorInfo;
+    public DrawColor GetColorInfo() {
+        return _colorInfo;
+    }
+
+    public SceneObjectDrawBase() {
+        _colorInfo = new DrawColor();
+    }
+}
+public class SceneObjectImage extends SceneObjectDrawBase {
     private String _usingImageName;
     public String GetUsingImageName() {
         return _usingImageName;
@@ -2544,12 +2230,12 @@ void mouseExited() {
 
     private PVector _objSize;
 
-    public SceneObjectImage(SceneObject obj) {
-        super(obj);
+    public SceneObjectImage() {
+        super();
     }
 
-    public SceneObjectImage(SceneObject obj, String imagePath) {
-        super(obj);
+    public SceneObjectImage(String imagePath) {
+        super();
         SetUsingImageName(imagePath);
     }
 
@@ -2565,7 +2251,8 @@ void mouseExited() {
         tint(GetColorInfo().GetColor());
         image(img, 0, 0, _objSize.x, _objSize.y);
     }
-}public class SceneObjectText extends Abs_SceneObjectDrawBase {
+}
+public class SceneObjectText extends SceneObjectDrawBase {
     private String _text;
     public String GetText() {
         return _text;
@@ -2667,13 +2354,13 @@ void mouseExited() {
     private PVector _objSize;
 
 
-    public SceneObjectText(SceneObject obj) {
-        super(obj);
+    public SceneObjectText() {
+        super();
         _InitParameterOnConstructor("");
     }
 
-    public SceneObjectText(SceneObject obj, String text) {
-        super(obj);
+    public SceneObjectText(String text) {
+        super();
         _InitParameterOnConstructor(text);
     }
 
@@ -2717,10 +2404,12 @@ void mouseExited() {
 
         text(_tempText, 0, 0, _objSize.x, _objSize.y);
     }
-}public final class SceneObjectTransform extends Abs_SceneObjectBehavior implements Comparable<SceneObjectTransform> {
-    /**
-     親トランスフォーム。
-     */
+}
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> {
+    public int GetID() {
+        return ClassID.TRANSFORM;
+    }
+
     private SceneObjectTransform _parent;
     public SceneObjectTransform GetParent() {
         return _parent;
@@ -2733,15 +2422,13 @@ void mouseExited() {
      isPriorityChangeがtrueの場合、自動的に親の優先度より1だけ高い優先度がつけられる。
      */
     public void SetParent(SceneObjectTransform value, boolean isPriorityChange) {
-        if (GetObject() instanceof Scene) {
-            return;
-        }
+        if (!_isSettableParent) return;
 
-        SceneObjectTransform t = GetScene().GetTransform();
         if (_parent != null) {
             _parent.RemoveChild(this);
         }
         if (value == null) {
+            SceneObjectTransform t = GetScene().GetTransform();
             _parent = t;
             t._AddChild(this);
         } else {
@@ -2754,39 +2441,41 @@ void mouseExited() {
     }
 
     /**
-     子トランスフォームリスト。
+     親トランスフォームを設定可能である場合は、trueとなる。
      */
+    private boolean _isSettableParent;
+
     private ArrayList<SceneObjectTransform> _children;
     public ArrayList<SceneObjectTransform> GetChildren() {
         return _children;
     }
 
-    /**
-     親へのアンカー。
-     親のどの箇所を基準にするのかを定める。
-     */
-    private SceneObjectAnchor _parentAnchor;
-    public SceneObjectAnchor GetParentAnchor() {
-        return _parentAnchor;
+    private Anchor _anchor;
+    public Anchor GetAnchor() {
+        return _anchor;
     }
-    public void SetParentAnchor(int value) {
-        if (_parentAnchor != null) {
-            _parentAnchor.SetAnchor(value);
-        }
+    public void SetAnchor(PVector min, PVector max) {
+        if (_anchor == null) return;
+        _anchor.SetMin(min);
+        _anchor.SetMax(max);
+    }
+    public void SetAnchor(float minX, float minY, float maxX, float maxY) {
+        if (_anchor == null) return;
+        _anchor.SetMin(minX, minY);
+        _anchor.SetMax(maxX, maxY);
     }
 
-    /**
-     自身のアンカー。
-     親の基準に対して、自身のどの箇所を基準にするのかを定める。
-     */
-    private SceneObjectAnchor _selfAnchor;
-    public SceneObjectAnchor GetSelfAnchor() {
-        return _selfAnchor;
+    private Pivot _pivot;
+    public Pivot GetPivot() {
+        return _pivot;
     }
-    public void SetSelfAnchor(int value) {
-        if (_selfAnchor != null) {
-            _selfAnchor.SetAnchor(value);
-        }
+    public void SetPivot(PVector value) {
+        if (_pivot == null) return;
+        _pivot.SetPivot(value);
+    }
+    public void SetPivot(float x, float y) {
+        if (_pivot == null) return;
+        _pivot.SetPivot(x, y);
     }
 
     /**
@@ -2801,163 +2490,144 @@ void mouseExited() {
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
-            if (!(GetObject() instanceof Scene)) {
-                GetScene().SetNeedSorting(true);
-            }
+            GetScene().SetNeedSorting(true);
         }
     }
 
     /**
-     絶対変化量行列。
-     これを変換行列としてから描画することで絶対変化量が表現する図形として描画される。
+     グローバルトランスフォーム行列。
      */
-    private PMatrix2D _matrix;
-    public PMatrix2D GetMatrix() {
-        return _matrix;
-    }
-    private void _PushMatrix() {
-        getMatrix(_matrix);
+    private float[] _matrix;
+    public void SetAffine() {
+        SetAffineMatrix(_matrix);
     }
 
     /**
-     平行移動量と回転量の表現しているものが、親トランスフォームの相対量なのか、シーンからの絶対量なのかを決める。
-     trueの場合、相対量となる。
+     マウス判定用行列。
      */
-    private boolean _isRelative;
-    public boolean IsRelative() {
-        return _isRelative;
-    }
-    public void SetRelative(boolean value) {
-        _isRelative = value;
-    }
+    private PMatrix2D _mouseMatrix;
 
     /**
-     平行移動量。
+     親空間での相対移動量、自空間での回転量、自空間でのスケール量を保持する。
      */
-    private PVector _position;
-    public PVector GetPosition() {
-        return _position;
-    }
-    public void SetPosition(PVector value) { 
-        _position = value;
-    }
-    public void SetPosition(float x, float y) {
-        _position.set(x, y);
+    private Transform _transform;
+    public Transform GetTransform() {
+        return _transform;
     }
 
-    /**
-     回転量。
-     */
-    private float _rotate;
-    public float GetRotate() { 
-        return _rotate;
+    public PVector GetTranslation() {
+        return _transform.GetTranslation();
     }
-    public void SetRotate(float value) { 
-        _rotate = value;
+    public void SetTranslation(float x, float y) {
+        _transform.SetTranslation(x, y);
     }
 
-    /**
-     図形の描画領域。
-     */
+    public float GetRotate() {
+        return _transform.GetRotate();
+    }
+    public void SetRotate(float rad) {
+        _transform.SetRotate(rad);
+    }
+
+    public PVector GetScale() {
+        return _transform.GetScale();
+    }
+    public void SetScale(float x, float y) {
+        _transform.SetScale(x, y);
+    }
+
     private PVector _size;
     public PVector GetSize() {
         return _size;
-    }
-    public void SetSize(PVector value) {
-        _size = value;
     }
     public void SetSize(float x, float y) {
         _size.set(x, y);
     }
 
-    public SceneObjectTransform(SceneObject obj) {
-        super(obj);
-        _position = new PVector();
-        _rotate = 0;
-        _size = new PVector();
-        _parentAnchor = new SceneObjectAnchor();
-        _selfAnchor = new SceneObjectAnchor();
-        _priority = 1;
-        _isRelative = true;
+    public SceneObjectTransform() {
+        super();
 
+        _transform = new Transform();
+        _size = new PVector();
+
+        _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
-        _matrix = new PMatrix2D();
+        _mouseMatrix = new PMatrix2D();
+        _matrix = new float[6];
     }
 
     /**
      オブジェクトのトランスフォーム処理を実行する。
      */
-    public void Transform() {
-        if (!GetObject().IsEnable()) {
-            return;
+    public void Transform(float[] mat) {
+        if (!GetObject().IsEnable()) return;
+        // 親から継承した行列を複製
+        Matrix2D.Copy(mat, _matrix);
+
+        float x, y;
+        x = GetTranslation().x;
+        y = GetTranslation().y;
+        if (GetParent() != null) {
+            // アンカーの座標へ移動
+            float aX, aY;
+            aX = (GetAnchor().GetMaxX() + GetAnchor().GetMinX()) / 2;
+            aY = (GetAnchor().GetMaxY() + GetAnchor().GetMinY()) / 2;
+            Matrix2D.Translate(_matrix, aX * GetParent().GetSize().x, aY * GetParent().GetSize().y);
+
+            if (GetAnchor().GetMaxX() == GetAnchor().GetMinX()) {
+                aX = (GetAnchor().GetMaxX() - GetAnchor().GetMinX()) * GetParent().GetSize().x;
+                x = 0;
+                SetSize(aX, GetSize().y);
+            }
+            if (GetAnchor().GetMaxY() == GetAnchor().GetMinY()) {
+                aY = (GetAnchor().GetMaxY() - GetAnchor().GetMinY()) * GetParent().GetSize().y;
+                y = 0;
+                SetSize(GetSize().x, aY);
+            }
         }
-        // 保存の限界でないかどうか
-        if (!matrixManager.PushMatrix()) {
-            return;
-        }
 
-        // 相対量か絶対量かを指定
-        SceneObjectTransform parent;
-        if (_isRelative) {
-            parent = _parent;
-        } else {
-            parent = GetScene().GetTransform();
-            GetScene().TransformScene();
-        }
+        // 親空間での相対座標へ移動
+        Matrix2D.Translate(_matrix, x, y);
 
-        float par1, par2;
+        // 自空間での回転
+        Matrix2D.Rotate(_matrix, GetRotate());
 
-        // 親の基準へ移動
-        par1 = _parentAnchor.GetHorizontal();
-        par2 = _parentAnchor.GetVertical();
-        translate(par1 * parent.GetSize().x, par2 * parent.GetSize().y);
+        // 自空間でのスケーリング
+        Matrix2D.Scale(_matrix, GetScale().x, GetScale().y);
 
-        // 自身の基準での回転
-        rotate(_rotate);
-
-        // 自身の基準へ移動
-        par1 = _selfAnchor.GetHorizontal();
-        par2 = _selfAnchor.GetVertical();
-        translate(-par1 * _size.x + _position.x, -par2 * _size.y + _position.y);
+        // ピボットの座標へ移動
+        Matrix2D.Translate(_matrix, GetPivot().GetX() * GetSize().x, GetPivot().GetY() * GetSize().y);
 
         // 再帰的に計算していく
         if (_children != null) {
             for (int i=0; i<_children.size(); i++) {
-                _children.get(i).Transform();
+                _children.get(i).Transform(_matrix);
             }
         }
-        _PushMatrix();
-        matrixManager.PopMatrix();
     }
 
     /**
      指定座標がトランスフォームの領域内であればtrueを返す。
      */
     public boolean IsInRegion(float y, float x) {
-        PMatrix2D inv = GetMatrix().get();
-        if (!inv.invert()) {
+        Matrix2D.Get(_matrix, _mouseMatrix);
+        if (!_mouseMatrix.invert()) {
             println(this);
             println("逆アフィン変換ができません。");
             return false;
         }
 
-        float[] in, out;
-        in = new float[]{y, x};
-        out = new float[2];
-        inv.mult(in, out);
-        return 0 <= out[0] && out[0] < _size.x && 0 <= out[1] && out[1] < _size.y;
+        float[] _in, _out;
+        _in = new float[]{y, x};
+        _out = new float[2];
+        _mouseMatrix.mult(_in, _out);
+        return 0 <= _out[0] && _out[0] < _size.x && 0 <= _out[1] && _out[1] < _size.y;
     }
 
-    /**
-     自身が指定されたトランスフォームの親の場合、trueを返す。
-     */
     public boolean IsParentOf(SceneObjectTransform t) {
         return this == t.GetParent();
     }
 
-    /**
-     自身が指定されたトランスフォームの子の場合、trueを返す。
-     */
     public boolean IsChildOf(SceneObjectTransform t) {
         return _parent == t;
     }
@@ -2965,7 +2635,6 @@ void mouseExited() {
     /**
      自身の子としてトランスフォームを追加する。
      ただし、既に子として存在している場合は追加できない。
-     基本的に、親トランスフォームから親子関係を構築するのは禁止する。
      
      @return 追加に成功した場合はtrueを返す
      */
@@ -2974,6 +2643,11 @@ void mouseExited() {
             return false;
         }
         return _children.add(t);
+    }
+
+    public void AddChild(SceneObjectTransform t, boolean isChangePriority) {
+        if (t == null) return;
+        t.SetParent(this, isChangePriority);
     }
 
     /**
@@ -3023,23 +2697,75 @@ void mouseExited() {
      自分以外の場合、falseを返す。
      */
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        return false;
+        return this == o;
     }
 
     /**
      優先度によって比較を行う。
      */
-    public int compareTo(SceneObjectTransform t) {
-        return _priority - t.GetPriority();
+    public int compareTo(SceneObjectTransform o) {
+        return GetPriority() - o.GetPriority();
+    }
+}
+/**
+ アフィン変換一回分の情報に責任を持つ。
+ サイズは持たない。
+ */
+public class Transform {
+    private PVector _translation;
+    public PVector GetTranslation() {
+        return _translation;
+    }
+    public void SetTranslation(PVector value) {
+        if (value == null) return;
+        _translation = value;
+    }
+    public void SetTranslation(float x, float y) {
+        _translation.set(x, y);
     }
 
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(super.toString());
+    private PVector _scale;
+    public PVector GetScale() {
+        return _scale;
+    }
+    public void SetScale(PVector value) {
+        if (value == null) return;
+        _scale = value;
+    }
+    public void SetScale(float x, float y) {
+        _scale.set(x, y);
+    }
 
-        return b.toString();
+    private float _rotate;
+    public float GetRotate() {
+        return _rotate;
+    }
+    public void SetRotate(float value) {
+        _rotate = value;
+    }
+
+    public Transform() {
+        _InitParametersOnConstructor(null, null, 0);
+    }
+
+    public Transform(PVector position, PVector scale, float rotate) {
+        _InitParametersOnConstructor(position, scale, rotate);
+    }
+
+    public Transform(float posX, float posY, float scaleX, float scaleY, float rotate) {
+        _InitParametersOnConstructor(new PVector(posX, posY), new PVector(scaleX, scaleY), rotate);
+    }
+
+    private void _InitParametersOnConstructor(PVector position, PVector scale, float rotate) {
+        if (position == null) {
+            position = new PVector();
+        }
+        if (scale == null) {
+            scale = new PVector(1, 1);
+        }
+
+        SetTranslation(position);
+        SetScale(scale);
+        SetRotate(rotate);
     }
 }

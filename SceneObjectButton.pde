@@ -1,11 +1,11 @@
-public class SceneObjectButton extends Abs_SceneObjectBehavior {
+public class SceneObjectButton extends SceneObjectBehavior {
     private ActionEvent _decideHandler;
     public ActionEvent GetDicideHandler() {
         return _decideHandler;
     }
 
-    public SceneObjectButton(SceneObject obj) {
-        super(obj);
+    public SceneObjectButton() {
+        super();
 
         _decideHandler = new ActionEvent();
     }

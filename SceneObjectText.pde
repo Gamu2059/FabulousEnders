@@ -1,4 +1,4 @@
-public class SceneObjectText extends Abs_SceneObjectDrawBase {
+public class SceneObjectText extends SceneObjectDrawBase {
     private String _text;
     public String GetText() {
         return _text;
@@ -100,13 +100,13 @@ public class SceneObjectText extends Abs_SceneObjectDrawBase {
     private PVector _objSize;
 
 
-    public SceneObjectText(SceneObject obj) {
-        super(obj);
+    public SceneObjectText() {
+        super();
         _InitParameterOnConstructor("");
     }
 
-    public SceneObjectText(SceneObject obj, String text) {
-        super(obj);
+    public SceneObjectText(String text) {
+        super();
         _InitParameterOnConstructor(text);
     }
 

@@ -296,7 +296,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     /**
      優先度によって比較を行う。
      */
-    public int compareTo(SceneObjectTransform t) {
-        return _priority - t.GetPriority();
+    public int compareTo(SceneObjectTransform o) {
+        return GetPriority() - o.GetPriority();
     }
 }

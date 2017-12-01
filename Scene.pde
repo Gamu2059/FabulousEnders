@@ -1,8 +1,13 @@
-public class Scene {
+public class Scene implements Comparable<Scene> {
     private String _name;
     public String GetName() {
         return _name;
     }
+
+    /**
+     ソートするのに用いる。
+     */
+    private Collection<SceneObject> _collection;
 
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
@@ -22,6 +27,18 @@ public class Scene {
     private SceneObjectDrawBack _drawBack;
     public SceneObjectDrawBack GetDrawBack() {
         return _drawBack;
+    }
+
+    /**
+    描画優先度。
+    トランスフォームのものとは使用用途が異なるので分けている。
+    */
+    private int _scenePriority;
+    public int GetScenePriority() {
+     return _scenePriority;   
+    }
+    public void SetScenePriority(int value) {
+        _scenePriority = value;
     }
 
     /**
@@ -50,6 +67,7 @@ public class Scene {
 
     public Scene (String name) {
         _name = name;
+        _collection = new Collection<SceneObject>();
         _objects = new ArrayList<SceneObject>();
         _transform = new SceneObjectTransform();
         sceneManager.AddScene(this);
@@ -61,7 +79,7 @@ public class Scene {
      */
     public void InitScene() {
         _isNeedSorting = true;
-        _Sorting();
+        Sorting();
     }
 
     /**
@@ -131,11 +149,9 @@ public class Scene {
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
     protected void Sorting() {
-        if (!_isNeedSorting) {
-            return;
-        }
+        if (!_isNeedSorting) return;
         _isNeedSorting = false;
-        Collections.sort(_objects);
+        _collection.SortList(GetObjects());
     }
 
     /**
@@ -143,19 +159,16 @@ public class Scene {
      ただし、マウス操作している時だけしか判定しない。
      */
     protected void CheckMAO() {
-        if (!inputManager.IsMouseMode()) {
-            return;
-        }
+        if (!inputManager.IsMouseMode()) return;
 
         SceneObject s;
         boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
             if (s.IsEnable() && s.IsAbleAO()) {
-                if (s == _activeObject) {
-                    // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
-                    return;
-                }
+                // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
+                if (s == _activeObject) return;
+
                 f = true;
 
                 if (_activeObject != null) {
@@ -301,5 +314,9 @@ public class Scene {
         }
         Scene s = (Scene) o;
         return GetName().equals(s.GetName());
+    }
+    
+    public int compareTo(Scene o) {
+        return GetScenePriority() - o.GetScenePriority();
     }
 }
