@@ -1,4 +1,8 @@
-public class SceneObjectImage extends Abs_SceneObjectDrawBase {
+public class SceneObjectImage extends SceneObjectDrawBase {
+    public int GetID() {
+        return ClassID.CID_IMAGE;
+    }
+    
     private String _usingImageName;
     public String GetUsingImageName() {
         return _usingImageName;
@@ -11,16 +15,17 @@ public class SceneObjectImage extends Abs_SceneObjectDrawBase {
 
     private PVector _objSize;
 
-    public SceneObjectImage(SceneObject obj) {
-        super(obj);
+    public SceneObjectImage() {
+        super();
     }
 
-    public SceneObjectImage(SceneObject obj, String imagePath) {
-        super(obj);
+    public SceneObjectImage(String imagePath) {
+        super();
         SetUsingImageName(imagePath);
     }
 
     public void Start() {
+        super.Start();
         _objSize = GetObject().GetTransform().GetSize();
     }
 

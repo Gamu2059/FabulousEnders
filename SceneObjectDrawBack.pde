@@ -1,6 +1,6 @@
 public class SceneObjectDrawBack extends SceneObjectBehavior { //<>//
     public int GetID() {
-        return ClassID.DRAW_BACK;
+        return ClassID.CID_DRAW_BACK;
     }
     
     private DrawColor _backColorInfo;

@@ -1,4 +1,4 @@
-public final class FontManager extends Abs_Manager {
+public final class FontManager {
     private HashMap<String, PFont> _fonts;
     private HashMap<String, PFont> GetFontHash() {
         return _fonts;

@@ -3,7 +3,7 @@ public class SceneObjectBehavior {
      残念ながら全てのビヘイビアクラスがこれを継承して適切な値を返さなければならない。
      */
     public int GetID() {
-        return ClassID.BEHAVIOR;
+        return ClassID.CID_BEHAVIOR;
     }
 
     /**
