@@ -38,14 +38,14 @@ void InitManager() {
 void draw() {
     // これをつけているとpjsで動きません
     surface.setTitle("Game Maker fps : " + frameRate);
-    //try {
+    try {
         background(255);
         sceneManager.Update();
         inputManager.Update();
-    //} 
-    //catch(Exception e) {
-    //    println(e);
-    //}
+    } 
+    catch(Exception e) {
+        println(e);
+    }
 }
 
 void keyPressed() {
