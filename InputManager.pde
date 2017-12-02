@@ -77,6 +77,7 @@ public final class InputManager {
         _isMouseMode = value;
     }
 
+    private boolean _isMousePressed, _preMousePressed;
 
     public InputManager() {
         _pressedKeys = new boolean[Key.KEY_NUM];
@@ -94,6 +95,10 @@ public final class InputManager {
         _keyReleasedHandler = new ActionEvent();
         _keyClickedHandler = new ActionEvent();
 
+        _InitInputEvent();
+    }
+
+    private void _InitInputEvent() {
         GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 println("Mouse Enterd on Window!");
@@ -107,6 +112,13 @@ public final class InputManager {
             }
         }
         );
+    }
+
+    /**
+     シーンマネージャの後に呼び出される必要がある。
+     */
+    public void Update() {
+        _preMousePressed = _isMousePressed;
     }
 
     public void KeyPressed() {
@@ -137,11 +149,13 @@ public final class InputManager {
     }
 
     public void MousePressed() {
+        _isMousePressed = true;
         SetMouseMode(true);
         GetMousePressedHandler().InvokeAllEvents();
     }
 
     public void MouseReleased() {
+        _isMousePressed = false;
         SetMouseMode(true);
         GetMouseReleasedHandler().InvokeAllEvents();
     }
@@ -291,29 +305,6 @@ public final class InputManager {
         return true;
     }
 
-    /**
-     引数で与えられた列挙定数に対して、その列挙されたものだけが押されている状態ならばtrueを、そうでなければfalseを返す。
-     引数が列挙定数の範囲外の場合は、必ずfalseが返される。
-     */
-    public boolean IsPressedKeysOnly(int[] inputs) {
-        if (inputs == null) {
-            return false;
-        }
-        sort(inputs);
-        int inputIndex = 0;
-        for (int i=0; i<Key.KEY_NUM; i++) {
-            if (!GetPressedKeys()[i]) {
-                continue;
-            } else if (inputIndex >= inputs.length) {
-                return false;
-            } else if (i != inputs[inputIndex]) {
-                return false;
-            }
-            inputIndex++;
-        }
-        return inputIndex == inputs.length;
-    }
-
     /* 
      引数で与えられた列挙定数に対して、全てのキーがクリックされた状態ならばtrueを、そうでなければfalseを返す。
      引数が列挙定数の範囲外の場合は、必ずfalseが返される。
@@ -332,26 +323,15 @@ public final class InputManager {
         return true;
     }
 
-    /**
-     引数で与えられた列挙定数に対して、その列挙されたものだけがクリックされた状態ならばtrueを、そうでなければfalseを返す。
-     引数が列挙定数の範囲外の場合は、必ずfalseが返される。
-     */
-    public boolean IsClickedKeysOnly(int[] inputs) {
-        if (inputs == null) {
-            return false;
-        }
-        sort(inputs);
-        int inputIndex = 0;
-        for (int i=0; i<Key.KEY_NUM; i++) {
-            if (!GetClickedKeys()[i]) {
-                continue;
-            } else if (inputIndex >= inputs.length) {
-                return false;
-            } else if (i != inputs[inputIndex]) {
-                return false;
-            }
-            inputIndex++;
-        }
-        return inputIndex == inputs.length;
+    public boolean IsMouseDown() {
+        return _isMousePressed && !_preMousePressed;
+    }
+
+    public boolean IsMouseStay() {
+        return _isMousePressed && _preMousePressed;
+    }
+
+    public boolean IsMouseUp() {
+        return !_isMousePressed && _preMousePressed;
     }
 }

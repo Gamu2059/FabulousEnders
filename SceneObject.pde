@@ -61,13 +61,21 @@ public class SceneObject implements Comparable<SceneObject> {
         _isActivatable = value;
     }
 
+    /**
+     アクティブオブジェクトの時、trueを返す。
+     */
+    private boolean _isActiveObject;
+    public boolean IsActiveObject() {
+        return _isActiveObject;
+    }
+
     public SceneObject(String name) {
         _name = name;
 
         _behaviors = new ArrayList<SceneObjectBehavior>();
         _transform = new SceneObjectTransform();
         AddBehavior(_transform);
-        
+
         _drawBack = new SceneObjectDrawBack();
         AddBehavior(_drawBack);
 
@@ -80,7 +88,7 @@ public class SceneObject implements Comparable<SceneObject> {
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
-            if (b.IsEnable()) {
+            if (b.IsEnable() && !b.IsStart()) {
                 b.Start();
             }
         }
@@ -105,6 +113,8 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void Draw() {
+        GetTransform().GetTransformProcessor().TransformProcessing();
+        
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -114,7 +124,7 @@ public class SceneObject implements Comparable<SceneObject> {
         }
     }
 
-    public boolean IsAbleAO() {
+    public boolean IsAbleActiveObject() {
         return IsActivatable() && _transform.IsInRegion(mouseX, mouseY);
     }
 
@@ -125,6 +135,7 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnEnabledActive() {
+        _isActiveObject = true;
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -135,6 +146,7 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public void OnDisabledActive() {
+        _isActiveObject = false;
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -273,7 +285,7 @@ public class SceneObject implements Comparable<SceneObject> {
     public boolean equals(Object o) {
         return this == o;
     }
-    
+
     public int compareTo(SceneObject o) {
         return GetTransform().compareTo(o.GetTransform());
     }

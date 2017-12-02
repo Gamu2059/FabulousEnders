@@ -1,4 +1,8 @@
 public class SceneObjectImage extends SceneObjectDrawBase {
+    public int GetID() {
+        return ClassID.CID_IMAGE;
+    }
+    
     private String _usingImageName;
     public String GetUsingImageName() {
         return _usingImageName;
@@ -21,6 +25,7 @@ public class SceneObjectImage extends SceneObjectDrawBase {
     }
 
     public void Start() {
+        super.Start();
         _objSize = GetObject().GetTransform().GetSize();
     }
 

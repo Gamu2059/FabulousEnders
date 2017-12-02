@@ -30,30 +30,37 @@ public class Scene implements Comparable<Scene> {
     }
 
     /**
-    描画優先度。
-    トランスフォームのものとは使用用途が異なるので分けている。
-    */
+     描画優先度。
+     トランスフォームのものとは使用用途が異なるので分けている。
+     */
     private int _scenePriority;
     public int GetScenePriority() {
-     return _scenePriority;   
+        return _scenePriority;
     }
     public void SetScenePriority(int value) {
         _scenePriority = value;
     }
 
     /**
-     次のフレームからアクティブになる場合にtrueになる。
+     読込待ちの場合、trueを返す。
      */
-    private boolean _enabledFlag;
-    public final void SetEnabledFlag(boolean value) {
-        _enabledFlag = value;
+    private boolean _isLoadFlag;
+    public final boolean IsLoadFlag() {
+        return _isLoadFlag;
     }
+    public final void Load() {
+        _isLoadFlag = true;
+    }
+
     /**
-     次のフレームからノンアクティブになる場合にtrueになる。
+     解放待ちの場合、trueを返す。
      */
-    private boolean _disabledFlag;
-    public final void SetDisabledFlag(boolean value) {
-        _disabledFlag = value;
+    private boolean _isReleaseFlag;
+    public final boolean IsReleaseFlag() {
+        return _isReleaseFlag;
+    }
+    public final void Release() {
+        _isReleaseFlag = true;
     }
 
     /**
@@ -69,8 +76,9 @@ public class Scene implements Comparable<Scene> {
         _name = name;
         _collection = new Collection<SceneObject>();
         _objects = new ArrayList<SceneObject>();
+
         _transform = new SceneObjectTransform();
-        sceneManager.AddScene(this);
+        _drawBack = new SceneObjectDrawBack();
     }
 
     /**
@@ -79,35 +87,53 @@ public class Scene implements Comparable<Scene> {
      */
     public void InitScene() {
         _isNeedSorting = true;
-        Sorting();
+        _Sorting();
     }
 
     /**
      シーンマネージャの描画リストに追加された時に呼び出される。
      */
     public void OnEnabled() {
-        _enabledFlag = false;
+        _isLoadFlag = false;
+        _OnStart();
     }
 
     /**
      シーンマネージャの描画リストから外された時に呼び出される。
      */
     public void OnDisabled() {
-        _disabledFlag = false;
-        Stop();
+        _isReleaseFlag = false;
+        _OnStop();
     }
 
-    public void OnEnableActive() {
+    /**
+     シーンマネージャのアクティブシーンになった時に呼び出される。
+     */
+    public void OnEnabledActive() {
+        CheckMouseActiveObject();
     }
 
-    public void OnDisableActive() {
+    /**
+     シーンマネージャのノンアクティブシーンになった時に呼び出される。
+     */
+    public void OnDisabledActive() {
+        CheckMouseActiveObject();
+    }
+
+    public boolean IsAbleActiveScene() {
+        return _transform.IsInRegion(mouseX, mouseY);
+    }
+
+    public void Update() {
+        _OnStart();
+        _OnUpdate();
     }
 
     /**
      フレームの最初に呼び出される。
      Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
      */
-    protected void Start() {
+    protected void _OnStart() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -122,7 +148,7 @@ public class Scene implements Comparable<Scene> {
      一度しか呼び出されない。
      オブジェクトの有効フラグに関わらず必ず呼び出す。
      */
-    protected void Stop() {
+    protected void _OnStop() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -134,7 +160,7 @@ public class Scene implements Comparable<Scene> {
      毎フレーム呼び出される。
      入力待ちやオブジェクトのアニメーション処理を行う。
      */
-    protected void Update() {
+    protected void _OnUpdate() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -148,7 +174,7 @@ public class Scene implements Comparable<Scene> {
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
-    protected void Sorting() {
+    protected void _Sorting() {
         if (!_isNeedSorting) return;
         _isNeedSorting = false;
         _collection.SortList(GetObjects());
@@ -158,18 +184,17 @@ public class Scene implements Comparable<Scene> {
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
      ただし、マウス操作している時だけしか判定しない。
      */
-    protected void CheckMAO() {
+    public void CheckMouseActiveObject() {
         if (!inputManager.IsMouseMode()) return;
 
         SceneObject s;
         boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsAbleAO()) {
+            if (s.IsEnable() && s.IsAbleActiveObject()) {
+                f = true;
                 // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
                 if (s == _activeObject) return;
-
-                f = true;
 
                 if (_activeObject != null) {
                     _activeObject.OnDisabledActive();
@@ -191,7 +216,7 @@ public class Scene implements Comparable<Scene> {
     /**
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
-    protected void Draw() {
+    public void Draw() {
         _DrawScene();
 
         SceneObject s;
@@ -207,8 +232,9 @@ public class Scene implements Comparable<Scene> {
      シーン背景を描画する。
      */
     private void _DrawScene() {
+        noStroke();
         fill(GetDrawBack().GetBackColorInfo().GetColor());
-        GetTransform().SetAffine();
+        GetTransform().GetTransformProcessor().TransformProcessing();
         PVector s = GetTransform().GetSize();
         rect(0, 0, s.x, s.y);
     }
@@ -220,9 +246,8 @@ public class Scene implements Comparable<Scene> {
      @return 追加に成功した場合はtrueを返す
      */
     public final boolean AddObject(SceneObject object) {
-        if (GetObject(object.GetName()) != null) {
-            return false;
-        }
+        if (GetObject(object.GetName()) != null) return false;
+        object.SetScene(this);
         object.GetTransform().SetParent(GetTransform(), true);
         return _objects.add(object);
     }
@@ -305,17 +330,15 @@ public class Scene implements Comparable<Scene> {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        }
-        if (o == null) {
+        } else if (o == null) {
             return false;
-        }
-        if (!(o instanceof Scene)) {
+        } else if (!(o instanceof Scene)) {
             return false;
         }
         Scene s = (Scene) o;
         return GetName().equals(s.GetName());
     }
-    
+
     public int compareTo(Scene o) {
         return GetScenePriority() - o.GetScenePriority();
     }

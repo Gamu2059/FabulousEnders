@@ -1,15 +1,15 @@
-/**
+/** //<>//
  アフィン変換一回分の情報に責任を持つ。
  サイズは持たない。
  */
-public class Transform {
+public class Transform implements Copyable<Transform> {
     private PVector _translation;
     public PVector GetTranslation() {
         return _translation;
     }
     public void SetTranslation(PVector value) {
         if (value == null) return;
-        _translation = value;
+        SetTranslation(value.x, value.y);
     }
     public void SetTranslation(float x, float y) {
         _translation.set(x, y);
@@ -21,7 +21,7 @@ public class Transform {
     }
     public void SetScale(PVector value) {
         if (value == null) return;
-        _scale = value;
+        SetScale(value.x, value.y);
     }
     public void SetScale(float x, float y) {
         _scale.set(x, y);
@@ -55,8 +55,25 @@ public class Transform {
             scale = new PVector(1, 1);
         }
 
-        SetTranslation(position);
-        SetScale(scale);
-        SetRotate(rotate);
+        _translation = position;
+        _scale = scale;
+        _rotate = rotate;
+    }
+
+    public void Init() {
+        SetTranslation(0, 0);
+        SetRotate(0);
+        SetScale(1, 1);
+    }
+
+    public void CopyTo(Transform t) {
+        if (t == null) return;
+        t.SetTranslation(GetTranslation());
+        t.SetScale(GetScale());
+        t.SetRotate(GetRotate());
+    }
+
+    public String toString() {
+        return "translate : " + GetTranslation() + "\nrotate : " + GetRotate() + "\nscale : " + GetScale();
     }
 }

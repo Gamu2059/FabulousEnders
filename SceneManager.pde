@@ -1,257 +1,221 @@
 public class SceneManager {
     /**
-    保持しているシーン。
-    */
+     保持しているシーン。
+     */
     private HashMap<String, Scene> _scenes;
 
     /**
-    描画するシーン。
-    シーンの優先度によって描画順が替わる。
-    */
+     実際に描画するシーンのリスト。
+     シーンの優先度によって描画順が替わる。
+     */
     private ArrayList<Scene> _drawScenes;
 
+    /**
+     入力を受け付けることができるシーン。
+     */
     private Scene _activeScene;
     public Scene GetActiveScene() {
         return _activeScene;
     }
-    private Scene _nextScene;
 
+    /**
+     ソートに用いる。
+     */
     private Collection<Scene> _collection;
 
-    private boolean _loadFlag;
+    private SceneObjectTransform _transform, _dummyTransform;
+    public SceneObjectTransform GetTransform() {
+        return _transform;
+    }
+
+    private IEvent _sceneOverWriteOptionEvent;
+    public IEvent GetSceneOverWriteOptionEvent() {
+        return _sceneOverWriteOptionEvent;
+    }
+    public void SetSceneOverWriteOptionEvent(IEvent value) {
+        _sceneOverWriteOptionEvent = value;
+    }
 
     public SceneManager () {
         _scenes = new HashMap<String, Scene>();
         _drawScenes = new ArrayList<Scene>();
         _collection = new Collection<Scene>();
-        _InitSceneEvent();
-    }
 
-    private void _InitSceneEvent() {
-        if (inputManager == null) {
-            inputManager = new InputManager();
-        }
-        inputManager.GetMousePressedHandler().SetEvent("Scene Mouse Pressed", new IEvent() { 
-            public void Event() {
-                OnMousePressed();
-            }
-        }
-        );
-        inputManager.GetMouseReleasedHandler().SetEvent("Scene Mouse Released", new IEvent() {
-            public void Event() {
-                OnMouseReleased();
-            }
-        }
-        );
-        inputManager.GetMouseClickedHandler().SetEvent("Scene Mouse Clicked", new IEvent() {
-            public void Event() {
-                OnMouseClicked();
-            }
-        }
-        );
-        inputManager.GetKeyPressedHandler().SetEvent("Scene Key Pressed", new IEvent() {
-            public void Event() {
-                OnKeyPressed();
-            }
-        }
-        );
-        inputManager.GetKeyReleasedHandler().SetEvent("Scene Key Released", new IEvent() {
-            public void Event() {
-                OnKeyReleased();
-            }
-        }
-        );
+        _transform = new SceneObjectTransform();
+        _transform.SetSize(width, height);
+        _transform.SetPivot(0, 0);
+
+        _dummyTransform = new SceneObjectTransform();
     }
 
     /**
-     ゲームを開始するために一番最初に呼び出す処理。
-     setup関数の一番最後に呼び出す必要がある。
-     */
-    public void Start(String sceneName) {
-        _InitScenes();
-        LoadScene(sceneName);
-        Update();
-    }
-
-    /**
-     シーンを読み込み、次のフレームからアクティブにさせる。
+     シーンマップから描画シーンリストにシーンを追加する。
      */
     public void LoadScene(String sceneName) {
-        Scene s = GetScene(sceneName);
-        if (s == null) {
-            return;
-        }
+        // シーンマップに存在しないなら何もしない
+        if (!_scenes.containsKey(sceneName)) return;
+        Scene s = _scenes.get(sceneName);
 
-        _nextScene = s;
+        // 既に描画リストに存在するなら何もしない
+        if (_drawScenes.contains(s)) return;
 
-        _loadFlag = true;
-        _nextScene.SetEnabledFlag(true);
+        s.Load();
+    }
 
-        if (_activeScene != null) {
-            _activeScene.SetDisabledFlag(true);
-        }
+    /**
+     描画シーンリストからシーンを外す。
+     */
+    public void ReleaseScene(String sceneName) {
+        // シーンマップに存在しないなら何もしない
+        if (!_scenes.containsKey(sceneName)) return;
+        Scene s = _scenes.get(sceneName);
+
+        // 描画リストに存在しないなら何もしない
+        if (!_drawScenes.contains(s)) return;        
+
+        s.Release();
+    }
+
+    public void Start() {
+        _InitScenes();
     }
 
     /**
      フレーム更新を行う。
-     アクティブシーンのみ処理される。
      */
     public void Update() {
-        if (_activeScene != null) {
-            _activeScene.Update();
+        _OnUpdate();
+        _OnTransform();
+        _OnCheckMouseActiveScene();
+        _OnDraw();
+        _OnCheckScene();
+    }
+
+    private void _OnUpdate() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            s.Update();
         }
-        if (_loadFlag) {
-            _ChangeScene();
+    }
+
+    private void _OnTransform() {
+        GetTransform().TransformMatrixOnRoot();
+    }
+
+    private void _OnCheckMouseActiveScene() {
+        if (!inputManager.IsMouseMode()) return;
+        if (_drawScenes == null) return;
+
+        Scene s;
+        boolean f = false;
+        for (int i=_drawScenes.size()-1; i>=0; i--) {
+            s = _drawScenes.get(i);
+            if (s.IsAbleActiveScene()) {
+                f = true;
+                // 現在のASが次のASになるならば、何もせずに処理を終わる。
+                if (s == _activeScene) break;
+
+                if (_activeScene != null) {
+                    _activeScene.OnDisabledActive();
+                }
+                _activeScene = s;
+            }
+        }
+        // 何もアクティブにならなければアクティブシーンも無効化する
+        if (!f) {
+            if (_activeScene != null) {
+                _activeScene.OnDisabledActive();
+                _activeScene = null;
+            }
+        }
+        if (_activeScene != null) {
+            _activeScene.CheckMouseActiveObject();
+        }
+    }
+
+    private void _OnDraw() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            if (i > 0 && _sceneOverWriteOptionEvent != null) {
+                _sceneOverWriteOptionEvent.Event();
+            }
+            s = _drawScenes.get(i);
+            s.Draw();
         }
     }
 
     /**
-     シーンを切り替える。
-     シーンの終了処理と開始処理を呼び出す。
+     シーンの読込と解放を処理する。
      */
-    private void _ChangeScene() {
-        _loadFlag = false;
+    private void _OnCheckScene() {
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            if (!s.IsReleaseFlag()) continue;
 
-        //if (_activeScene != null) {
-        //    _activeScene.Disabled();
-        //}
-        //if (_nextScene != null) {
-        //    _nextScene.Enabled();
-        //}
+            _drawScenes.remove(s);
+            s.OnDisabled();
+            s.GetTransform().SetParent(_dummyTransform, false);
+        }
+        for (String n : _scenes.keySet()) {
+            s = _scenes.get(n);
+            if (!s.IsLoadFlag()) continue;
 
-        //_activeScene = _nextScene;
-        //_nextScene = null;
+            _drawScenes.add(s);
+            s.OnEnabled();
+            s.GetTransform().SetParent(_transform, false);
+        }
+        _collection.SortList(_drawScenes);
     }
 
     /**
      シーンインスタンスを初期化する。
-     主にシーン内のソーティングなどである。
+     主にシーンそのもののソーティングと、シーン内のソーティングなどである。
      */
     private void _InitScenes() {
-        if (_scenes == null) {
-            return;
+        if (_scenes == null) return;
+        Scene s;
+        for (String name : _scenes.keySet()) {
+            s = _scenes.get(name);
+            s.InitScene();
         }
 
-        for (int i=0; i<_scenes.size(); i++) {
-            _scenes.get(i).InitScene();
-        }
-    }
-
-    private void OnMousePressed() {
-    }
-
-    private void OnMouseReleased() {
-    }
-
-    private void OnMouseClicked() {
-    }
-
-    private void OnMouseWheel() {
-    }
-
-    private void OnMouseMoved() {
-    }
-
-    private void OnMouseDragged() {
-    }
-
-    private void OnMouseEntered() {
-    }
-
-    private void OnMouseExited() {
-    }
-
-    private void OnKeyPressed() {
-    }
-
-    private void OnKeyReleased() {
+        if (_drawScenes == null) return;
+        _collection.SortList(_drawScenes);
     }
 
     /**
-     自身のリストにシーンを追加する。
+     シーンマップにシーンを追加する。
      ただし、既に子として追加されている場合は追加できない。
      
      @return 追加に成功した場合はtrueを返す
      */
     public boolean AddScene(Scene scene) {
-        //if (GetScene(scene.GetName()) != null) {
-            return false;
-        //}
-        //return _scenes.add(scene);
+        if (scene == null) return false;
+        if (GetScene(scene.GetName()) != null) return false;
+        _scenes.put(scene.GetName(), scene);
+        scene.GetTransform().SetParent(_dummyTransform, false);
+        return true;
     }
 
     /**
-     自身のリストのindex番目のシーンを返す。
-     負数を指定した場合、後ろからindex番目のシーンを返す。
-     
-     @return index番目のシーン 存在しなければnull
-     @throws Exception indexがリストのサイズより大きい場合
-     */
-    public Scene GetScene(int index) throws Exception {
-        if (index >= _scenes.size() || -index > _scenes.size()) {
-            throw new Exception("指定されたindexが不正です。 index : " + index);
-        }
-        if (index < 0) {
-            index += _scenes.size();
-        }
-        return _scenes.get(index);
-    }
-
-    /**
-     自身のリストの中からnameと一致する名前のシーンを返す。
+     シーンマップの中からnameと一致する名前のシーンを返す。
      
      @return nameと一致する名前のシーン 存在しなければNull
      */
     public Scene GetScene(String name) {
-        Scene s;
-        for (int i=0; i<_scenes.size(); i++) {
-            s = _scenes.get(i);
-            if (s.GetName().equals(name)) {
-                return s;
-            }
-        }
-        return null;
+        return _scenes.get(name);
     }
 
     /**
-     自身のリストに指定したシーンが存在すれば削除する。
-     
-     @return 削除に成功した場合はtrueを返す。
-     */
-    //public boolean RemoveScene(Scene scene) {
-        //return _scenes.remove(scene);
-    //}
-
-    /**
-     自身のリストのindex番目のシーンを削除する。
-     負数を指定した場合、後ろからindex番目のシーンを削除する。
-     
-     @return index番目のシーン 存在しなければNull
-     @throws Exception indexがリストのサイズより大きい場合
-     */
-    public Scene RemoveScene(int index) throws Exception {
-        if (index >= _scenes.size() || -index > _scenes.size()) {
-            throw new Exception("指定されたindexが不正です。 index : " + index);
-        }
-        if (index < 0) {
-            index += _scenes.size();
-        }
-        return _scenes.remove(index);
-    }
-
-    /**
-     自身のリストの中からnameと一致するシーンを削除する。
+     シーンマップの中からnameと一致するシーンを削除する。
      
      @return nameと一致する名前のシーン 存在しなければNull
      */
     public Scene RemoveScene(String name) {
-        Scene s;
-        for (int i=0; i<_scenes.size(); i++) {
-            s = _scenes.get(i);
-            if (s.GetName().equals(name)) {
-                return _scenes.remove(i);
-            }
-        }
-        return null;
+        return _scenes.remove(name);
     }
 }
