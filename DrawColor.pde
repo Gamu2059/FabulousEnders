@@ -133,13 +133,4 @@ public final class DrawColor {
             GetBlueOrBrightness() == d.GetBlueOrBrightness() && 
             GetAlpha() == d.GetAlpha();
     }
-
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" :\n");
-        b.append("  is RGB : ").append(IsRGB()).append(" \n");
-        b.append("  parameter : ").append(GetRedOrHue()).append(", ").append(GetGreenOrSaturation()).append(", ").append(GetBlueOrBrightness()).append(", ").append(GetAlpha());
-
-        return b.toString();
-    }
 }

@@ -1,4 +1,14 @@
-public class Scene extends SceneObject {
+public class Scene implements Comparable<Scene> {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    /**
+     ソートするのに用いる。
+     */
+    private Collection<SceneObject> _collection;
+
     private ArrayList<SceneObject> _objects;
     public final ArrayList<SceneObject> GetObjects() {
         return _objects;
@@ -9,19 +19,48 @@ public class Scene extends SceneObject {
         return _activeObject;
     }
 
-    /**
-     次のフレームからアクティブになる場合にtrueになる。
-     */
-    private boolean _enabledFlag;
-    public final void SetEnabledFlag(boolean value) {
-        _enabledFlag = value;
+    private SceneObjectTransform _transform;
+    public SceneObjectTransform GetTransform() {
+        return _transform;
     }
+
+    private SceneObjectDrawBack _drawBack;
+    public SceneObjectDrawBack GetDrawBack() {
+        return _drawBack;
+    }
+
     /**
-     次のフレームからノンアクティブになる場合にtrueになる。
+     描画優先度。
+     トランスフォームのものとは使用用途が異なるので分けている。
      */
-    private boolean _disabledFlag;
-    public final void SetDisabledFlag(boolean value) {
-        _disabledFlag = value;
+    private int _scenePriority;
+    public int GetScenePriority() {
+        return _scenePriority;
+    }
+    public void SetScenePriority(int value) {
+        _scenePriority = value;
+    }
+
+    /**
+     読込待ちの場合、trueを返す。
+     */
+    private boolean _isLoadFlag;
+    public final boolean IsLoadFlag() {
+        return _isLoadFlag;
+    }
+    public final void Load() {
+        _isLoadFlag = true;
+    }
+
+    /**
+     解放待ちの場合、trueを返す。
+     */
+    private boolean _isReleaseFlag;
+    public final boolean IsReleaseFlag() {
+        return _isReleaseFlag;
+    }
+    public final void Release() {
+        _isReleaseFlag = true;
     }
 
     /**
@@ -33,29 +72,14 @@ public class Scene extends SceneObject {
         _isNeedSorting = value;
     }
 
-    /**
-     シーンにのみ特別にスケール値を与える。
-     */
-    private PVector _sceneScale;
-    public PVector GetSceneScale() {
-        return _sceneScale;
-    }
-    public void SetSceneScale(PVector value) {
-        if (value != null) {
-            _sceneScale = value;
-        }
-    }
-    public void SetSceneScale(float value1, float value2) {
-        _sceneScale.set(value1, value2);
-    }
-
     public Scene (String name) {
-        super(name);
+        _name = name;
+        _collection = new Collection<SceneObject>();
         _objects = new ArrayList<SceneObject>();
-        _sceneScale = new PVector(1, 1);
-        sceneManager.AddScene(this);
-    }
 
+        _transform = new SceneObjectTransform();
+        _drawBack = new SceneObjectDrawBack();
+    }
 
     /**
      シーンの初期化を行う。
@@ -67,45 +91,49 @@ public class Scene extends SceneObject {
     }
 
     /**
-     　アクティブシーンになる直前のフレームの一番最後に呼び出される。
+     シーンマネージャの描画リストに追加された時に呼び出される。
      */
-    public void Enabled() {
-        _enabledFlag = false;
+    public void OnEnabled() {
+        _isLoadFlag = false;
+        _OnStart();
     }
 
     /**
-     ノンアクティブシーンになる直前のフレームの一番最後に呼び出される。
+     シーンマネージャの描画リストから外された時に呼び出される。
      */
-    public void Disabled() {
-        _disabledFlag = false;
-        _Stop();
+    public void OnDisabled() {
+        _isReleaseFlag = false;
+        _OnStop();
     }
 
+    /**
+     シーンマネージャのアクティブシーンになった時に呼び出される。
+     */
+    public void OnEnabledActive() {
+        CheckMouseActiveObject();
+    }
 
     /**
-     毎フレームのシーン更新処理。
+     シーンマネージャのノンアクティブシーンになった時に呼び出される。
      */
+    public void OnDisabledActive() {
+        CheckMouseActiveObject();
+    }
+
+    public boolean IsAbleActiveScene() {
+        return _transform.IsInRegion(mouseX, mouseY);
+    }
+
     public void Update() {
-        _ResetBackGround();
-        _Start();
-        _Update();
-        _Animation();
-        _ResetMatrix();
-        _Transform();
-        _Sorting();
-        _CheckMAO();
-        _Draw();
-    }
-
-    protected void _ResetBackGround() {
-        background(0);
+        _OnStart();
+        _OnUpdate();
     }
 
     /**
      フレームの最初に呼び出される。
-     _Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
+     Stopと異なり、オブジェクトごとにタイミングが異なるのでフレーム毎に呼び出される。
      */
-    protected void _Start() {
+    protected void _OnStart() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -120,7 +148,7 @@ public class Scene extends SceneObject {
      一度しか呼び出されない。
      オブジェクトの有効フラグに関わらず必ず呼び出す。
      */
-    protected void _Stop() {
+    protected void _OnStop() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -132,7 +160,7 @@ public class Scene extends SceneObject {
      毎フレーム呼び出される。
      入力待ちやオブジェクトのアニメーション処理を行う。
      */
-    protected void _Update() {
+    protected void _OnUpdate() {
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -143,86 +171,30 @@ public class Scene extends SceneObject {
     }
 
     /**
-     _Updateとは異なり、AnimationBehaviorによる高度なフレームアニメーションを行う。
-     主に子オブジェクトのアニメーションや画像連番表示を処理するのに用いる。
-     */
-    protected void _Animation() {
-        SceneObject s;
-        for (int i=0; i<_objects.size(); i++) {
-            s = _objects.get(i);
-            if (s.IsEnable() && s.GetBehavior(SceneObjectAnimationController.class) != null) {
-                s.Animation();
-            }
-        }
-    }
-
-    /**
-     アフィン行列を初期化する。
-     */
-    protected void _ResetMatrix() {
-        while (matrixManager.PopMatrix());
-        resetMatrix();
-    }
-
-    /**
-     シーンの平行移動と回転を行う。
-     */
-    public void TransformScene() {
-        PVector p = GetTransform().GetPosition();
-        resetMatrix();
-        scale(GetSceneScale().x, GetSceneScale().y);
-        translate(p.x, p.y);
-        rotate(GetTransform().GetRotate());
-    }
-
-    /**
-     オブジェクトを移動させる。
-     ここまでに指示されたトランスフォームの移動は、全てここで処理される。
-     それ以降のトランスフォーム処理は無視される。
-     */
-    protected void _Transform() {
-        TransformScene();
-
-        SceneObject s;
-        for (int i=0; i<_objects.size(); i++) {
-            s = _objects.get(i);
-            if (s.IsEnable() && s.IsChildOf(this)) {
-                s.GetTransform().Transform();
-            }
-        }
-    }
-
-    /**
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
     protected void _Sorting() {
-        if (!_isNeedSorting) {
-            return;
-        }
+        if (!_isNeedSorting) return;
         _isNeedSorting = false;
-        Collections.sort(_objects);
+        _collection.SortList(GetObjects());
     }
 
     /**
      オブジェクトに対してマウスカーソルがどのように重なっているか判定する。
      ただし、マウス操作している時だけしか判定しない。
      */
-    protected void _CheckMAO() {
-        if (!inputManager.IsMouseMode()) {
-            return;
-        }
+    public void CheckMouseActiveObject() {
+        if (!inputManager.IsMouseMode()) return;
 
         SceneObject s;
         boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {
             s = _objects.get(i);
-            if (s.IsEnable() && s.IsAbleAO()) {
-                if (s == _activeObject) {
-                    // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
-                    return;
-                }
+            if (s.IsEnable() && s.IsAbleActiveObject()) {
                 f = true;
+                // 現在のMAOが次のMAOになるならば、何もせずに処理を終わる。
+                if (s == _activeObject) return;
 
                 if (_activeObject != null) {
                     _activeObject.OnDisabledActive();
@@ -244,7 +216,7 @@ public class Scene extends SceneObject {
     /**
      ドローバックとイメージ系の振る舞いを持つオブジェクトの描画を行う。
      */
-    protected void _Draw() {
+    public void Draw() {
         _DrawScene();
 
         SceneObject s;
@@ -260,52 +232,11 @@ public class Scene extends SceneObject {
      シーン背景を描画する。
      */
     private void _DrawScene() {
+        noStroke();
         fill(GetDrawBack().GetBackColorInfo().GetColor());
-        TransformScene();
+        GetTransform().GetTransformProcessor().TransformProcessing();
         PVector s = GetTransform().GetSize();
         rect(0, 0, s.x, s.y);
-    }
-
-    private boolean _CheckDisableMAO() {
-        if (GetActiveObject() == null) {
-            return true;
-        }
-        return !GetActiveObject().IsEnable();
-    }
-
-    public void OnMousePressed() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMousePressed();
-    }
-
-    public void OnMouseReleased() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMouseReleased();
-    }
-
-    public void OnMouseClicked() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnMouseClicked();
-    }
-
-    public void OnKeyPressed() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnKeyPressed();
-    }
-
-    public void OnKeyReleased() {
-        if (_CheckDisableMAO()) {
-            return;
-        }
-        GetActiveObject().OnKeyReleased();
     }
 
     /**
@@ -315,9 +246,8 @@ public class Scene extends SceneObject {
      @return 追加に成功した場合はtrueを返す
      */
     public final boolean AddObject(SceneObject object) {
-        if (GetObject(object.GetName()) != null) {
-            return false;
-        }
+        if (GetObject(object.GetName()) != null) return false;
+        object.SetScene(this);
         object.GetTransform().SetParent(GetTransform(), true);
         return _objects.add(object);
     }
@@ -400,24 +330,16 @@ public class Scene extends SceneObject {
     public boolean equals(Object o) {
         if (o == this) {
             return true;
-        }
-        if (o == null) {
+        } else if (o == null) {
             return false;
-        }
-        if (!(o instanceof Scene)) {
+        } else if (!(o instanceof Scene)) {
             return false;
         }
         Scene s = (Scene) o;
         return GetName().equals(s.GetName());
     }
 
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append(getClass().getSimpleName()).append(" \n");
-        b.append("  name : ").append(GetName()).append(" \n");
-        b.append("  objects :\n");
-        b.append(_objects).append(" \n");
-
-        return b.toString();
+    public int compareTo(Scene o) {
+        return GetScenePriority() - o.GetScenePriority();
     }
 }

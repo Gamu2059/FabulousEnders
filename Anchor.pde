@@ -1,39 +1,90 @@
+/**
+ 平面上のある領域の基準点を二つ保持する責任を持つ。
+ */
 public class Anchor {
-    private PVector _anchor;
-    public PVector GetAnchor() {
-        return _anchor;
+    private Pivot _min, _max;
+
+    public PVector GetMin() {
+        return _min.GetPivot();
     }
-    public void SetAnchor(PVector value) {
+    public void SetMin(PVector value) {
         if (value == null) return;
-        _anchor = value;
-    }
-    public void SetAnchor(float x, float y) {
-        _anchor.set(x, y);
+        SetMin(value.x, value.y);
     }
 
-    public final static float ANCHOR_LEFT = 0;
-    public final static float ANCHOR_CENTER = 0.5;
-    public final static float ANCHOR_RIGHT = 1;
-    public final static float ANCHOR_TOP = 0;
-    public final static float ANCHOR_BOTTOM = 1;
+    public void SetMin(float x, float y) {
+        float temp;
+        if (x > GetMax().x) {
+            temp = GetMax().x;
+            _max.SetX(x);
+            x = temp;
+        }
+        if (y > GetMax().y) {
+            temp = GetMax().y;
+            _max.SetY(y);
+            y = temp;
+        }
+        _min.SetPivot(x, y);
+    }
+
+    public PVector GetMax() {
+        return _max.GetPivot();
+    }
+    public void SetMax(PVector value) {
+        if (value == null) return;
+        SetMax(value.x, value.y);
+    }
+
+    public void SetMax(float x, float y) {
+        float temp;
+        if (x < GetMin().x) {
+            temp = GetMin().x;
+            _min.SetX(x);
+            x = temp;
+        }
+        if (y < GetMin().y) {
+            temp = GetMin().y;
+            _min.SetY(y);
+            y = temp;
+        }
+        _max.SetPivot(x, y);
+    }
 
     public Anchor() {
-        SetAnchor(new PVector(ANCHOR_LEFT, ANCHOR_TOP));
+        _InitParametersOnConstructor(Pivot.P_LEFT, Pivot.P_TOP, Pivot.P_RIGHT, Pivot.P_BOTTOM);
     }
 
-    public Anchor(PVector value) {
-        SetAnchor(value);
+    public Anchor(float minX, float minY, float maxX, float maxY) {
+        _InitParametersOnConstructor(minX, minY, maxX, maxY);
     }
 
-    public Anchor(float x, float y) {
-        SetAnchor(x, y);
+    private void _InitParametersOnConstructor(float minX, float minY, float maxX, float maxY) {
+        _min = new Pivot(minX, minY);
+        _max = new Pivot(maxX, maxY);
     }
 
-    public float GetHorizontal() {
-        return GetAnchor().x;
+    public float GetMinX() {
+        return GetMin().x;
     }
-
-    public float GetVertical() {
-        return GetAnchor().y;
+    public float GetMinY() {
+        return GetMin().y;
+    }
+    public float GetMaxX() {
+        return GetMax().x;
+    }
+    public float GetMaxY() {
+        return GetMax().y;
+    }
+    public void SetMinX(float value) {
+        SetMin(value, GetMinY());
+    }
+    public void SetMinY(float value) {
+        SetMin(GetMinX(), value);
+    }
+    public void SetMaxX(float value) {
+        SetMax(value, GetMaxY());
+    }
+    public void SetMaxY(float value) {
+        SetMax(GetMaxX(), value);
     }
 }

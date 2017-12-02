@@ -1,15 +1,13 @@
-public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
-    /**
-     背景の色情報。
-     */
+public class SceneObjectDrawBack extends SceneObjectBehavior { //<>//
+    public int GetID() {
+        return ClassID.CID_DRAW_BACK;
+    }
+    
     private DrawColor _backColorInfo;
     public DrawColor GetBackColorInfo() {
         return _backColorInfo;
     }
 
-    /**
-     ボーダの色情報。
-     */
     private DrawColor _borderColorInfo;
     public DrawColor GetBorderColorInfo() {
         return _borderColorInfo;
@@ -38,10 +36,6 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
     public void SetEnableBorder(boolean value) {
         _enableBorder = value;
     }
-
-    /**
-     ボーダの直径。
-     */
     private float _borderSize;
     public float GetBorderSize() {
         return _borderSize;
@@ -50,9 +44,6 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
         _borderSize = value;
     }
 
-    /**
-     ボーダの端の形。
-     */
     private int _borderType;
     public int GetBorderType() {
         return _borderType;
@@ -63,29 +54,12 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
 
     private PVector _size;
 
-    public SceneObjectDrawBack(SceneObject obj) {
-        super(obj);
-
+    public SceneObjectDrawBack() {
         DrawColor backInfo, borderInfo;
         backInfo = new DrawColor(true, 100, 100, 100, 255);
         borderInfo = new DrawColor(true, 0, 0, 0, 255);
 
         _InitParameterOnConstructor(true, backInfo, true, borderInfo, 1, ROUND);
-    }
-
-    public SceneObjectDrawBack(SceneObject obj, boolean enableBack, DrawColor backInfo, boolean enableBorder, DrawColor borderInfo, float borderSize, int borderType) {
-        super(obj);
-        _InitParameterOnConstructor(enableBack, backInfo, enableBorder, borderInfo, borderSize, borderType);
-    }
-
-    public SceneObjectDrawBack(SceneObject obj, boolean enableBack, boolean backColorMode, float ba1, float ba2, float ba3, float ba4, boolean enableBorder, boolean borderColorMode, float bo1, float bo2, float bo3, float bo4) {
-        super(obj);
-
-        DrawColor backInfo, borderInfo;
-        backInfo = new DrawColor(backColorMode, ba1, ba2, ba3, ba4);
-        borderInfo = new DrawColor(borderColorMode, bo1, bo2, bo3, bo4);
-
-        _InitParameterOnConstructor(enableBack, backInfo, enableBorder, borderInfo, 1, ROUND);
     }
 
     private void _InitParameterOnConstructor(boolean enableBack, DrawColor backInfo, boolean enableBorder, DrawColor borderInfo, float borderSize, int borderType) {
@@ -103,9 +77,7 @@ public class SceneObjectDrawBack extends Abs_SceneObjectBehavior { //<>//
     }
 
     public void Draw() {
-        if (_size == null) {
-            return;
-        }
+        if (_size == null) return;
 
         if (_enableBorder) {
             stroke(_borderColorInfo.GetColor());

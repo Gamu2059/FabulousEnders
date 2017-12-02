@@ -1,22 +1,36 @@
-public class SceneObjectButton extends Abs_SceneObjectBehavior {
+public class SceneObjectButton extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_BUTTON;
+    }
+    
+    private boolean _isActive;
+
     private ActionEvent _decideHandler;
     public ActionEvent GetDicideHandler() {
         return _decideHandler;
     }
 
-    public SceneObjectButton(SceneObject obj) {
-        super(obj);
+    public SceneObjectButton() {
+        super();
 
         _decideHandler = new ActionEvent();
     }
 
-    public void OnMouseClicked() {
-        GetDicideHandler().InvokeAllEvents();
+    public void OnEnabledActive() {
+        super.OnEnabledActive();
+        _isActive = true;
     }
 
-    public void OnKeyReleased() {
-        if (inputManager.IsClickedKey(Key._ENTER)) {
-            GetDicideHandler().InvokeAllEvents();
+    public void OnDisabledActive() {
+        super.OnDisabledActive();
+        _isActive = false;
+    }
+
+    public void Update() {
+        if (_isActive) {
+            if (inputManager.IsMouseUp()) {
+                GetDicideHandler().InvokeAllEvents();
+            }
         }
     }
 }

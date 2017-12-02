@@ -1,4 +1,8 @@
-public class SceneObjectText extends Abs_SceneObjectDrawBase {
+public class SceneObjectText extends SceneObjectDrawBase {
+    public int GetID() {
+        return ClassID.CID_TEXT;
+    }
+    
     private String _text;
     public String GetText() {
         return _text;
@@ -100,13 +104,13 @@ public class SceneObjectText extends Abs_SceneObjectDrawBase {
     private PVector _objSize;
 
 
-    public SceneObjectText(SceneObject obj) {
-        super(obj);
+    public SceneObjectText() {
+        super();
         _InitParameterOnConstructor("");
     }
 
-    public SceneObjectText(SceneObject obj, String text) {
-        super(obj);
+    public SceneObjectText(String text) {
+        super();
         _InitParameterOnConstructor(text);
     }
 
@@ -119,6 +123,7 @@ public class SceneObjectText extends Abs_SceneObjectDrawBase {
     }
 
     public void Start() {
+        super.Start();
         _objSize = GetObject().GetTransform().GetSize();
     }
 
@@ -133,9 +138,7 @@ public class SceneObjectText extends Abs_SceneObjectDrawBase {
     }
 
     public void Draw() {
-        if (GetText() == null) {
-            return;
-        }
+        if (GetText() == null) return;
         fill(GetColorInfo().GetColor());
         textFont(fontManager.GetFont(GetUsingFontName()));
         textSize(GetFontSize());
