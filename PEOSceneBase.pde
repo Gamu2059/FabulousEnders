@@ -1,21 +1,40 @@
 public class PEOSceneBase extends Scene {
-    public PEOSceneBase(String name) {
+    public PEOSceneBase(String name, String titleText) {
         super(name);
-    }
-
-    protected void _SetTransform(SceneObject o, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY, float sX, float sY) {
-        if (o == null) return;
-        SceneObjectTransform t = o.GetTransform();
-        t.GetAnchor().SetMin(minAX, minAY);
-        t.GetAnchor().SetMax(maxAX, maxAY);
-        t.GetPivot().SetPivot(pX, pY);
-        t.SetSize(sX, sY);
+        
+        textFont(fontManager.GetFont("FFScala"));
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        float x = textWidth(titleText) + 20;
         
         SceneObject title;
         
+        title = new SceneObject("Title L");
         AddObject(title);
         AddChild(title);
+        title.GetDrawBack().SetEnable(false);
+        title.GetTransform().InitTransform(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
+        new SceneObjectImage(title, PEOConst.EDITOR_GENERAL_PATH + "Title_L.png");
         
+        title = new SceneObject("Title C");
+        AddObject(title);
+        AddChild(title);
+        title.GetDrawBack().SetEnable(false);
+        title.GetTransform().InitTransform(0, 0, 0, 0, 0, 0, PEOConst.TITLE_MERGIN_WIDTH, 0, 1, 1, 0, x, PEOConst.TITLE_HEIGHT);
+        new SceneObjectImage(title, PEOConst.EDITOR_GENERAL_PATH + "Title_C.png");
+        
+        SceneObjectText _text = new SceneObjectText(title, titleText);
+        _text.SetFontSize(12);
+        _text.SetUsingFontName("FFScala");
+        _text.SetAlign(CENTER, BASELINE);
+        _text.GetColorInfo().SetColor(0, 0, 0);
+        
+        title = new SceneObject("Title R");
+        AddObject(title);
+        AddChild(title);
+        title.GetDrawBack().SetEnable(false);
+        title.GetTransform().InitTransform(0, 0, 0, 0, 0, 0, PEOConst.TITLE_MERGIN_WIDTH + x, 0, 1, 1, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
+        new SceneObjectImage(title, PEOConst.EDITOR_GENERAL_PATH + "Title_R.png");
     }
     
     protected void _SetDragHandler(SceneObject o, IEvent dragEvent) {
@@ -36,12 +55,5 @@ public class PEOSceneBase extends Scene {
         }
         );
         dh.GetDraggedActionHandler().SetEvent("mouse dragged", dragEvent);
-    }
-    
-    private void _SetImage(SceneObject o, String path) {
-        if (o == null) return;
-        SceneObjectImage img = new SceneObjectImage();
-        o.AddBehavior(img);
-        img.SetUsingImageName(path);
     }
 }

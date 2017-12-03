@@ -2,8 +2,8 @@
  インスペクターの基底クラス。
  */
 public class PEOSceneInspectorBase extends PEOSceneBase {
-    public PEOSceneInspectorBase(String name) {
-        super(name);
+    public PEOSceneInspectorBase(String name, String title) {
+        super(name, title);
 
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
@@ -19,7 +19,7 @@ public class PEOSceneInspectorBase extends PEOSceneBase {
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 0, 0, 0, 1, 0, 0.5, 4, 0);
+        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, 2, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;

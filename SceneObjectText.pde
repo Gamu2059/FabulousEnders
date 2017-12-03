@@ -40,7 +40,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
         return _verticalAlign;
     }
     public void SetVerticalAlign(int value) {
-        if (value == TOP || value == CENTER || value == BOTTOM) {
+        if (value == TOP || value == CENTER || value == BOTTOM || value == BASELINE) {
             _verticalAlign = value;
             switch(value) {
             case TOP:
@@ -53,7 +53,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
                 _yRate = 1;
                 break;
             default:
-                _yRate = 0;
+                _yRate = 0.8;
                 break;
             }
         }
@@ -141,6 +141,13 @@ public class SceneObjectText extends SceneObjectDrawBase {
     public SceneObjectText(String text) {
         super();
         _InitParameterOnConstructor(text);
+    }
+
+    public SceneObjectText(SceneObject o, String text) {
+        super();   
+        _InitParameterOnConstructor(text);
+        if (o == null) return;
+        o.AddBehavior(this);
     }
 
     private void _InitParameterOnConstructor(String text) {

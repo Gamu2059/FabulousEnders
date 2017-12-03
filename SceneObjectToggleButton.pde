@@ -10,6 +10,17 @@ public class SceneObjectToggleButton extends SceneObjectButton {
 
     public SceneObjectToggleButton(String eventLabel, String offImg, String onImg) {
         super(eventLabel);
+        _InitParametersOnConstructor(offImg, onImg);
+    }
+    
+    public SceneObjectToggleButton(SceneObject o, String eventLabel, String offImg, String onImg) {
+        super(eventLabel);
+        _InitParametersOnConstructor(offImg, onImg);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
+    
+    private void _InitParametersOnConstructor(String offImg, String onImg) {
         _isOn = true;
         _offImg = offImg;
         _onImg = onImg;

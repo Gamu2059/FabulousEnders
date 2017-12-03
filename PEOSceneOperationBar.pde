@@ -4,11 +4,11 @@ public class PEOSceneOperationBar extends Scene {
         super("Operation Bar");
 
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        
+
         float selfH, menuH;
         selfH = PEOConst.OPERATION_BAR_HEIGHT;
         menuH = PEOConst.MENU_BAR_HEIGHT;
-        _SetTransform(GetTransform(), width, selfH, 0, menuH, 0, 0, 1, 0, 0.5, 0);
+        GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, menuH, 1, 1, 0, width, selfH);
 
         SceneObject opeObj;
 
@@ -17,49 +17,26 @@ public class PEOSceneOperationBar extends Scene {
             "Translate", 
             "Rotate", 
             "Scale", 
-            "Pivot"
+            "Pivot", 
+            "Play"
         };
 
         float x = 10;
+        String basePath;
         for (int i=0; i<paths.length; i++, x+=32) {
+            basePath = PEOConst.OPERATION_BAR_PATH + paths[i];
+
             opeObj = new SceneObject(paths[i]+" Ope");
             opeObj.GetDrawBack().SetEnable(false);
             AddObject(opeObj);
             AddChild(opeObj);
-            _SetTransform(opeObj.GetTransform(), 32, 22, x, 0, 0, 0.5, 0, 0.5, 0, 0.5);
-            _SetImage(opeObj, paths[i]+"_Off.png");
-            _SetToggleButton(opeObj, paths[i]+"_On.png", paths[i]+"_Off.png");
+            if (i < paths.length - 1) {
+                opeObj.GetTransform().InitTransform(0, 0.5, 0, 0.5, 0, 0.5, x, 0, 1, 1, 0, 32, 22);
+            } else {
+                opeObj.GetTransform().InitTransform(0.5, 0.5, 0.5, 0.5, 0, 0.5, 0, 0, 1, 1, 0, 32, 22);
+            }
+            new SceneObjectImage(opeObj, basePath +"_Off.png");
+            new SceneObjectToggleButton(opeObj, opeObj.GetName() + " OperationBar Label", basePath +"_On.png", basePath +"_Off.png");
         }
-
-        opeObj = new SceneObject("Play Ope");
-        opeObj.GetDrawBack().SetEnable(false);
-        AddObject(opeObj);
-        AddChild(opeObj);
-        _SetTransform(opeObj.GetTransform(), 32, 22, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
-        _SetImage(opeObj, "Play_Off.png");
-        _SetToggleButton(opeObj, "Play_On.png", "Play_Off.png");
-    }
-
-    private void _SetTransform(SceneObjectTransform t, float w, float h, float x, float y, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY) {
-        if (t == null) return;
-        t.SetTranslation(x, y);
-        t.SetSize(w, h);
-        t.GetAnchor().SetMin(minAX, minAY);
-        t.GetAnchor().SetMax(maxAX, maxAY);
-        t.GetPivot().SetPivot(pX, pY);
-    }
-
-    private void _SetImage(SceneObject o, String fileName) {
-        if (o == null) return;
-        SceneObjectImage img = new SceneObjectImage();
-        o.AddBehavior(img);
-        img.SetUsingImageName(PEOConst.OPERATION_BAR_PATH + fileName);
-    }
-
-    private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
-        if (o == null) return;
-        String path = PEOConst.OPERATION_BAR_PATH;
-        SceneObjectToggleButton btn = new SceneObjectToggleButton(o.GetName() + " OperationBar Label" , path + onFile, path + offFile);
-        o.AddBehavior(btn);
     }
 }

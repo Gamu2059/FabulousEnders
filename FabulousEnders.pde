@@ -30,19 +30,19 @@ void setup() {
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
         
-        PEOSceneViewBase view = new PEOSceneViewBase("hoge");
+        PEOSceneViewBase view = new PEOSceneViewBase("hoge", "Scene");
         sceneManager.AddScene(view);
         sceneManager.LoadScene(view.GetName());
         
-        PEOSceneProjectBase project = new PEOSceneProjectBase("huga");
+        PEOSceneProjectBase project = new PEOSceneProjectBase("huga", "Project");
         sceneManager.AddScene(project);
         sceneManager.LoadScene(project.GetName());
         
-        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy");
+        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy", "Heararchy");
         sceneManager.AddScene(heararchy);
         sceneManager.LoadScene(heararchy.GetName());
         
-        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector");
+        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector", "Inspector");
         sceneManager.AddScene(inspector);
         sceneManager.LoadScene(inspector.GetName());
 

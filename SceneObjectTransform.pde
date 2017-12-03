@@ -137,6 +137,16 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _matrix = new PMatrix2D();
         _transformProcessor = new TransformProcessor();
     }
+    
+    public void InitTransform(float minAX, float minAY, float maxAX, float maxAY, float pX, float pY, float tX, float tY, float sX, float sY, float rad, float sizeX, float sizeY) {
+        GetAnchor().SetMin(minAX, minAY);
+        GetAnchor().SetMax(maxAX, maxAY);
+        GetPivot().SetPivot(pX, pY);
+        SetTranslation(tX, tY);
+        SetScale(sX, sY);
+        SetRotate(rad);
+        SetSize(sizeX, sizeY);
+    }
 
     /**
      オブジェクトのトランスフォーム処理を実行する。
