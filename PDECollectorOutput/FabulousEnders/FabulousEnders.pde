@@ -1,3 +1,9 @@
+/**
+ 接頭辞について。
+ PE ... ProcessingEngineの略称。Pjsで動作する保証がないクラス。要検証。
+ PEO... ProcessingEngineOnlyの略称。Pjsで動作しないことが分かりきっているクラス。
+ */
+
 import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
@@ -14,11 +20,11 @@ void setup() {
     try {
         InitManager();
 
-        A_TestScene1 s1 = new A_TestScene1("main1");
-        A_TestScene2 s2 = new A_TestScene2("main2");
-        sceneManager.AddScene(s1);
-        sceneManager.LoadScene(s1.GetName());
-        sceneManager.AddScene(s2);
+        //A_TestScene1 s1 = new A_TestScene1("main1");
+        //A_TestScene2 s2 = new A_TestScene2("main2");
+        Scene_MenuBar menu = new Scene_MenuBar();
+        sceneManager.AddScene(menu);
+        sceneManager.LoadScene(menu.GetName());
 
         sceneManager.Start();
     } 
@@ -38,14 +44,14 @@ void InitManager() {
 void draw() {
     // これをつけているとpjsで動きません
     surface.setTitle("Game Maker fps : " + frameRate);
-    //try {
-        background(255);
+    try {
+        background(0);
         sceneManager.Update();
         inputManager.Update();
-    //} 
-    //catch(Exception e) {
-    //    println(e);
-    //}
+    } 
+    catch(Exception e) {
+        println(e);
+    }
 }
 
 void keyPressed() {
@@ -355,6 +361,7 @@ public class A_TestScene2 extends Scene {
 ObjectBehavior及びサブクラスを特定するためのIDを定義する責任を持つ。
 */
 public final class ClassID {
+    // Basic Behavior
     public static final int CID_BEHAVIOR = 0;
     public static final int CID_TRANSFORM = 1;
     public static final int CID_DRAW_BACK = 2;
@@ -1136,6 +1143,107 @@ public class Pivot {
         SetPivot(GetX(), value);
     }
 }
+/**
+ メニューアイテムオブジェクト。
+ */
+public class PMenu extends SceneObject {
+    private SceneObjectText _text;
+    public SceneObjectText GetText() {
+        return _text;
+    }
+
+    private SceneObjectButton _button;
+
+    private DrawColor _dc;
+
+    public PMenu(String name, String t) {
+        super(name);
+        
+        _dc = GetDrawBack().GetBackColorInfo();
+        GetDrawBack().SetEnableBorder(false);
+        _dc.SetColor(204, 232, 255, 0);
+
+        _text = new SceneObjectText();
+        _text.SetText(t);
+        _text.SetFontSize(12);
+        _text.SetUsingFontName("FFScala");
+        _text.SetAlign(LEFT, TOP);
+        _text.GetColorInfo().SetColor(0, 0, 0);
+        AddBehavior(_text);
+
+        _button = new SceneObjectButton();
+        AddBehavior(_button);
+        _button.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
+            public void Event() {
+                _dc.SetAlpha(255);
+            }
+        }
+        );
+        _button.GetDisabledActiveHandler().SetEvent("mouse exited", new IEvent() {
+            public void Event() {
+                _dc.SetAlpha(0);
+            }
+        }
+        );
+    }
+}
+/**
+ メニューバーオブジェクト。
+ */
+public class PMenuBar extends SceneObject {
+    private ArrayList<PMenu> _menus;
+
+    private boolean _isStart;
+
+    public PMenuBar(String name) {
+        super(name);
+
+        _menus = new ArrayList<PMenu>();
+
+        SceneObjectDrawBack db = GetDrawBack();
+        db.GetBackColorInfo().SetColor(255, 255, 255);
+        db.SetEnableBorder(false);
+    }
+
+    public void AddMenu(PMenu menu) {
+        if (menu == null) return;
+        if (_menus.contains(menu)) return;
+        _menus.add(menu);
+    }
+
+    public void Start() {
+        // 自身の他の振る舞いに処理が行き渡るようにする
+        super.Start();
+        
+        if (_isStart) return;
+        _isStart = true;
+
+        if (_menus == null) return;
+        PMenu p;
+        SceneObjectTransform tr;
+        SceneObjectText t;
+        float x, sum = 0;
+        
+        for (int i=0; i<_menus.size(); i++) {
+            p = _menus.get(i);
+            t = p.GetText();
+            textFont(fontManager.GetFont(t.GetUsingFontName()));
+            textSize(t.GetFontSize());
+            textAlign(t.GetHorizontalAlign(), t. GetVerticalAlign());
+            textLeading(t.GetLineSpace());
+
+            x = textWidth(t.GetText()) + 20;
+            tr = p.GetTransform();
+            tr.SetParent(GetTransform(), true);
+            tr.SetSize(x, 0);
+            tr.GetAnchor().SetMin(0, 0);
+            tr.GetAnchor().SetMax(0, 1);
+            tr.GetPivot().SetPivot(0, 0.5);
+            tr.SetTranslation(sum, 0);
+            sum += x;
+        }
+    }
+}
 public class Scene implements Comparable<Scene> {
     private String _name;
     public String GetName() {
@@ -1225,7 +1333,7 @@ public class Scene implements Comparable<Scene> {
      */
     public void InitScene() {
         _isNeedSorting = true;
-        _Sorting();
+        Sorting();
     }
 
     /**
@@ -1312,7 +1420,7 @@ public class Scene implements Comparable<Scene> {
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
-    protected void _Sorting() {
+    public void Sorting() {
         if (!_isNeedSorting) return;
         _isNeedSorting = false;
         _collection.SortList(GetObjects());
@@ -1356,7 +1464,7 @@ public class Scene implements Comparable<Scene> {
      */
     public void Draw() {
         _DrawScene();
-
+        
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -1378,6 +1486,15 @@ public class Scene implements Comparable<Scene> {
     }
 
     /**
+     毎回オブジェクトのSetParentを呼び出すのが面倒なので省略のために用意。
+     */
+    public final void AddChild(SceneObject object) {
+        if (object == null) return;
+        
+        object.GetTransform().SetParent(GetTransform(), true);
+    }
+
+    /**
      自身のリストにオブジェクトを追加する。
      ただし、既に子として追加されている場合は追加できない。
      
@@ -1386,7 +1503,6 @@ public class Scene implements Comparable<Scene> {
     public final boolean AddObject(SceneObject object) {
         if (GetObject(object.GetName()) != null) return false;
         object.SetScene(this);
-        object.GetTransform().SetParent(GetTransform(), true);
         return _objects.add(object);
     }
 
@@ -1569,6 +1685,7 @@ public class SceneManager {
     public void Update() {
         _OnUpdate();
         _OnTransform();
+        _OnSorting();
         _OnCheckMouseActiveScene();
         _OnDraw();
         _OnCheckScene();
@@ -1584,7 +1701,17 @@ public class SceneManager {
     }
 
     private void _OnTransform() {
+
         GetTransform().TransformMatrixOnRoot();
+    }
+
+    private void _OnSorting() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            s.Sorting();
+        }
     }
 
     private void _OnCheckMouseActiveScene() {
@@ -1643,6 +1770,7 @@ public class SceneManager {
             s.OnDisabled();
             s.GetTransform().SetParent(_dummyTransform, false);
         }
+        boolean f = false;
         for (String n : _scenes.keySet()) {
             s = _scenes.get(n);
             if (!s.IsLoadFlag()) continue;
@@ -1650,8 +1778,11 @@ public class SceneManager {
             _drawScenes.add(s);
             s.OnEnabled();
             s.GetTransform().SetParent(_transform, false);
+            f = true;
         }
-        _collection.SortList(_drawScenes);
+        if (f) {
+            _collection.SortList(_drawScenes);
+        }
     }
 
     /**
@@ -2082,7 +2213,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
     public int GetID() {
         return ClassID.CID_BUTTON;
     }
-    
+
     private boolean _isActive;
 
     private ActionEvent _decideHandler;
@@ -2090,20 +2221,34 @@ public class SceneObjectButton extends SceneObjectBehavior {
         return _decideHandler;
     }
 
+    private ActionEvent _enabledActiveHandler;
+    public ActionEvent GetEnabledActiveHandler() {
+        return _enabledActiveHandler;
+    }
+
+    private ActionEvent _disabledActiveHandler;
+    public ActionEvent GetDisabledActiveHandler() {
+        return _disabledActiveHandler;
+    }
+
     public SceneObjectButton() {
         super();
 
         _decideHandler = new ActionEvent();
+        _enabledActiveHandler = new ActionEvent();
+        _disabledActiveHandler = new ActionEvent();
     }
 
     public void OnEnabledActive() {
         super.OnEnabledActive();
         _isActive = true;
+        GetEnabledActiveHandler().InvokeAllEvents();
     }
 
     public void OnDisabledActive() {
         super.OnDisabledActive();
         _isActive = false;
+        GetDisabledActiveHandler().InvokeAllEvents();
     }
 
     public void Update() {
@@ -2268,7 +2413,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
     public int GetID() {
         return ClassID.CID_TEXT;
     }
-    
+
     private String _text;
     public String GetText() {
         return _text;
@@ -2284,6 +2429,20 @@ public class SceneObjectText extends SceneObjectDrawBase {
     public void SetHorizontalAlign(int value) {
         if (value == LEFT || value == CENTER || value == RIGHT) {
             _horizontalAlign = value;
+            switch(value) {
+            case LEFT:
+                _xRate = 0;
+                break;
+            case CENTER:
+                _xRate = 0.5;
+                break;
+            case RIGHT:
+                _xRate = 1;
+                break;
+            default:
+                _xRate = 0;
+                break;
+            }
         }
     }
 
@@ -2292,8 +2451,22 @@ public class SceneObjectText extends SceneObjectDrawBase {
         return _verticalAlign;
     }
     public void SetVerticalAlign(int value) {
-        if (value == TOP || value == CENTER || value == BOTTOM || value == BASELINE) {
+        if (value == TOP || value == CENTER || value == BOTTOM) {
             _verticalAlign = value;
+            switch(value) {
+            case TOP:
+                _yRate = 0;
+                break;
+            case CENTER:
+                _yRate = 0.5;
+                break;
+            case BOTTOM:
+                _yRate = 1;
+                break;
+            default:
+                _yRate = 0;
+                break;
+            }
         }
     }
 
@@ -2368,6 +2541,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
     private String _tempText;
 
     private PVector _objSize;
+    private float _xRate, _yRate;
 
 
     public SceneObjectText() {
@@ -2416,11 +2590,10 @@ public class SceneObjectText extends SceneObjectDrawBase {
         } else {
             _tempText = GetText();
         }
-
-        text(_tempText, 0, 0, _objSize.x, _objSize.y);
+        text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
     }
 }
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> {
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>//
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -2546,7 +2719,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
     public SceneObjectTransform() {
         super();
-        
+
         _transform = new Transform();
         _size = new PVector();
 
@@ -2564,13 +2737,13 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
      */
     public void TransformMatrixOnRoot() {
         transformManager.ResetDepth();
-        
+
         // これ以上階層を辿れない場合は変形させない
         if (!transformManager.PushDepth()) return;
-        
+
         _transformProcessor.Init();
         _matrix.reset();
-        
+
         _TransformMatrix();
     }
 
@@ -2635,7 +2808,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         y = -GetPivot().GetY() * GetSize().y;
         _transformProcessor.AddTranslate(x, y);
         _matrix.translate(x, y);
-        
+
         // 再帰的に計算していく
         if (_children != null) {
             for (int i=0; i<_children.size(); i++) {
@@ -2742,6 +2915,43 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
      */
     public int compareTo(SceneObjectTransform o) {
         return GetPriority() - o.GetPriority();
+    }
+}
+public class Scene_MenuBar extends Scene {
+    public Scene_MenuBar() {
+        super("Menu Bar");
+
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
+        SceneObjectTransform t = GetTransform();
+        t.SetSize(width, 20);
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(1, 0);
+        t.GetPivot().SetPivot(0.5, 0);
+
+        PMenuBar menuBarObj = new PMenuBar("Menu Bar");
+        AddObject(menuBarObj);
+        AddChild(menuBarObj);
+
+        PMenu menuObj;
+        menuObj = new PMenu("File Menu", "File");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Edit Menu", "Edit");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("GameObject Menu", "GameObject");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Behavior Menu", "Behavior");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Window Menu", "Window");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
     }
 }
 /** //<>//

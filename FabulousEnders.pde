@@ -1,3 +1,9 @@
+/**
+ 接頭辞について。
+ PE ... ProcessingEngineの略称。Pjsで動作する保証がないクラス。要検証。
+ PEO... ProcessingEngineOnlyの略称。Pjsで動作しないことが分かりきっているクラス。
+ */
+
 import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
@@ -14,11 +20,11 @@ void setup() {
     try {
         InitManager();
 
-        A_TestScene1 s1 = new A_TestScene1("main1");
-        A_TestScene2 s2 = new A_TestScene2("main2");
-        sceneManager.AddScene(s1);
-        sceneManager.LoadScene(s1.GetName());
-        sceneManager.AddScene(s2);
+        //A_TestScene1 s1 = new A_TestScene1("main1");
+        //A_TestScene2 s2 = new A_TestScene2("main2");
+        Scene_MenuBar menu = new Scene_MenuBar();
+        sceneManager.AddScene(menu);
+        sceneManager.LoadScene(menu.GetName());
 
         sceneManager.Start();
     } 
@@ -39,7 +45,7 @@ void draw() {
     // これをつけているとpjsで動きません
     surface.setTitle("Game Maker fps : " + frameRate);
     try {
-        background(255);
+        background(0);
         sceneManager.Update();
         inputManager.Update();
     } 

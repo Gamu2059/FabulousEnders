@@ -1,4 +1,4 @@
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> {
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>//
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -124,7 +124,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
     public SceneObjectTransform() {
         super();
-        
+
         _transform = new Transform();
         _size = new PVector();
 
@@ -142,13 +142,13 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
      */
     public void TransformMatrixOnRoot() {
         transformManager.ResetDepth();
-        
+
         // これ以上階層を辿れない場合は変形させない
         if (!transformManager.PushDepth()) return;
-        
+
         _transformProcessor.Init();
         _matrix.reset();
-        
+
         _TransformMatrix();
     }
 
@@ -213,7 +213,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         y = -GetPivot().GetY() * GetSize().y;
         _transformProcessor.AddTranslate(x, y);
         _matrix.translate(x, y);
-        
+
         // 再帰的に計算していく
         if (_children != null) {
             for (int i=0; i<_children.size(); i++) {

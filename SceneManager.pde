@@ -86,6 +86,7 @@ public class SceneManager {
     public void Update() {
         _OnUpdate();
         _OnTransform();
+        _OnSorting();
         _OnCheckMouseActiveScene();
         _OnDraw();
         _OnCheckScene();
@@ -101,7 +102,17 @@ public class SceneManager {
     }
 
     private void _OnTransform() {
+
         GetTransform().TransformMatrixOnRoot();
+    }
+
+    private void _OnSorting() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            s.Sorting();
+        }
     }
 
     private void _OnCheckMouseActiveScene() {
@@ -160,6 +171,7 @@ public class SceneManager {
             s.OnDisabled();
             s.GetTransform().SetParent(_dummyTransform, false);
         }
+        boolean f = false;
         for (String n : _scenes.keySet()) {
             s = _scenes.get(n);
             if (!s.IsLoadFlag()) continue;
@@ -167,8 +179,11 @@ public class SceneManager {
             _drawScenes.add(s);
             s.OnEnabled();
             s.GetTransform().SetParent(_transform, false);
+            f = true;
         }
-        _collection.SortList(_drawScenes);
+        if (f) {
+            _collection.SortList(_drawScenes);
+        }
     }
 
     /**
