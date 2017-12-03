@@ -1,14 +1,14 @@
-public class SceneObjectButton extends SceneObjectBehavior {
+public class SceneObjectDragHandler extends SceneObjectBehavior {
     public int GetID() {
-        return ClassID.CID_BUTTON;
+        return ClassID.CID_DRAG_HANDLER;
     }
 
     private boolean _isActive;
     private String _eventLabel;
 
-    private ActionEvent _decideHandler;
-    public ActionEvent GetDecideHandler() {
-        return _decideHandler;
+    private ActionEvent _draggedActionHandler;
+    public ActionEvent GetDraggedActionHandler() {
+        return _draggedActionHandler;
     }
 
     private ActionEvent _enabledActiveHandler;
@@ -21,11 +21,11 @@ public class SceneObjectButton extends SceneObjectBehavior {
         return _disabledActiveHandler;
     }
 
-    public SceneObjectButton(String eventLabel) {
+    public SceneObjectDragHandler(String eventLabel) {
         super();
 
         _eventLabel = eventLabel;
-        _decideHandler = new ActionEvent();
+        _draggedActionHandler = new ActionEvent();
         _enabledActiveHandler = new ActionEvent();
         _disabledActiveHandler = new ActionEvent();
     }
@@ -44,10 +44,10 @@ public class SceneObjectButton extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseDraggedHandler().AddEvent(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isActive) return;
-                GetDecideHandler().InvokeAllEvents();
+                GetDraggedActionHandler().InvokeAllEvents();
             }
         }
         );

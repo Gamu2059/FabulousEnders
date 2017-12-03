@@ -55,7 +55,7 @@ public class PESceneOperationBar extends Scene {
     private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
         if (o == null) return;
         String path = ImageManager.OPERATION_BAR_PATH;
-        SceneObjectToggleButton btn = new SceneObjectToggleButton(path + onFile, path + offFile);
+        SceneObjectToggleButton btn = new SceneObjectToggleButton(o.GetName() + " OperationBar Label" , path + onFile, path + offFile);
         o.AddBehavior(btn);
     }
 }

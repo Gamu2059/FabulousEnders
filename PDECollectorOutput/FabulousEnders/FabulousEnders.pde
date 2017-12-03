@@ -21,12 +21,17 @@ void setup() {
     try {
         InitManager();
         
-        Scene_MenuBar menu = new Scene_MenuBar();
+        PESceneMenuBar menu = new PESceneMenuBar();
         sceneManager.AddScene(menu);
         sceneManager.LoadScene(menu.GetName());
-        Scene_OperationBar operation = new Scene_OperationBar();
+        
+        PESceneOperationBar operation = new PESceneOperationBar();
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
+        
+        PESceneEngineOverAll engine = new PESceneEngineOverAll();
+        sceneManager.AddScene(engine);
+        sceneManager.LoadScene(engine.GetName());
 
         sceneManager.Start();
     } 
@@ -241,122 +246,6 @@ public class Anchor {
     }
     public void SetMaxY(float value) {
         SetMax(GetMaxX(), value);
-    }
-}
-public class A_TestScene1 extends Scene {
-    private float _rad;
-    
-    public A_TestScene1(String name) {
-        super(name);
-        GetDrawBack().GetBackColorInfo().SetColor(100, 200, 200);
-
-        SceneObjectTransform objT1, objT2;
-
-        SceneObject o = new SceneObject("camera?");
-        AddObject(o);
-        o.GetDrawBack().GetBackColorInfo().SetColor(200, 200, 0, 100);
-        SetText(o);
-        objT1 = o.GetTransform();
-        objT1.SetSize(100, 100);
-        objT1.GetAnchor().SetMin(0.5, 0.5);
-        objT1.GetAnchor().SetMax(0.5, 0.5);
-
-        SceneObject o1 = new SceneObject("Overlapped");
-        AddObject(o1);
-        o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
-        SetImage(o1);
-        SetButton(o1);
-        objT2 = o1.GetTransform();
-        objT2.SetParent(o.GetTransform(), true);
-        objT2.SetSize(100, 140);
-        objT2.GetAnchor().SetMin(0.5, 0.5);
-        objT2.GetAnchor().SetMax(0.5, 0.5);
-        objT2.GetPivot().SetPivot(0, 0);
-    }
-
-    private void SetImage(SceneObject o) {
-        SceneObjectImage i = new SceneObjectImage();
-        o.AddBehavior(i);
-        i.SetUsingImageName("icon.png");
-    }
-
-    private void SetText(SceneObject o) {
-        SceneObjectText t = new SceneObjectText("TestTestTestTestTestTestTestTest");
-        o.AddBehavior(t);
-        t.SetDrawInOrder(true);
-        t.SetDrawSpeed(10);
-        t.GetColorInfo().SetColor(0, 0, 200);
-    }
-
-    private void SetButton(SceneObject o) {
-        SceneObjectButton b = new SceneObjectButton();
-        o.AddBehavior(b);
-        b.GetDecideHandler().AddEvent("pushed", new IEvent() {
-            public void Event() {
-                GetTransform().SetRotate(_rad += 1);
-                sceneManager.LoadScene("main2");
-                sceneManager.ReleaseScene("main1");
-            }
-        }
-        );
-    }
-}
-public class A_TestScene2 extends Scene {
-    private float _rad;
-    
-    public A_TestScene2(String name) {
-        super(name);
-        GetDrawBack().GetBackColorInfo().SetColor(200, 100, 0);
-
-        SceneObjectTransform objT1, objT2;
-
-        SceneObject o = new SceneObject("camera?");
-        AddObject(o);
-        o.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 0, 50);
-        SetText(o);
-        objT1 = o.GetTransform();
-        objT1.SetSize(100, 100);
-        objT1.GetAnchor().SetMin(0.5, 0.5);
-        objT1.GetAnchor().SetMax(0.5, 0.5);
-
-        SceneObject o1 = new SceneObject("Overlapped");
-        AddObject(o1);
-        o1.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
-        SetImage(o1);
-        SetButton(o1);
-        objT2 = o1.GetTransform();
-        objT2.SetParent(o.GetTransform(), true);
-        objT2.SetSize(100, 140);
-        objT2.GetAnchor().SetMin(0.5, 0.5);
-        objT2.GetAnchor().SetMax(0.5, 0.5);
-        objT2.GetPivot().SetPivot(0, 0);
-    }
-
-    private void SetImage(SceneObject o) {
-        SceneObjectImage i = new SceneObjectImage();
-        o.AddBehavior(i);
-        i.SetUsingImageName("icon.png");
-    }
-
-    private void SetText(SceneObject o) {
-        SceneObjectText t = new SceneObjectText("ばななななななな");
-        o.AddBehavior(t);
-        t.SetDrawInOrder(true);
-        t.SetDrawSpeed(10);
-        t.GetColorInfo().SetColor(0, 0, 200);
-    }
-
-    private void SetButton(SceneObject o) {
-        SceneObjectButton b = new SceneObjectButton();
-        o.AddBehavior(b);
-        b.GetDecideHandler().AddEvent("pushed", new IEvent() {
-            public void Event() {
-                GetTransform().SetRotate(_rad -= 1);
-                sceneManager.LoadScene("main1");
-                sceneManager.ReleaseScene("main2");
-            }
-        }
-        );
     }
 }
 /**
@@ -1093,6 +982,116 @@ public class Key {
     public final static int _BACK = 43;
     public final static int _SHIFT = 44;
 }
+public class PESceneEngineOverAll extends Scene {
+    public PESceneEngineOverAll() {
+        super("Engine Over All");
+        
+        GetDrawBack().GetBackColorInfo().SetColor(0, 150, 255);
+        SceneObjectTransform t = GetTransform();
+        t.SetSize(width, 0);
+        // 上部のメニューバーと操作部の分だけ下げる
+        t.GetAnchor().SetMin(0, 52f/height);
+        t.GetAnchor().SetMax(1, 1);
+    }
+}
+public class PESceneMenuBar extends Scene {
+    public PESceneMenuBar() {
+        super("Menu Bar");
+
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
+        SceneObjectTransform t = GetTransform();
+        t.SetSize(width, 20);
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(1, 0);
+        t.GetPivot().SetPivot(0.5, 0);
+
+        PMenuBar menuBarObj = new PMenuBar("Menu Bar");
+        AddObject(menuBarObj);
+        AddChild(menuBarObj);
+
+        PMenu menuObj;
+        menuObj = new PMenu("File Menu", "File");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Edit Menu", "Edit");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("GameObject Menu", "GameObject");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Behavior Menu", "Behavior");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Window Menu", "Window");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+    }
+}
+public class PESceneOperationBar extends Scene {
+
+    public PESceneOperationBar() {
+        super("Operation Bar");
+
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
+        _SetTransform(GetTransform(), width, 32, 0, 20, 0, 0, 1, 0, 0.5, 0);
+
+        SceneObject opeObj;
+
+        String[] paths = new String[]{
+            "Hand", 
+            "Translate", 
+            "Rotate", 
+            "Scale", 
+            "Pivot"
+        };
+
+        float x = 10;
+        for (int i=0; i<paths.length; i++, x+=32) {
+            opeObj = new SceneObject(paths[i]+" Ope");
+            opeObj.GetDrawBack().SetEnable(false);
+            AddObject(opeObj);
+            AddChild(opeObj);
+            _SetTransform(opeObj.GetTransform(), 32, 22, x, 0, 0, 0.5, 0, 0.5, 0, 0.5);
+            _SetImage(opeObj, paths[i]+"_Off.png");
+            _SetToggleButton(opeObj, paths[i]+"_On.png", paths[i]+"_Off.png");
+        }
+
+        opeObj = new SceneObject("Play Ope");
+        opeObj.GetDrawBack().SetEnable(false);
+        AddObject(opeObj);
+        AddChild(opeObj);
+        _SetTransform(opeObj.GetTransform(), 32, 22, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
+        _SetImage(opeObj, "Play_Off.png");
+        _SetToggleButton(opeObj, "Play_On.png", "Play_Off.png");
+    }
+
+    private void _SetTransform(SceneObjectTransform t, float w, float h, float x, float y, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY) {
+        if (t == null) return;
+        t.SetTranslation(x, y);
+        t.SetSize(w, h);
+        t.GetAnchor().SetMin(minAX, minAY);
+        t.GetAnchor().SetMax(maxAX, maxAY);
+        t.GetPivot().SetPivot(pX, pY);
+    }
+
+    private void _SetImage(SceneObject o, String fileName) {
+        if (o == null) return;
+        SceneObjectImage img = new SceneObjectImage();
+        o.AddBehavior(img);
+        img.SetUsingImageName(ImageManager.OPERATION_BAR_PATH + fileName);
+    }
+
+    private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
+        if (o == null) return;
+        String path = ImageManager.OPERATION_BAR_PATH;
+        SceneObjectToggleButton btn = new SceneObjectToggleButton(path + onFile, path + offFile);
+        o.AddBehavior(btn);
+    }
+}
 /**
  平面上のある領域の基準点を保持する責任を持つ。
  */
@@ -1495,10 +1494,10 @@ public class Scene implements Comparable<Scene> {
     /**
      毎回オブジェクトのSetParentを呼び出すのが面倒なので省略のために用意。
      */
-    public final void AddChild(SceneObject object) {
-        if (object == null) return;
+    public final void AddChild(SceneObject o) {
+        if (o == null) return;
         
-        object.GetTransform().SetParent(GetTransform(), true);
+        o.GetTransform().SetParent(GetTransform(), true);
     }
 
     /**
@@ -1747,7 +1746,7 @@ public class SceneManager {
                 _activeScene = null;
             }
         }
-        if (_activeScene != null) {
+        if (_activeScene != null) { //<>// //<>//
             _activeScene.CheckMouseActiveObject();
         }
     }
@@ -2266,7 +2265,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
         }
     }
 }
-public class SceneObjectDrawBack extends SceneObjectBehavior { //<>//
+public class SceneObjectDrawBack extends SceneObjectBehavior { //<>// //<>//
     public int GetID() {
         return ClassID.CID_DRAW_BACK;
     }
@@ -2638,7 +2637,7 @@ public class SceneObjectToggleButton extends SceneObjectButton {
         );
     }
 }
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>// //<>//
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>//
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -2711,6 +2710,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
+            if (GetScene() == null) return;
             GetScene().SetNeedSorting(true);
         }
     }
@@ -2962,105 +2962,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         return GetPriority() - o.GetPriority();
     }
 }
-public class Scene_MenuBar extends Scene {
-    public Scene_MenuBar() {
-        super("Menu Bar");
-
-        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
-        SceneObjectTransform t = GetTransform();
-        t.SetSize(width, 20);
-        t.GetAnchor().SetMin(0, 0);
-        t.GetAnchor().SetMax(1, 0);
-        t.GetPivot().SetPivot(0.5, 0);
-
-        PMenuBar menuBarObj = new PMenuBar("Menu Bar");
-        AddObject(menuBarObj);
-        AddChild(menuBarObj);
-
-        PMenu menuObj;
-        menuObj = new PMenu("File Menu", "File");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PMenu("Edit Menu", "Edit");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PMenu("GameObject Menu", "GameObject");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PMenu("Behavior Menu", "Behavior");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PMenu("Window Menu", "Window");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-    }
-}
-public class Scene_OperationBar extends Scene {
-
-    public Scene_OperationBar() {
-        super("Operation Bar");
-
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        _SetTransform(GetTransform(), width, 32, 0, 20, 0, 0, 1, 0, 0.5, 0);
-
-        SceneObject opeObj;
-
-        String[] paths = new String[]{
-            "Hand", 
-            "Translate", 
-            "Rotate", 
-            "Scale", 
-            "Pivot"
-        };
-
-        float x = 10;
-        for (int i=0; i<paths.length; i++, x+=32) {
-            opeObj = new SceneObject(paths[i]+" Ope");
-            opeObj.GetDrawBack().SetEnable(false);
-            AddObject(opeObj);
-            AddChild(opeObj);
-            _SetTransform(opeObj.GetTransform(), 32, 22, x, 0, 0, 0.5, 0, 0.5, 0, 0.5);
-            _SetImage(opeObj, paths[i]+"_Off.png");
-            _SetToggleButton(opeObj, paths[i]+"_On.png", paths[i]+"_Off.png");
-        }
-
-        opeObj = new SceneObject("Play Ope");
-        opeObj.GetDrawBack().SetEnable(false);
-        AddObject(opeObj);
-        AddChild(opeObj);
-        _SetTransform(opeObj.GetTransform(), 32, 22, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
-        _SetImage(opeObj, "Play_Off.png");
-        _SetToggleButton(opeObj, "Play_On.png", "Play_Off.png");
-    }
-
-    private void _SetTransform(SceneObjectTransform t, float w, float h, float x, float y, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY) {
-        if (t == null) return;
-        t.SetTranslation(x, y);
-        t.SetSize(w, h);
-        t.GetAnchor().SetMin(minAX, minAY);
-        t.GetAnchor().SetMax(maxAX, maxAY);
-        t.GetPivot().SetPivot(pX, pY);
-    }
-
-    private void _SetImage(SceneObject o, String fileName) {
-        if (o == null) return;
-        SceneObjectImage img = new SceneObjectImage();
-        o.AddBehavior(img);
-        img.SetUsingImageName(ImageManager.OPERATION_BAR_PATH + fileName);
-    }
-
-    private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
-        if (o == null) return;
-        String path = ImageManager.OPERATION_BAR_PATH;
-        SceneObjectToggleButton btn = new SceneObjectToggleButton(path + onFile, path + offFile);
-        o.AddBehavior(btn);
-    }
-}
-/** //<>//
+/** //<>// //<>//
  アフィン変換一回分の情報に責任を持つ。
  サイズは持たない。
  */

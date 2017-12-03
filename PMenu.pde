@@ -26,7 +26,7 @@ public class PMenu extends SceneObject {
         _text.GetColorInfo().SetColor(0, 0, 0);
         AddBehavior(_text);
 
-        _button = new SceneObjectButton();
+        _button = new SceneObjectButton(name + t + " PMenu Label");
         AddBehavior(_button);
         _button.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
             public void Event() {

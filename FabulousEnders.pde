@@ -14,6 +14,7 @@ SceneManager sceneManager;
 ImageManager imageManager;
 FontManager fontManager;
 TransformManager transformManager;
+PEOScenePositionManager peoScenePositionManager;
 
 void setup() {
     size(displayWidth, displayHeight);
@@ -28,10 +29,6 @@ void setup() {
         PESceneOperationBar operation = new PESceneOperationBar();
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
-        
-        PESceneEngineOverAll engine = new PESceneEngineOverAll();
-        sceneManager.AddScene(engine);
-        sceneManager.LoadScene(engine.GetName());
 
         sceneManager.Start();
     } 
@@ -46,6 +43,8 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+    
+    peoScenePositionManager = new PEOScenePositionManager();
 }
 
 void draw() {

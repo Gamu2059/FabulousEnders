@@ -8,14 +8,16 @@ public class SceneObjectToggleButton extends SceneObjectButton {
 
     private SceneObjectImage _img;
 
-    public SceneObjectToggleButton(String offImg, String onImg) {
-        super();
+    public SceneObjectToggleButton(String eventLabel, String offImg, String onImg) {
+        super(eventLabel);
         _isOn = true;
         _offImg = offImg;
         _onImg = onImg;
     }
 
     public void Start() {
+        super.Start();
+        
         SceneObjectBehavior beh = GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
         if (beh instanceof SceneObjectImage) {
             _img = (SceneObjectImage) beh;
