@@ -1,5 +1,8 @@
 public final class ImageManager {
-    public static final String IMAGEPATH = "image/";
+    // イメージのルートパス
+    public static final String IMAGE_PATH = "image/";
+    
+    public static final String OPERATION_BAR_PATH="Engine/OperationBar/";
     
     private HashMap<String, PImage> _images;
     private HashMap<String, PImage> GetImageHash() {
@@ -11,7 +14,7 @@ public final class ImageManager {
     }
 
     public PImage GetImage(String path) {
-        path = IMAGEPATH + path;
+        path = IMAGE_PATH + path;
         if (GetImageHash().containsKey(path)) {
             return GetImageHash().get(path);
         }

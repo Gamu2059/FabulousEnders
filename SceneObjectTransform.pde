@@ -1,4 +1,4 @@
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>//
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>//
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -71,6 +71,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
+            if (GetScene() == null) return;
             GetScene().SetNeedSorting(true);
         }
     }

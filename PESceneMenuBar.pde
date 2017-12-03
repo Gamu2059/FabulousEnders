@@ -1,5 +1,5 @@
-public class Scene_MenuBar extends Scene {
-    public Scene_MenuBar() {
+public class PESceneMenuBar extends Scene {
+    public PESceneMenuBar() {
         super("Menu Bar");
 
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);

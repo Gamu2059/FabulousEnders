@@ -6,7 +6,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
     private boolean _isActive;
 
     private ActionEvent _decideHandler;
-    public ActionEvent GetDicideHandler() {
+    public ActionEvent GetDecideHandler() {
         return _decideHandler;
     }
 
@@ -43,7 +43,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
     public void Update() {
         if (_isActive) {
             if (inputManager.IsMouseUp()) {
-                GetDicideHandler().InvokeAllEvents();
+                GetDecideHandler().InvokeAllEvents();
             }
         }
     }

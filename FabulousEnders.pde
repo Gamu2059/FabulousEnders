@@ -16,15 +16,22 @@ FontManager fontManager;
 TransformManager transformManager;
 
 void setup() {
-    size(1066, 600);
+    size(displayWidth, displayHeight);
+    surface.setLocation(0, 0);
     try {
         InitManager();
-
-        //A_TestScene1 s1 = new A_TestScene1("main1");
-        //A_TestScene2 s2 = new A_TestScene2("main2");
-        Scene_MenuBar menu = new Scene_MenuBar();
+        
+        PESceneMenuBar menu = new PESceneMenuBar();
         sceneManager.AddScene(menu);
         sceneManager.LoadScene(menu.GetName());
+        
+        PESceneOperationBar operation = new PESceneOperationBar();
+        sceneManager.AddScene(operation);
+        sceneManager.LoadScene(operation.GetName());
+        
+        PESceneEngineOverAll engine = new PESceneEngineOverAll();
+        sceneManager.AddScene(engine);
+        sceneManager.LoadScene(engine.GetName());
 
         sceneManager.Start();
     } 

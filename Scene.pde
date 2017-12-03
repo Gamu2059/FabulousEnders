@@ -242,10 +242,16 @@ public class Scene implements Comparable<Scene> {
     /**
      毎回オブジェクトのSetParentを呼び出すのが面倒なので省略のために用意。
      */
-    public final void AddChild(SceneObject object) {
-        if (object == null) return;
+    public final void AddChild(SceneObjectTransform t) {
+        if (t == null) return;
         
-        object.GetTransform().SetParent(GetTransform(), true);
+        t.SetParent(GetTransform(), true);
+    }
+    
+    public final void AddChild(SceneObject o) {
+        if (o == null) return;
+        
+        AddChild(o.GetTransform());
     }
 
     /**

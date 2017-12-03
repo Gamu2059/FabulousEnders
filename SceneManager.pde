@@ -141,7 +141,7 @@ public class SceneManager {
                 _activeScene = null;
             }
         }
-        if (_activeScene != null) {
+        if (_activeScene != null) { //<>// //<>//
             _activeScene.CheckMouseActiveObject();
         }
     }

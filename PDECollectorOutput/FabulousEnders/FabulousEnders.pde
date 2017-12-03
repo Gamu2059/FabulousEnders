@@ -16,15 +16,17 @@ FontManager fontManager;
 TransformManager transformManager;
 
 void setup() {
-    size(1066, 600);
+    size(displayWidth, displayHeight);
+    surface.setLocation(0, 0);
     try {
         InitManager();
-
-        //A_TestScene1 s1 = new A_TestScene1("main1");
-        //A_TestScene2 s2 = new A_TestScene2("main2");
+        
         Scene_MenuBar menu = new Scene_MenuBar();
         sceneManager.AddScene(menu);
         sceneManager.LoadScene(menu.GetName());
+        Scene_OperationBar operation = new Scene_OperationBar();
+        sceneManager.AddScene(operation);
+        sceneManager.LoadScene(operation.GetName());
 
         sceneManager.Start();
     } 
@@ -289,7 +291,7 @@ public class A_TestScene1 extends Scene {
     private void SetButton(SceneObject o) {
         SceneObjectButton b = new SceneObjectButton();
         o.AddBehavior(b);
-        b.GetDicideHandler().AddEvent("pushed", new IEvent() {
+        b.GetDecideHandler().AddEvent("pushed", new IEvent() {
             public void Event() {
                 GetTransform().SetRotate(_rad += 1);
                 sceneManager.LoadScene("main2");
@@ -347,7 +349,7 @@ public class A_TestScene2 extends Scene {
     private void SetButton(SceneObject o) {
         SceneObjectButton b = new SceneObjectButton();
         o.AddBehavior(b);
-        b.GetDicideHandler().AddEvent("pushed", new IEvent() {
+        b.GetDecideHandler().AddEvent("pushed", new IEvent() {
             public void Event() {
                 GetTransform().SetRotate(_rad -= 1);
                 sceneManager.LoadScene("main1");
@@ -369,6 +371,8 @@ public final class ClassID {
     public static final int CID_IMAGE = 4;
     public static final int CID_TEXT = 5;
     public static final int CID_BUTTON = 6;
+    
+    public static final int CID_TOGGLE_BUTTON = 7;
 }
 public class Collection<R extends Comparable> {
     /**
@@ -667,7 +671,10 @@ public interface IEvent {
     public void Event();
 }
 public final class ImageManager {
-    public static final String IMAGEPATH = "image/";
+    // イメージのルートパス
+    public static final String IMAGE_PATH = "image/";
+    
+    public static final String OPERATION_BAR_PATH="Engine/OperationBar/";
     
     private HashMap<String, PImage> _images;
     private HashMap<String, PImage> GetImageHash() {
@@ -679,7 +686,7 @@ public final class ImageManager {
     }
 
     public PImage GetImage(String path) {
-        path = IMAGEPATH + path;
+        path = IMAGE_PATH + path;
         if (GetImageHash().containsKey(path)) {
             return GetImageHash().get(path);
         }
@@ -1167,7 +1174,7 @@ public class PMenu extends SceneObject {
         _text.SetText(t);
         _text.SetFontSize(12);
         _text.SetUsingFontName("FFScala");
-        _text.SetAlign(LEFT, TOP);
+        _text.SetAlign(CENTER, CENTER);
         _text.GetColorInfo().SetColor(0, 0, 0);
         AddBehavior(_text);
 
@@ -2217,7 +2224,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
     private boolean _isActive;
 
     private ActionEvent _decideHandler;
-    public ActionEvent GetDicideHandler() {
+    public ActionEvent GetDecideHandler() {
         return _decideHandler;
     }
 
@@ -2254,7 +2261,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
     public void Update() {
         if (_isActive) {
             if (inputManager.IsMouseUp()) {
-                GetDicideHandler().InvokeAllEvents();
+                GetDecideHandler().InvokeAllEvents();
             }
         }
     }
@@ -2593,7 +2600,45 @@ public class SceneObjectText extends SceneObjectDrawBase {
         text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
     }
 }
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>//
+public class SceneObjectToggleButton extends SceneObjectButton {
+    public int GetID() {
+        return ClassID.CID_TOGGLE_BUTTON;
+    }
+
+    private boolean _isOn;
+    private String _offImg, _onImg;
+
+    private SceneObjectImage _img;
+
+    public SceneObjectToggleButton(String offImg, String onImg) {
+        super();
+        _isOn = true;
+        _offImg = offImg;
+        _onImg = onImg;
+    }
+
+    public void Start() {
+        SceneObjectBehavior beh = GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
+        if (beh instanceof SceneObjectImage) {
+            _img = (SceneObjectImage) beh;
+        }
+
+        GetDecideHandler().AddEvent("Toggle", new IEvent() {
+            public void Event() {
+                _isOn = !_isOn;
+
+                if (_img == null) return;
+                if (_isOn) {
+                    _img.SetUsingImageName(_onImg);
+                } else {
+                    _img.SetUsingImageName(_offImg);
+                }
+            }
+        }
+        );
+    }
+}
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>// //<>//
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -2952,6 +2997,67 @@ public class Scene_MenuBar extends Scene {
         menuObj = new PMenu("Window Menu", "Window");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
+    }
+}
+public class Scene_OperationBar extends Scene {
+
+    public Scene_OperationBar() {
+        super("Operation Bar");
+
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
+        _SetTransform(GetTransform(), width, 32, 0, 20, 0, 0, 1, 0, 0.5, 0);
+
+        SceneObject opeObj;
+
+        String[] paths = new String[]{
+            "Hand", 
+            "Translate", 
+            "Rotate", 
+            "Scale", 
+            "Pivot"
+        };
+
+        float x = 10;
+        for (int i=0; i<paths.length; i++, x+=32) {
+            opeObj = new SceneObject(paths[i]+" Ope");
+            opeObj.GetDrawBack().SetEnable(false);
+            AddObject(opeObj);
+            AddChild(opeObj);
+            _SetTransform(opeObj.GetTransform(), 32, 22, x, 0, 0, 0.5, 0, 0.5, 0, 0.5);
+            _SetImage(opeObj, paths[i]+"_Off.png");
+            _SetToggleButton(opeObj, paths[i]+"_On.png", paths[i]+"_Off.png");
+        }
+
+        opeObj = new SceneObject("Play Ope");
+        opeObj.GetDrawBack().SetEnable(false);
+        AddObject(opeObj);
+        AddChild(opeObj);
+        _SetTransform(opeObj.GetTransform(), 32, 22, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
+        _SetImage(opeObj, "Play_Off.png");
+        _SetToggleButton(opeObj, "Play_On.png", "Play_Off.png");
+    }
+
+    private void _SetTransform(SceneObjectTransform t, float w, float h, float x, float y, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY) {
+        if (t == null) return;
+        t.SetTranslation(x, y);
+        t.SetSize(w, h);
+        t.GetAnchor().SetMin(minAX, minAY);
+        t.GetAnchor().SetMax(maxAX, maxAY);
+        t.GetPivot().SetPivot(pX, pY);
+    }
+
+    private void _SetImage(SceneObject o, String fileName) {
+        if (o == null) return;
+        SceneObjectImage img = new SceneObjectImage();
+        o.AddBehavior(img);
+        img.SetUsingImageName(ImageManager.OPERATION_BAR_PATH + fileName);
+    }
+
+    private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
+        if (o == null) return;
+        String path = ImageManager.OPERATION_BAR_PATH;
+        SceneObjectToggleButton btn = new SceneObjectToggleButton(path + onFile, path + offFile);
+        o.AddBehavior(btn);
     }
 }
 /** //<>//
