@@ -87,7 +87,7 @@ public class Scene implements Comparable<Scene> {
      */
     public void InitScene() {
         _isNeedSorting = true;
-        _Sorting();
+        Sorting();
     }
 
     /**
@@ -174,7 +174,7 @@ public class Scene implements Comparable<Scene> {
      オブジェクトのトランスフォームの優先度によってソートする。
      毎度処理していると重くなるのフラグが立っている時のみ処理する。
      */
-    protected void _Sorting() {
+    public void Sorting() {
         if (!_isNeedSorting) return;
         _isNeedSorting = false;
         _collection.SortList(GetObjects());
@@ -218,7 +218,7 @@ public class Scene implements Comparable<Scene> {
      */
     public void Draw() {
         _DrawScene();
-
+        
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -240,6 +240,15 @@ public class Scene implements Comparable<Scene> {
     }
 
     /**
+     毎回オブジェクトのSetParentを呼び出すのが面倒なので省略のために用意。
+     */
+    public final void AddChild(SceneObject object) {
+        if (object == null) return;
+        
+        object.GetTransform().SetParent(GetTransform(), true);
+    }
+
+    /**
      自身のリストにオブジェクトを追加する。
      ただし、既に子として追加されている場合は追加できない。
      
@@ -248,7 +257,6 @@ public class Scene implements Comparable<Scene> {
     public final boolean AddObject(SceneObject object) {
         if (GetObject(object.GetName()) != null) return false;
         object.SetScene(this);
-        object.GetTransform().SetParent(GetTransform(), true);
         return _objects.add(object);
     }
 

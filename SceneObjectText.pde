@@ -150,7 +150,6 @@ public class SceneObjectText extends SceneObjectDrawBase {
         } else {
             _tempText = GetText();
         }
-
         text(_tempText, 0, 0, _objSize.x, _objSize.y);
     }
 }
