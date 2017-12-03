@@ -14,6 +14,7 @@ SceneManager sceneManager;
 ImageManager imageManager;
 FontManager fontManager;
 TransformManager transformManager;
+PEOScenePositionManager peoScenePositionManager;
 
 void setup() {
     size(displayWidth, displayHeight);
@@ -21,17 +22,29 @@ void setup() {
     try {
         InitManager();
         
-        PESceneMenuBar menu = new PESceneMenuBar();
+        PEOSceneMenuBar menu = new PEOSceneMenuBar();
         sceneManager.AddScene(menu);
         sceneManager.LoadScene(menu.GetName());
         
-        PESceneOperationBar operation = new PESceneOperationBar();
+        PEOSceneOperationBar operation = new PEOSceneOperationBar();
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
         
-        PESceneEngineOverAll engine = new PESceneEngineOverAll();
-        sceneManager.AddScene(engine);
-        sceneManager.LoadScene(engine.GetName());
+        PEOSceneViewBase view = new PEOSceneViewBase("hoge");
+        sceneManager.AddScene(view);
+        sceneManager.LoadScene(view.GetName());
+        
+        PEOSceneProjectBase project = new PEOSceneProjectBase("huga");
+        sceneManager.AddScene(project);
+        sceneManager.LoadScene(project.GetName());
+        
+        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy");
+        sceneManager.AddScene(heararchy);
+        sceneManager.LoadScene(heararchy.GetName());
+        
+        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector");
+        sceneManager.AddScene(inspector);
+        sceneManager.LoadScene(inspector.GetName());
 
         sceneManager.Start();
     } 
@@ -46,6 +59,8 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+    
+    peoScenePositionManager = new PEOScenePositionManager();
 }
 
 void draw() {
@@ -262,6 +277,7 @@ public final class ClassID {
     public static final int CID_BUTTON = 6;
     
     public static final int CID_TOGGLE_BUTTON = 7;
+    public static final int CID_DRAG_HANDLER = 8;
 }
 public class Collection<R extends Comparable> {
     /**
@@ -982,62 +998,295 @@ public class Key {
     public final static int _BACK = 43;
     public final static int _SHIFT = 44;
 }
-public class PESceneEngineOverAll extends Scene {
-    public PESceneEngineOverAll() {
-        super("Engine Over All");
+/**
+ メニューアイテムオブジェクト。
+ */
+public class PEOMenu extends SceneObject {
+    private SceneObjectText _text;
+    public SceneObjectText GetText() {
+        return _text;
+    }
+
+    private SceneObjectButton _button;
+
+    private DrawColor _dc;
+
+    public PEOMenu(String name, String t) {
+        super(name);
         
-        GetDrawBack().GetBackColorInfo().SetColor(0, 150, 255);
-        SceneObjectTransform t = GetTransform();
-        t.SetSize(width, 0);
-        // 上部のメニューバーと操作部の分だけ下げる
-        t.GetAnchor().SetMin(0, 52f/height);
-        t.GetAnchor().SetMax(1, 1);
+        _dc = GetDrawBack().GetBackColorInfo();
+        GetDrawBack().SetEnableBorder(false);
+        _dc.SetColor(204, 232, 255, 0);
+
+        _text = new SceneObjectText();
+        _text.SetText(t);
+        _text.SetFontSize(12);
+        _text.SetUsingFontName("FFScala");
+        _text.SetAlign(CENTER, CENTER);
+        _text.GetColorInfo().SetColor(0, 0, 0);
+        AddBehavior(_text);
+
+        _button = new SceneObjectButton(name + t + " PMenu Label");
+        AddBehavior(_button);
+        _button.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
+            public void Event() {
+                _dc.SetAlpha(255);
+            }
+        }
+        );
+        _button.GetDisabledActiveHandler().SetEvent("mouse exited", new IEvent() {
+            public void Event() {
+                _dc.SetAlpha(0);
+            }
+        }
+        );
     }
 }
-public class PESceneMenuBar extends Scene {
-    public PESceneMenuBar() {
+/**
+ メニューバーオブジェクト。
+ */
+public class PEOMenuBar extends SceneObject {
+    private ArrayList<PEOMenu> _menus;
+
+    private boolean _isStart;
+
+    public PEOMenuBar(String name) {
+        super(name);
+
+        _menus = new ArrayList<PEOMenu>();
+
+        SceneObjectDrawBack db = GetDrawBack();
+        db.GetBackColorInfo().SetColor(255, 255, 255);
+        db.SetEnableBorder(false);
+    }
+
+    public void AddMenu(PEOMenu menu) {
+        if (menu == null) return;
+        if (_menus.contains(menu)) return;
+        _menus.add(menu);
+    }
+
+    public void Start() {
+        // 自身の他の振る舞いに処理が行き渡るようにする
+        super.Start();
+
+        if (_isStart) return;
+        _isStart = true;
+
+        if (_menus == null) return;
+        PEOMenu p;
+        SceneObjectTransform tr;
+        SceneObjectText t;
+        float x, sum = 0;
+
+        for (int i=0; i<_menus.size(); i++) {
+            p = _menus.get(i);
+            t = p.GetText();
+            textFont(fontManager.GetFont(t.GetUsingFontName()));
+            textSize(t.GetFontSize());
+            textAlign(t.GetHorizontalAlign(), t. GetVerticalAlign());
+            textLeading(t.GetLineSpace());
+
+            x = textWidth(t.GetText()) + 20;
+            tr = p.GetTransform();
+            tr.SetParent(GetTransform(), true);
+            tr.SetSize(x, 0);
+            tr.GetAnchor().SetMin(0, 0);
+            tr.GetAnchor().SetMax(0, 1);
+            tr.GetPivot().SetPivot(0, 0.5);
+            tr.SetTranslation(sum, 0);
+            sum += x;
+        }
+    }
+}
+public class PEOSceneBase extends Scene {
+    public PEOSceneBase(String name) {
+        super(name);
+    }
+
+    protected void _SetTransform(SceneObject o, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY, float sX, float sY) {
+        if (o == null) return;
+        SceneObjectTransform t = o.GetTransform();
+        t.GetAnchor().SetMin(minAX, minAY);
+        t.GetAnchor().SetMax(maxAX, maxAY);
+        t.GetPivot().SetPivot(pX, pY);
+        t.SetSize(sX, sY);
+    }
+    
+    protected void _SetDragHandler(SceneObject o, IEvent dragEvent) {
+        if (o == null) return;
+        SceneObjectDragHandler dh = new SceneObjectDragHandler(GetName() + o.GetName() + " DragHandler Label");
+        o.AddBehavior(dh);
+
+        dh.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
+            public void Event() {
+                cursor(MOVE);
+            }
+        }
+        );
+        dh.GetDisabledActiveHandler().SetEvent("mouse exited", new IEvent() {
+            public void Event() {
+                cursor(ARROW);
+            }
+        }
+        );
+        dh.GetDraggedActionHandler().SetEvent("mouse dragged", dragEvent);
+    }
+}
+/**
+ ヒエラルキーの基底クラス。
+ */
+public class PEOSceneHeararchyBase extends PEOSceneBase {
+    public PEOSceneHeararchyBase(String name) {
+        super(name);
+
+        GetDrawBack().GetBackColorInfo().SetColor(200, 100, 100);
+        SceneObjectTransform t = GetTransform();
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(0, 0);
+        t.GetPivot().SetPivot(0, 0);
+
+        SceneObject slider;
+
+        slider = new SceneObject("View to Hierarchy Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 0);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 0, 0, 0, 1, 0, 0.5, 4, 0);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dx = mouseX - pmouseX;
+                peoScenePositionManager.SlideOnVtoH(mouseX + dx);
+            }
+        }
+        );
+        
+        slider = new SceneObject("Hierarchy to Inspector Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 200);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 1, 0, 1, 1, 1, 0.5, 4, 0);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dx = mouseX - pmouseX;
+                peoScenePositionManager.SlideOnHtoI(mouseX + dx);
+            }
+        }
+        );
+    }
+
+    /**
+     アップデートの段階でサイズを取得して調整する。
+     */
+    protected void _OnUpdate() {
+        super._OnUpdate();
+
+        float v2h, h2i, h;
+        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        v2h = peoScenePositionManager.GetVtoH();
+        h2i = peoScenePositionManager.GetHtoI();
+        
+        GetTransform().SetTranslation(v2h, h);
+        GetTransform().SetSize(h2i - v2h, height - h);
+    }
+}
+/**
+ インスペクターの基底クラス。
+ */
+public class PEOSceneInspectorBase extends PEOSceneBase {
+    public PEOSceneInspectorBase(String name) {
+        super(name);
+
+        GetDrawBack().GetBackColorInfo().SetColor(100, 200, 200);
+        SceneObjectTransform t = GetTransform();
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(0, 0);
+        t.GetPivot().SetPivot(0, 0);
+
+        SceneObject slider;
+        
+        slider = new SceneObject("Hierarchy to Inspector Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 200);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 0, 0, 0, 1, 0, 0.5, 4, 0);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dx = mouseX - pmouseX;
+                peoScenePositionManager.SlideOnHtoI(mouseX + dx);
+            }
+        }
+        );
+    }
+
+    /**
+     アップデートの段階でサイズを取得して調整する。
+     */
+    protected void _OnUpdate() {
+        super._OnUpdate();
+
+        float h2i, h;
+        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h2i = peoScenePositionManager.GetHtoI();
+        
+        GetTransform().SetTranslation(h2i, h);
+        GetTransform().SetSize(width - h2i, height - h);
+    }
+}
+public class PEOSceneMenuBar extends Scene {
+    public PEOSceneMenuBar() {
         super("Menu Bar");
 
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
         SceneObjectTransform t = GetTransform();
-        t.SetSize(width, 20);
+        t.SetSize(width, peoScenePositionManager.MENU_BAR_HEIGHT);
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(1, 0);
         t.GetPivot().SetPivot(0.5, 0);
 
-        PMenuBar menuBarObj = new PMenuBar("Menu Bar");
+        PEOMenuBar menuBarObj = new PEOMenuBar("Menu Bar");
         AddObject(menuBarObj);
         AddChild(menuBarObj);
 
-        PMenu menuObj;
-        menuObj = new PMenu("File Menu", "File");
+        PEOMenu menuObj;
+        menuObj = new PEOMenu("File Menu", "File");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
         
-        menuObj = new PMenu("Edit Menu", "Edit");
+        menuObj = new PEOMenu("Edit Menu", "Edit");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
         
-        menuObj = new PMenu("GameObject Menu", "GameObject");
+        menuObj = new PEOMenu("GameObject Menu", "GameObject");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
         
-        menuObj = new PMenu("Behavior Menu", "Behavior");
+        menuObj = new PEOMenu("Behavior Menu", "Behavior");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
         
-        menuObj = new PMenu("Window Menu", "Window");
+        menuObj = new PEOMenu("Window Menu", "Window");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
     }
 }
-public class PESceneOperationBar extends Scene {
+public class PEOSceneOperationBar extends Scene {
 
-    public PESceneOperationBar() {
+    public PEOSceneOperationBar() {
         super("Operation Bar");
 
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        _SetTransform(GetTransform(), width, 32, 0, 20, 0, 0, 1, 0, 0.5, 0);
+        
+        float selfH, menuH;
+        selfH = peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        menuH = peoScenePositionManager.MENU_BAR_HEIGHT;
+        _SetTransform(GetTransform(), width, selfH, 0, menuH, 0, 0, 1, 0, 0.5, 0);
 
         SceneObject opeObj;
 
@@ -1088,8 +1337,235 @@ public class PESceneOperationBar extends Scene {
     private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
         if (o == null) return;
         String path = ImageManager.OPERATION_BAR_PATH;
-        SceneObjectToggleButton btn = new SceneObjectToggleButton(path + onFile, path + offFile);
+        SceneObjectToggleButton btn = new SceneObjectToggleButton(o.GetName() + " OperationBar Label" , path + onFile, path + offFile);
         o.AddBehavior(btn);
+    }
+}
+/**
+ 開発エンジン専用。
+ */
+public final class PEOScenePositionManager {
+    public final float MENU_BAR_HEIGHT = 20;
+    public final float OPERATION_BAR_HEIGHT = 32;
+    
+    public final float MIN_VIEW_WIDTH = 220;
+    public final float MIN_VIEW_HEIGHT = 220;
+    public final float MIN_PROJECT_HEIGHT = 120;
+    public final float MIN_HIERARCHY_WIDTH = 220;
+    public final float MIN_INSPECTOR_WIDTH = 280;
+
+    private float _viewToHierarchy;
+    public float GetVtoH() {
+        return _viewToHierarchy;
+    }
+
+    private float _viewToProject;
+    public float GetVtoP() {
+        return _viewToProject;
+    }
+
+    private float _hierarchyToInspector;
+    public float GetHtoI() {
+        return _hierarchyToInspector;
+    }
+
+    public PEOScenePositionManager() {
+        _viewToHierarchy = 0.6 * width;
+        _viewToProject = 0.7 * height;
+        _hierarchyToInspector = 0.8 * width;
+    }
+
+    /**
+     ViewとHierarchyの間を設定する。
+     それ以上サイズを変えられない場合はfalse、サイズを変えた場合はtrueを返す。
+     */
+    public boolean SlideOnVtoH(float pos) {
+        if (_viewToHierarchy > pos) {
+            if (MIN_VIEW_WIDTH <= pos) {
+                _viewToHierarchy = pos;
+                return true;
+            }
+            return false;
+        } else {
+            if (_hierarchyToInspector - pos >= MIN_HIERARCHY_WIDTH) {
+                _viewToHierarchy = pos;
+                return true;
+            } else {
+                // インスペクタも巻き込む場合
+                if (SlideOnHtoI(pos + MIN_HIERARCHY_WIDTH)) {
+                    _viewToHierarchy = pos;
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+
+    /**
+     HierarchyとInspectorの間を設定する。
+     それ以上サイズを変えられない場合はfalse、サイズを変えた場合はtrueを返す。
+     */
+    public boolean SlideOnHtoI(float pos) {
+        if (_hierarchyToInspector > pos) {
+            if (pos - _viewToHierarchy >= MIN_HIERARCHY_WIDTH) {
+                _hierarchyToInspector = pos;
+                return true;
+            } else {
+                // ビューも巻き込む場合
+                if (SlideOnVtoH(pos - MIN_HIERARCHY_WIDTH)) {
+                    _hierarchyToInspector = pos;
+                    return true;
+                }
+                return false;
+            }
+        } else {
+            if (width - pos >= MIN_INSPECTOR_WIDTH) {
+                _hierarchyToInspector = pos;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     ViewとProjectの間を設定する。
+     それ以上サイズを変えられない場合はfalse、サイズを変えた場合はtrueを返す。
+     */
+    public boolean SlideOnVtoP(float pos) {
+        if (_viewToProject > pos) {
+            if (MIN_VIEW_HEIGHT + MENU_BAR_HEIGHT + OPERATION_BAR_HEIGHT <= pos) {
+                _viewToProject = pos;
+                return true;
+            }
+            return false;
+        } else {
+            if (height - pos >= MIN_PROJECT_HEIGHT) {
+                _viewToProject = pos;
+                return true;
+            }
+            return false;
+        }
+    }
+}
+/**
+ プロジェクトビューの基底クラス。
+ */
+public class PEOSceneProjectBase extends PEOSceneBase {
+    public PEOSceneProjectBase(String name) {
+        super(name);
+
+        GetDrawBack().GetBackColorInfo().SetColor(0, 100, 150);
+        SceneObjectTransform t = GetTransform();
+        t.GetAnchor().SetMin(0, 1);
+        t.GetAnchor().SetMax(0, 1);
+        t.GetPivot().SetPivot(0, 1);
+
+        SceneObject slider;
+
+        slider = new SceneObject("Project to Hierarchy Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 0, 200);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 1, 0, 1, 1, 1, 0.5, 4, 0);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dx = mouseX - pmouseX;
+                peoScenePositionManager.SlideOnVtoH(mouseX + dx);
+            }
+        }
+        );
+        
+        slider = new SceneObject("View to Project Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 0, 0, 1, 0, 0.5, 0, 0, 4);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dy = mouseY - pmouseY;
+                peoScenePositionManager.SlideOnVtoP(mouseY + dy);
+            }
+        }
+        );
+    }
+
+    /**
+     アップデートの段階でサイズを取得して調整する。
+     */
+    protected void _OnUpdate() {
+        super._OnUpdate();
+
+        float v2h, v2p;
+        v2h = peoScenePositionManager.GetVtoH();
+        v2p = peoScenePositionManager.GetVtoP();
+        
+        GetTransform().SetSize(v2h, height - v2p);
+    }
+}
+/**
+ メインビューの基底クラス。
+ */
+public class PEOSceneViewBase extends PEOSceneBase {
+    public PEOSceneViewBase(String name) {
+        super(name);
+
+        GetDrawBack().GetBackColorInfo().SetColor(0, 255, 0);
+        SceneObjectTransform t = GetTransform();
+        float h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        t.SetTranslation(0, h);
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(0, 0);
+        t.GetPivot().SetPivot(0, 0);
+
+        SceneObject slider;
+
+        slider = new SceneObject("View to Hierarchy Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 0, 100);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 1, 0, 1, 1, 1, 0.5, 4, 0);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dx = mouseX - pmouseX;
+                peoScenePositionManager.SlideOnVtoH(mouseX + dx);
+            }
+        }
+        );
+        
+        slider = new SceneObject("View to Project Slider");
+        //slider.GetDrawBack().SetEnable(false);
+        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200, 100);
+        AddObject(slider);
+        AddChild(slider);
+
+        _SetTransform(slider, 0, 1, 1, 1, 0.5, 1, 0, 4);
+        _SetDragHandler(slider, new IEvent() {
+            public void Event() {
+                float dy = mouseY - pmouseY;
+                peoScenePositionManager.SlideOnVtoP(mouseY + dy);
+            }
+        }
+        );
+    }
+
+    /**
+     アップデートの段階でサイズを取得して調整する。
+     */
+    protected void _OnUpdate() {
+        super._OnUpdate();
+
+        float v2h, v2p, h;
+        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        v2h = peoScenePositionManager.GetVtoH();
+        v2p = peoScenePositionManager.GetVtoP();
+        
+        GetTransform().SetSize(v2h, v2p - h);
     }
 }
 /**
@@ -1147,107 +1623,6 @@ public class Pivot {
 
     public void SetY(float value) {
         SetPivot(GetX(), value);
-    }
-}
-/**
- メニューアイテムオブジェクト。
- */
-public class PMenu extends SceneObject {
-    private SceneObjectText _text;
-    public SceneObjectText GetText() {
-        return _text;
-    }
-
-    private SceneObjectButton _button;
-
-    private DrawColor _dc;
-
-    public PMenu(String name, String t) {
-        super(name);
-        
-        _dc = GetDrawBack().GetBackColorInfo();
-        GetDrawBack().SetEnableBorder(false);
-        _dc.SetColor(204, 232, 255, 0);
-
-        _text = new SceneObjectText();
-        _text.SetText(t);
-        _text.SetFontSize(12);
-        _text.SetUsingFontName("FFScala");
-        _text.SetAlign(CENTER, CENTER);
-        _text.GetColorInfo().SetColor(0, 0, 0);
-        AddBehavior(_text);
-
-        _button = new SceneObjectButton();
-        AddBehavior(_button);
-        _button.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
-            public void Event() {
-                _dc.SetAlpha(255);
-            }
-        }
-        );
-        _button.GetDisabledActiveHandler().SetEvent("mouse exited", new IEvent() {
-            public void Event() {
-                _dc.SetAlpha(0);
-            }
-        }
-        );
-    }
-}
-/**
- メニューバーオブジェクト。
- */
-public class PMenuBar extends SceneObject {
-    private ArrayList<PMenu> _menus;
-
-    private boolean _isStart;
-
-    public PMenuBar(String name) {
-        super(name);
-
-        _menus = new ArrayList<PMenu>();
-
-        SceneObjectDrawBack db = GetDrawBack();
-        db.GetBackColorInfo().SetColor(255, 255, 255);
-        db.SetEnableBorder(false);
-    }
-
-    public void AddMenu(PMenu menu) {
-        if (menu == null) return;
-        if (_menus.contains(menu)) return;
-        _menus.add(menu);
-    }
-
-    public void Start() {
-        // 自身の他の振る舞いに処理が行き渡るようにする
-        super.Start();
-        
-        if (_isStart) return;
-        _isStart = true;
-
-        if (_menus == null) return;
-        PMenu p;
-        SceneObjectTransform tr;
-        SceneObjectText t;
-        float x, sum = 0;
-        
-        for (int i=0; i<_menus.size(); i++) {
-            p = _menus.get(i);
-            t = p.GetText();
-            textFont(fontManager.GetFont(t.GetUsingFontName()));
-            textSize(t.GetFontSize());
-            textAlign(t.GetHorizontalAlign(), t. GetVerticalAlign());
-            textLeading(t.GetLineSpace());
-
-            x = textWidth(t.GetText()) + 20;
-            tr = p.GetTransform();
-            tr.SetParent(GetTransform(), true);
-            tr.SetSize(x, 0);
-            tr.GetAnchor().SetMin(0, 0);
-            tr.GetAnchor().SetMax(0, 1);
-            tr.GetPivot().SetPivot(0, 0.5);
-            tr.SetTranslation(sum, 0);
-            sum += x;
-        }
     }
 }
 public class Scene implements Comparable<Scene> {
@@ -1746,7 +2121,7 @@ public class SceneManager {
                 _activeScene = null;
             }
         }
-        if (_activeScene != null) { //<>// //<>//
+        if (_activeScene != null) {
             _activeScene.CheckMouseActiveObject();
         }
     }
@@ -2221,6 +2596,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
     }
 
     private boolean _isActive;
+    private String _eventLabel;
 
     private ActionEvent _decideHandler;
     public ActionEvent GetDecideHandler() {
@@ -2237,9 +2613,10 @@ public class SceneObjectButton extends SceneObjectBehavior {
         return _disabledActiveHandler;
     }
 
-    public SceneObjectButton() {
+    public SceneObjectButton(String eventLabel) {
         super();
 
+        _eventLabel = eventLabel;
         _decideHandler = new ActionEvent();
         _enabledActiveHandler = new ActionEvent();
         _disabledActiveHandler = new ActionEvent();
@@ -2257,11 +2634,82 @@ public class SceneObjectButton extends SceneObjectBehavior {
         GetDisabledActiveHandler().InvokeAllEvents();
     }
 
-    public void Update() {
-        if (_isActive) {
-            if (inputManager.IsMouseUp()) {
+    public void Start() {
+        super.Start();
+        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
+            public void Event() {
+                if (!_isActive) return;
                 GetDecideHandler().InvokeAllEvents();
             }
+        }
+        );
+    }
+}
+public class SceneObjectDragHandler extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DRAG_HANDLER;
+    }
+
+    private boolean _isActive, _isDragging;
+    private String _eventLabel;
+
+    private ActionEvent _draggedActionHandler;
+    public ActionEvent GetDraggedActionHandler() {
+        return _draggedActionHandler;
+    }
+
+    private ActionEvent _enabledActiveHandler;
+    public ActionEvent GetEnabledActiveHandler() {
+        return _enabledActiveHandler;
+    }
+
+    private ActionEvent _disabledActiveHandler;
+    public ActionEvent GetDisabledActiveHandler() {
+        return _disabledActiveHandler;
+    }
+
+    public SceneObjectDragHandler(String eventLabel) {
+        super();
+
+        _eventLabel = eventLabel;
+        _draggedActionHandler = new ActionEvent();
+        _enabledActiveHandler = new ActionEvent();
+        _disabledActiveHandler = new ActionEvent();
+    }
+
+    public void OnEnabledActive() {
+        super.OnEnabledActive();
+        _isActive = true;
+        GetEnabledActiveHandler().InvokeAllEvents();
+    }
+
+    public void OnDisabledActive() {
+        super.OnDisabledActive();
+        _isActive = false;
+        GetDisabledActiveHandler().InvokeAllEvents();
+    }
+
+    public void Start() {
+        super.Start();
+        inputManager.GetMouseDraggedHandler().AddEvent(_eventLabel, new IEvent() {
+            public void Event() {
+                if (!_isDragging) return;
+                GetDraggedActionHandler().InvokeAllEvents();
+            }
+        }
+        );
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_isActive) {
+            if (inputManager.IsMouseDown()) {
+                _isDragging = true;
+            }
+        }
+        if (inputManager.IsMouseUp()) {
+            _isDragging = false;
         }
     }
 }
@@ -2609,14 +3057,16 @@ public class SceneObjectToggleButton extends SceneObjectButton {
 
     private SceneObjectImage _img;
 
-    public SceneObjectToggleButton(String offImg, String onImg) {
-        super();
+    public SceneObjectToggleButton(String eventLabel, String offImg, String onImg) {
+        super(eventLabel);
         _isOn = true;
         _offImg = offImg;
         _onImg = onImg;
     }
 
     public void Start() {
+        super.Start();
+        
         SceneObjectBehavior beh = GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
         if (beh instanceof SceneObjectImage) {
             _img = (SceneObjectImage) beh;
@@ -2790,6 +3240,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _matrix.reset();
 
         _TransformMatrix();
+        transformManager.PopDepth();
     }
 
     /**
@@ -2805,7 +3256,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
         _TransformMatrix();
 
-        transformManager.PushDepth();
+        transformManager.PopDepth();
     }
 
     private void _TransformMatrix() {

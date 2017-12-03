@@ -1,12 +1,4 @@
 public final class DrawColor {
-    public static final int MAX_RED = 255;
-    public static final int MAX_GREEN = 255;
-    public static final int MAX_BLUE = 255;
-    public static final int MAX_HUE = 360;
-    public static final int MAX_SATURATION = 100;
-    public static final int MAX_BRIGHTNESS = 100;
-    public static final int MAX_ALPHA = 255;
-
     private boolean _isRGB;
     public boolean IsRGB() {
         return _isRGB;
@@ -25,10 +17,10 @@ public final class DrawColor {
         return _p1;
     }
     public void SetRedOrHue(float value) {
-        if (_isRGB && value > MAX_RED) {
-            value %= MAX_RED;
-        } else if (!_isRGB && value > MAX_HUE) {
-            value %= MAX_HUE;
+        if (_isRGB && value > PConst.MAX_RED) {
+            value %= PConst.MAX_RED;
+        } else if (!_isRGB && value > PConst.MAX_HUE) {
+            value %= PConst.MAX_HUE;
         }
         _p1 = value;
     }
@@ -37,10 +29,10 @@ public final class DrawColor {
         return _p2;
     }
     public void SetGreenOrSaturation(float value) {
-        if (_isRGB && value > MAX_GREEN) {
-            value %= MAX_GREEN;
-        } else if (!_isRGB && value > MAX_SATURATION) {
-            value %= MAX_SATURATION;
+        if (_isRGB && value > PConst.MAX_GREEN) {
+            value %= PConst.MAX_GREEN;
+        } else if (!_isRGB && value > PConst.MAX_SATURATION) {
+            value %= PConst.MAX_SATURATION;
         }
         _p2 = value;
     }
@@ -49,10 +41,10 @@ public final class DrawColor {
         return _p3;
     }
     public void SetBlueOrBrightness(float value) {
-        if (_isRGB && value > MAX_BLUE) {
-            value %= MAX_BLUE;
-        } else if (!_isRGB && value > MAX_BRIGHTNESS) {
-            value %= MAX_BRIGHTNESS;
+        if (_isRGB && value > PConst.MAX_BLUE) {
+            value %=PConst. MAX_BLUE;
+        } else if (!_isRGB && value > PConst.MAX_BRIGHTNESS) {
+            value %= PConst.MAX_BRIGHTNESS;
         }
         _p3 = value;
     }
@@ -61,8 +53,8 @@ public final class DrawColor {
         return _alpha;
     }
     public void SetAlpha(float value) {
-        if (value > MAX_ALPHA) {
-            value %= MAX_ALPHA;
+        if (value > PConst.MAX_ALPHA) {
+            value %= PConst.MAX_ALPHA;
         }
         _alpha = value;
     }
@@ -85,19 +77,19 @@ public final class DrawColor {
     }
 
     public DrawColor() {
-        _InitParameterOnConstructor(true, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+        _InitParameterOnConstructor(true, PConst.MAX_RED, PConst.MAX_GREEN, PConst.MAX_BLUE, PConst.MAX_ALPHA);
     }
 
     public DrawColor(boolean isRGB) {
         if (_isRGB) {
-            _InitParameterOnConstructor(_isRGB, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+            _InitParameterOnConstructor(_isRGB, PConst.MAX_RED, PConst.MAX_GREEN, PConst.MAX_BLUE, PConst.MAX_ALPHA);
         } else {
-            _InitParameterOnConstructor(_isRGB, MAX_HUE, MAX_SATURATION, MAX_BRIGHTNESS, MAX_ALPHA);
+            _InitParameterOnConstructor(_isRGB, PConst.MAX_HUE, PConst.MAX_SATURATION, PConst.MAX_BRIGHTNESS, PConst.MAX_ALPHA);
         }
     }
 
     public DrawColor(boolean isRGB, float p1, float p2, float p3) {
-        _InitParameterOnConstructor(isRGB, p1, p2, p3, MAX_ALPHA);
+        _InitParameterOnConstructor(isRGB, p1, p2, p3, PConst.MAX_ALPHA);
     }
 
     public DrawColor(boolean isRGB, float p1, float p2, float p3, float p4) {
@@ -111,9 +103,9 @@ public final class DrawColor {
 
     private void _ChangeColorMode() {
         if (_isRGB) {
-            colorMode(RGB, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+            colorMode(RGB, PConst.MAX_RED, PConst.MAX_GREEN, PConst.MAX_BLUE, PConst.MAX_ALPHA);
         } else {
-            colorMode(HSB, MAX_HUE, MAX_SATURATION, MAX_BRIGHTNESS, MAX_ALPHA);
+            colorMode(HSB, PConst.MAX_HUE, PConst.MAX_SATURATION, PConst.MAX_BRIGHTNESS, PConst.MAX_ALPHA);
         }
     }
 

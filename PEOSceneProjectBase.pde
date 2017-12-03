@@ -5,7 +5,7 @@ public class PEOSceneProjectBase extends PEOSceneBase {
     public PEOSceneProjectBase(String name) {
         super(name);
 
-        GetDrawBack().GetBackColorInfo().SetColor(0, 100, 150);
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
         t.GetAnchor().SetMin(0, 1);
         t.GetAnchor().SetMax(0, 1);

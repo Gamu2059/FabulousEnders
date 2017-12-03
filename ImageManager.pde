@@ -2,6 +2,7 @@ public final class ImageManager {
     // イメージのルートパス
     public static final String IMAGE_PATH = "image/";
     
+    // エンジン用パス
     public static final String OPERATION_BAR_PATH="Engine/OperationBar/";
     
     private HashMap<String, PImage> _images;

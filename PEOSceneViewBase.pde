@@ -5,7 +5,7 @@ public class PEOSceneViewBase extends PEOSceneBase {
     public PEOSceneViewBase(String name) {
         super(name);
 
-        GetDrawBack().GetBackColorInfo().SetColor(0, 255, 0);
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
         float h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
         t.SetTranslation(0, h);
