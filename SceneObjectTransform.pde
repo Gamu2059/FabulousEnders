@@ -151,6 +151,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _matrix.reset();
 
         _TransformMatrix();
+        transformManager.PopDepth();
     }
 
     /**
@@ -166,7 +167,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
         _TransformMatrix();
 
-        transformManager.PushDepth();
+        transformManager.PopDepth();
     }
 
     private void _TransformMatrix() {

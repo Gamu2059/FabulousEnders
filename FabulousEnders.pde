@@ -22,13 +22,29 @@ void setup() {
     try {
         InitManager();
         
-        PESceneMenuBar menu = new PESceneMenuBar();
+        PEOSceneMenuBar menu = new PEOSceneMenuBar();
         sceneManager.AddScene(menu);
         sceneManager.LoadScene(menu.GetName());
         
-        PESceneOperationBar operation = new PESceneOperationBar();
+        PEOSceneOperationBar operation = new PEOSceneOperationBar();
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
+        
+        PEOSceneViewBase view = new PEOSceneViewBase("hoge");
+        sceneManager.AddScene(view);
+        sceneManager.LoadScene(view.GetName());
+        
+        PEOSceneProjectBase project = new PEOSceneProjectBase("huga");
+        sceneManager.AddScene(project);
+        sceneManager.LoadScene(project.GetName());
+        
+        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy");
+        sceneManager.AddScene(heararchy);
+        sceneManager.LoadScene(heararchy.GetName());
+        
+        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector");
+        sceneManager.AddScene(inspector);
+        sceneManager.LoadScene(inspector.GetName());
 
         sceneManager.Start();
     } 

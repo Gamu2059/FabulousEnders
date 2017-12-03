@@ -3,7 +3,7 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         return ClassID.CID_DRAG_HANDLER;
     }
 
-    private boolean _isActive;
+    private boolean _isActive, _isDragging;
     private String _eventLabel;
 
     private ActionEvent _draggedActionHandler;
@@ -46,10 +46,23 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         super.Start();
         inputManager.GetMouseDraggedHandler().AddEvent(_eventLabel, new IEvent() {
             public void Event() {
-                if (!_isActive) return;
+                if (!_isDragging) return;
                 GetDraggedActionHandler().InvokeAllEvents();
             }
         }
         );
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_isActive) {
+            if (inputManager.IsMouseDown()) {
+                _isDragging = true;
+            }
+        }
+        if (inputManager.IsMouseUp()) {
+            _isDragging = false;
+        }
     }
 }

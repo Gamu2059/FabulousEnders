@@ -1,22 +1,22 @@
 /**
  メニューバーオブジェクト。
  */
-public class PMenuBar extends SceneObject {
-    private ArrayList<PMenu> _menus;
+public class PEOMenuBar extends SceneObject {
+    private ArrayList<PEOMenu> _menus;
 
     private boolean _isStart;
 
-    public PMenuBar(String name) {
+    public PEOMenuBar(String name) {
         super(name);
 
-        _menus = new ArrayList<PMenu>();
+        _menus = new ArrayList<PEOMenu>();
 
         SceneObjectDrawBack db = GetDrawBack();
         db.GetBackColorInfo().SetColor(255, 255, 255);
         db.SetEnableBorder(false);
     }
 
-    public void AddMenu(PMenu menu) {
+    public void AddMenu(PEOMenu menu) {
         if (menu == null) return;
         if (_menus.contains(menu)) return;
         _menus.add(menu);
@@ -25,16 +25,16 @@ public class PMenuBar extends SceneObject {
     public void Start() {
         // 自身の他の振る舞いに処理が行き渡るようにする
         super.Start();
-        
+
         if (_isStart) return;
         _isStart = true;
 
         if (_menus == null) return;
-        PMenu p;
+        PEOMenu p;
         SceneObjectTransform tr;
         SceneObjectText t;
         float x, sum = 0;
-        
+
         for (int i=0; i<_menus.size(); i++) {
             p = _menus.get(i);
             t = p.GetText();

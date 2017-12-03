@@ -2,9 +2,11 @@
  開発エンジン専用。
  */
 public final class PEOScenePositionManager {
+    public final float MENU_BAR_HEIGHT = 20;
+    public final float OPERATION_BAR_HEIGHT = 32;
+    
     public final float MIN_VIEW_WIDTH = 220;
-    // メニューや操作部の高さも含む
-    public final float MIN_VIEW_HEIGHT = 220 + 52;
+    public final float MIN_VIEW_HEIGHT = 220;
     public final float MIN_PROJECT_HEIGHT = 120;
     public final float MIN_HIERARCHY_WIDTH = 220;
     public final float MIN_INSPECTOR_WIDTH = 280;
@@ -88,7 +90,7 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnVtoP(float pos) {
         if (_viewToProject > pos) {
-            if (MIN_VIEW_HEIGHT <= pos) {
+            if (MIN_VIEW_HEIGHT + MENU_BAR_HEIGHT + OPERATION_BAR_HEIGHT <= pos) {
                 _viewToProject = pos;
                 return true;
             }

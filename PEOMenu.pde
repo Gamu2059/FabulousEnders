@@ -1,7 +1,7 @@
 /**
  メニューアイテムオブジェクト。
  */
-public class PMenu extends SceneObject {
+public class PEOMenu extends SceneObject {
     private SceneObjectText _text;
     public SceneObjectText GetText() {
         return _text;
@@ -11,7 +11,7 @@ public class PMenu extends SceneObject {
 
     private DrawColor _dc;
 
-    public PMenu(String name, String t) {
+    public PEOMenu(String name, String t) {
         super(name);
         
         _dc = GetDrawBack().GetBackColorInfo();

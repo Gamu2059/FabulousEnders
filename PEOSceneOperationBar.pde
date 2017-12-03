@@ -1,10 +1,14 @@
-public class PESceneOperationBar extends Scene {
+public class PEOSceneOperationBar extends Scene {
 
-    public PESceneOperationBar() {
+    public PEOSceneOperationBar() {
         super("Operation Bar");
 
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        _SetTransform(GetTransform(), width, 32, 0, 20, 0, 0, 1, 0, 0.5, 0);
+        
+        float selfH, menuH;
+        selfH = peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        menuH = peoScenePositionManager.MENU_BAR_HEIGHT;
+        _SetTransform(GetTransform(), width, selfH, 0, menuH, 0, 0, 1, 0, 0.5, 0);
 
         SceneObject opeObj;
 
