@@ -1,3 +1,9 @@
+/**
+ 接頭辞について。
+ PE ... ProcessingEngineの略称。Pjsで動作する保証がないクラス。要検証。
+ PEO... ProcessingEngineOnlyの略称。Pjsで動作しないことが分かりきっているクラス。
+ */
+
 import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;

@@ -20,6 +20,8 @@ public class PMenu extends SceneObject {
 
         _text = new SceneObjectText();
         _text.SetText(t);
+        _text.SetFontSize(12);
+        _text.SetUsingFontName("FFScala");
         _text.SetAlign(CENTER, CENTER);
         _text.GetColorInfo().SetColor(0, 0, 0);
         AddBehavior(_text);

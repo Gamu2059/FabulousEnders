@@ -21,5 +21,17 @@ public class Scene_MenuBar extends Scene {
         menuObj = new PMenu("Edit Menu", "Edit");
         AddObject(menuObj);
         menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("GameObject Menu", "GameObject");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Behavior Menu", "Behavior");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
+        
+        menuObj = new PMenu("Window Menu", "Window");
+        AddObject(menuObj);
+        menuBarObj.AddMenu(menuObj);
     }
 }

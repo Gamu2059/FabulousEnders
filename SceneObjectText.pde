@@ -2,7 +2,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
     public int GetID() {
         return ClassID.CID_TEXT;
     }
-    
+
     private String _text;
     public String GetText() {
         return _text;
@@ -18,6 +18,20 @@ public class SceneObjectText extends SceneObjectDrawBase {
     public void SetHorizontalAlign(int value) {
         if (value == LEFT || value == CENTER || value == RIGHT) {
             _horizontalAlign = value;
+            switch(value) {
+            case LEFT:
+                _xRate = 0;
+                break;
+            case CENTER:
+                _xRate = 0.5;
+                break;
+            case RIGHT:
+                _xRate = 1;
+                break;
+            default:
+                _xRate = 0;
+                break;
+            }
         }
     }
 
@@ -26,8 +40,22 @@ public class SceneObjectText extends SceneObjectDrawBase {
         return _verticalAlign;
     }
     public void SetVerticalAlign(int value) {
-        if (value == TOP || value == CENTER || value == BOTTOM || value == BASELINE) {
+        if (value == TOP || value == CENTER || value == BOTTOM) {
             _verticalAlign = value;
+            switch(value) {
+            case TOP:
+                _yRate = 0;
+                break;
+            case CENTER:
+                _yRate = 0.5;
+                break;
+            case BOTTOM:
+                _yRate = 1;
+                break;
+            default:
+                _yRate = 0;
+                break;
+            }
         }
     }
 
@@ -102,6 +130,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
     private String _tempText;
 
     private PVector _objSize;
+    private float _xRate, _yRate;
 
 
     public SceneObjectText() {
@@ -150,6 +179,6 @@ public class SceneObjectText extends SceneObjectDrawBase {
         } else {
             _tempText = GetText();
         }
-        text(_tempText, 0, 0, _objSize.x, _objSize.y);
+        text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
     }
 }

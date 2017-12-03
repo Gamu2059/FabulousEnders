@@ -43,7 +43,7 @@ public class PMenuBar extends SceneObject {
             textAlign(t.GetHorizontalAlign(), t. GetVerticalAlign());
             textLeading(t.GetLineSpace());
 
-            x = textWidth(t.GetText());
+            x = textWidth(t.GetText()) + 20;
             tr = p.GetTransform();
             tr.SetParent(GetTransform(), true);
             tr.SetSize(x, 0);
