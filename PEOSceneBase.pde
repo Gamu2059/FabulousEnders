@@ -10,6 +10,12 @@ public class PEOSceneBase extends Scene {
         t.GetAnchor().SetMax(maxAX, maxAY);
         t.GetPivot().SetPivot(pX, pY);
         t.SetSize(sX, sY);
+        
+        SceneObject title;
+        
+        AddObject(title);
+        AddChild(title);
+        
     }
     
     protected void _SetDragHandler(SceneObject o, IEvent dragEvent) {
@@ -30,5 +36,12 @@ public class PEOSceneBase extends Scene {
         }
         );
         dh.GetDraggedActionHandler().SetEvent("mouse dragged", dragEvent);
+    }
+    
+    private void _SetImage(SceneObject o, String path) {
+        if (o == null) return;
+        SceneObjectImage img = new SceneObjectImage();
+        o.AddBehavior(img);
+        img.SetUsingImageName(path);
     }
 }

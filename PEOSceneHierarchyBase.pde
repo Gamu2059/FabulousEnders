@@ -51,7 +51,7 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         super._OnUpdate();
 
         float v2h, h2i, h;
-        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h = PEOConst.BAR_HEIGHT;
         v2h = peoScenePositionManager.GetVtoH();
         h2i = peoScenePositionManager.GetHtoI();
         

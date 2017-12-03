@@ -4,7 +4,7 @@ public class PEOSceneMenuBar extends Scene {
 
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
         SceneObjectTransform t = GetTransform();
-        t.SetSize(width, peoScenePositionManager.MENU_BAR_HEIGHT);
+        t.SetSize(width, PEOConst.MENU_BAR_HEIGHT);
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(1, 0);
         t.GetPivot().SetPivot(0.5, 0);

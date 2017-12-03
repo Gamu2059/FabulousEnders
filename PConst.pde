@@ -12,5 +12,6 @@ public final class PConst {
     public static final int MAX_BRIGHTNESS = 100;
     public static final int MAX_ALPHA = 255;
     
-    public final String s="1";
+    // 画像のルートパス
+    public static final String IMAGE_PATH = "image/";
 }

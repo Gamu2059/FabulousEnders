@@ -2,15 +2,6 @@
  開発エンジン専用。
  */
 public final class PEOScenePositionManager {
-    public final float MENU_BAR_HEIGHT = 20;
-    public final float OPERATION_BAR_HEIGHT = 32;
-    
-    public final float MIN_VIEW_WIDTH = 220;
-    public final float MIN_VIEW_HEIGHT = 220;
-    public final float MIN_PROJECT_HEIGHT = 120;
-    public final float MIN_HIERARCHY_WIDTH = 220;
-    public final float MIN_INSPECTOR_WIDTH = 280;
-
     private float _viewToHierarchy;
     public float GetVtoH() {
         return _viewToHierarchy;
@@ -38,18 +29,18 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnVtoH(float pos) {
         if (_viewToHierarchy > pos) {
-            if (MIN_VIEW_WIDTH <= pos) {
+            if (PEOConst.MIN_VIEW_WIDTH <= pos) {
                 _viewToHierarchy = pos;
                 return true;
             }
             return false;
         } else {
-            if (_hierarchyToInspector - pos >= MIN_HIERARCHY_WIDTH) {
+            if (_hierarchyToInspector - pos >= PEOConst.MIN_HIERARCHY_WIDTH) {
                 _viewToHierarchy = pos;
                 return true;
             } else {
                 // インスペクタも巻き込む場合
-                if (SlideOnHtoI(pos + MIN_HIERARCHY_WIDTH)) {
+                if (SlideOnHtoI(pos + PEOConst.MIN_HIERARCHY_WIDTH)) {
                     _viewToHierarchy = pos;
                     return true;
                 }
@@ -64,19 +55,19 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnHtoI(float pos) {
         if (_hierarchyToInspector > pos) {
-            if (pos - _viewToHierarchy >= MIN_HIERARCHY_WIDTH) {
+            if (pos - _viewToHierarchy >= PEOConst.MIN_HIERARCHY_WIDTH) {
                 _hierarchyToInspector = pos;
                 return true;
             } else {
                 // ビューも巻き込む場合
-                if (SlideOnVtoH(pos - MIN_HIERARCHY_WIDTH)) {
+                if (SlideOnVtoH(pos - PEOConst.MIN_HIERARCHY_WIDTH)) {
                     _hierarchyToInspector = pos;
                     return true;
                 }
                 return false;
             }
         } else {
-            if (width - pos >= MIN_INSPECTOR_WIDTH) {
+            if (width - pos >= PEOConst.MIN_INSPECTOR_WIDTH) {
                 _hierarchyToInspector = pos;
                 return true;
             }
@@ -90,13 +81,13 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnVtoP(float pos) {
         if (_viewToProject > pos) {
-            if (MIN_VIEW_HEIGHT + MENU_BAR_HEIGHT + OPERATION_BAR_HEIGHT <= pos) {
+            if (PEOConst.BAR_HEIGHT + PEOConst.OPERATION_BAR_HEIGHT <= pos) {
                 _viewToProject = pos;
                 return true;
             }
             return false;
         } else {
-            if (height - pos >= MIN_PROJECT_HEIGHT) {
+            if (height - pos >= PEOConst.MIN_PROJECT_HEIGHT) {
                 _viewToProject = pos;
                 return true;
             }

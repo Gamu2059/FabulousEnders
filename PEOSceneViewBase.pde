@@ -7,7 +7,7 @@ public class PEOSceneViewBase extends PEOSceneBase {
 
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
-        float h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        float h = PEOConst.BAR_HEIGHT;
         t.SetTranslation(0, h);
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(0, 0);
@@ -53,7 +53,7 @@ public class PEOSceneViewBase extends PEOSceneBase {
         super._OnUpdate();
 
         float v2h, v2p, h;
-        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h = PEOConst.BAR_HEIGHT;
         v2h = peoScenePositionManager.GetVtoH();
         v2p = peoScenePositionManager.GetVtoP();
         

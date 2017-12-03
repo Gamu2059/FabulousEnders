@@ -36,7 +36,7 @@ public class PEOSceneInspectorBase extends PEOSceneBase {
         super._OnUpdate();
 
         float h2i, h;
-        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h = PEOConst.BAR_HEIGHT;
         h2i = peoScenePositionManager.GetHtoI();
         
         GetTransform().SetTranslation(h2i, h);

@@ -6,8 +6,8 @@ public class PEOSceneOperationBar extends Scene {
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         
         float selfH, menuH;
-        selfH = peoScenePositionManager.OPERATION_BAR_HEIGHT;
-        menuH = peoScenePositionManager.MENU_BAR_HEIGHT;
+        selfH = PEOConst.OPERATION_BAR_HEIGHT;
+        menuH = PEOConst.MENU_BAR_HEIGHT;
         _SetTransform(GetTransform(), width, selfH, 0, menuH, 0, 0, 1, 0, 0.5, 0);
 
         SceneObject opeObj;
@@ -53,12 +53,12 @@ public class PEOSceneOperationBar extends Scene {
         if (o == null) return;
         SceneObjectImage img = new SceneObjectImage();
         o.AddBehavior(img);
-        img.SetUsingImageName(ImageManager.OPERATION_BAR_PATH + fileName);
+        img.SetUsingImageName(PEOConst.OPERATION_BAR_PATH + fileName);
     }
 
     private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
         if (o == null) return;
-        String path = ImageManager.OPERATION_BAR_PATH;
+        String path = PEOConst.OPERATION_BAR_PATH;
         SceneObjectToggleButton btn = new SceneObjectToggleButton(o.GetName() + " OperationBar Label" , path + onFile, path + offFile);
         o.AddBehavior(btn);
     }
