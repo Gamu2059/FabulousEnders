@@ -1,4 +1,4 @@
-public class SceneObjectDrawBack extends SceneObjectBehavior { //<>//
+public class SceneObjectDrawBack extends SceneObjectBehavior { //<>// //<>//
     public int GetID() {
         return ClassID.CID_DRAW_BACK;
     }

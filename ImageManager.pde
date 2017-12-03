@@ -1,6 +1,4 @@
 public final class ImageManager {
-    public static final String IMAGEPATH = "image/";
-    
     private HashMap<String, PImage> _images;
     private HashMap<String, PImage> GetImageHash() {
         return _images;
@@ -11,7 +9,7 @@ public final class ImageManager {
     }
 
     public PImage GetImage(String path) {
-        path = IMAGEPATH + path;
+        path = PConst.IMAGE_PATH + path;
         if (GetImageHash().containsKey(path)) {
             return GetImageHash().get(path);
         }

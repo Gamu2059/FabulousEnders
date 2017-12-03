@@ -23,6 +23,13 @@ public class SceneObjectImage extends SceneObjectDrawBase {
         super();
         SetUsingImageName(imagePath);
     }
+    
+    public SceneObjectImage(SceneObject o, String imagePath) {
+        super();
+        SetUsingImageName(imagePath);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
 
     public void Start() {
         super.Start();

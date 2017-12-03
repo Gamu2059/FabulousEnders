@@ -1,4 +1,4 @@
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>// //<>//
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>//
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -46,6 +46,21 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _anchor.SetMax(maxX, maxY);
     }
 
+    private PVector _offsetMin, _offsetMax;
+    public PVector GetOffsetMin() {
+        return _offsetMin;
+    }
+    public void SetOffsetMin(float x, float y) {
+        _offsetMin.set(x, y);
+    }
+    public PVector GetOffsetMax() {
+        return _offsetMax;
+    }
+    public void SetOffsetMax(float x, float y) {
+        _offsetMax.set(x, y);
+    }
+
+
     private Pivot _pivot;
     public Pivot GetPivot() {
         return _pivot;
@@ -71,6 +86,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
+            if (GetScene() == null) return;
             GetScene().SetNeedSorting(true);
         }
     }
@@ -130,11 +146,23 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
         _anchor = new Anchor();
         _pivot = new Pivot(0.5, 0.5);
+        _offsetMin = new PVector();
+        _offsetMax = new PVector();
 
         _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
         _transformProcessor = new TransformProcessor();
+    }
+
+    public void InitTransform(float minAX, float minAY, float maxAX, float maxAY, float pX, float pY, float tX, float tY, float sX, float sY, float rad, float sizeX, float sizeY) {
+        GetAnchor().SetMin(minAX, minAY);
+        GetAnchor().SetMax(maxAX, maxAY);
+        GetPivot().SetPivot(pX, pY);
+        SetTranslation(tX, tY);
+        SetScale(sX, sY);
+        SetRotate(rad);
+        SetSize(sizeX, sizeY);
     }
 
     /**
@@ -150,6 +178,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _matrix.reset();
 
         _TransformMatrix();
+        transformManager.PopDepth();
     }
 
     /**
@@ -165,7 +194,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
         _TransformMatrix();
 
-        transformManager.PushDepth();
+        transformManager.PopDepth();
     }
 
     private void _TransformMatrix() {
@@ -175,19 +204,19 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         if (GetParent() != null) {
             // アンカーの座標へ移動
             float aX, aY;
-            aX = (GetAnchor().GetMaxX() + GetAnchor().GetMinX()) / 2 * GetParent().GetSize().x;
-            aY = (GetAnchor().GetMaxY() + GetAnchor().GetMinY()) / 2 * GetParent().GetSize().y;
+            aX = ((GetAnchor().GetMaxX() + GetAnchor().GetMinX()) * GetParent().GetSize().x + GetOffsetMin().x + GetOffsetMax().x) /2 ;
+            aY = ((GetAnchor().GetMaxY() + GetAnchor().GetMinY()) * GetParent().GetSize().y + GetOffsetMin().y + GetOffsetMax().y) / 2;
 
             _transformProcessor.AddTranslate(aX, aY);
             _matrix.translate(aX, aY);
 
             if (GetAnchor().GetMaxX() != GetAnchor().GetMinX()) {
-                aX = (GetAnchor().GetMaxX() - GetAnchor().GetMinX()) * GetParent().GetSize().x;
+                aX = (GetAnchor().GetMaxX() - GetAnchor().GetMinX()) * GetParent().GetSize().x - GetOffsetMin().x + GetOffsetMax().x;
                 x = 0;
                 SetSize(aX, GetSize().y);
             }
             if (GetAnchor().GetMaxY() != GetAnchor().GetMinY()) {
-                aY = (GetAnchor().GetMaxY() - GetAnchor().GetMinY()) * GetParent().GetSize().y;
+                aY = (GetAnchor().GetMaxY() - GetAnchor().GetMinY()) * GetParent().GetSize().y - GetOffsetMin().y + GetOffsetMax().y;
                 y = 0;
                 SetSize(GetSize().x, aY);
             }

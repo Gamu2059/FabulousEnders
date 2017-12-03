@@ -1,4 +1,4 @@
-public class Key {
+public final class Key {
     // 使用するキーの総数
     public final static int KEY_NUM = 45;
 

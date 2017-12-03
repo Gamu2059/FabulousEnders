@@ -10,4 +10,7 @@ public final class ClassID {
     public static final int CID_IMAGE = 4;
     public static final int CID_TEXT = 5;
     public static final int CID_BUTTON = 6;
+    
+    public static final int CID_TOGGLE_BUTTON = 7;
+    public static final int CID_DRAG_HANDLER = 8;
 }

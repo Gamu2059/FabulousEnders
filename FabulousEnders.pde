@@ -14,17 +14,41 @@ SceneManager sceneManager;
 ImageManager imageManager;
 FontManager fontManager;
 TransformManager transformManager;
+PEOScenePositionManager peoScenePositionManager;
 
 void setup() {
-    size(1066, 600);
+    surface.setSize(displayWidth * 3 / 4, displayHeight * 3 / 4);
+    surface.setLocation(0, 0);
     try {
         InitManager();
-
-        //A_TestScene1 s1 = new A_TestScene1("main1");
-        //A_TestScene2 s2 = new A_TestScene2("main2");
-        Scene_MenuBar menu = new Scene_MenuBar();
+        
+        PEOSceneMenuBar menu = new PEOSceneMenuBar();
         sceneManager.AddScene(menu);
         sceneManager.LoadScene(menu.GetName());
+        
+        PEOSceneOperationBar operation = new PEOSceneOperationBar();
+        sceneManager.AddScene(operation);
+        sceneManager.LoadScene(operation.GetName());
+        
+        PEOSceneExplain explain = new PEOSceneExplain();
+        sceneManager.AddScene(explain);
+        sceneManager.LoadScene(explain.GetName());
+        
+        PEOSceneViewBase view = new PEOSceneViewBase("hoge", "Scene");
+        sceneManager.AddScene(view);
+        sceneManager.LoadScene(view.GetName());
+        
+        PEOSceneProjectBase project = new PEOSceneProjectBase("huga", "Project");
+        sceneManager.AddScene(project);
+        sceneManager.LoadScene(project.GetName());
+        
+        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy", "Heararchy");
+        sceneManager.AddScene(heararchy);
+        sceneManager.LoadScene(heararchy.GetName());
+        
+        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector", "Inspector");
+        sceneManager.AddScene(inspector);
+        sceneManager.LoadScene(inspector.GetName());
 
         sceneManager.Start();
     } 
@@ -39,6 +63,8 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+    
+    peoScenePositionManager = new PEOScenePositionManager();
 }
 
 void draw() {
