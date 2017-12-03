@@ -6,22 +6,13 @@ public class PEOSceneBase extends Scene {
         textSize(12);
         textAlign(CENTER, CENTER);
         float x = textWidth(titleText) + 20;
+        float xMergin = PEOConst.SLIDE_SPACE + PEOConst.TITLE_MERGIN_WIDTH;
         
         SceneObject title;
         
-        title = new SceneObject("Title L");
-        AddObject(title);
-        AddChild(title);
-        title.GetDrawBack().SetEnable(false);
-        title.GetTransform().InitTransform(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
-        new SceneObjectImage(title, PEOConst.EDITOR_GENERAL_PATH + "Title_L.png");
-        
-        title = new SceneObject("Title C");
-        AddObject(title);
-        AddChild(title);
-        title.GetDrawBack().SetEnable(false);
-        title.GetTransform().InitTransform(0, 0, 0, 0, 0, 0, PEOConst.TITLE_MERGIN_WIDTH, 0, 1, 1, 0, x, PEOConst.TITLE_HEIGHT);
-        new SceneObjectImage(title, PEOConst.EDITOR_GENERAL_PATH + "Title_C.png");
+        _SetHeaderObject("Title L", "Title_L.png", 0, 0, PEOConst.SLIDE_SPACE, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
+        _SetHeaderObject("Title R", "Title_R.png", 0, 0, xMergin + x, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
+        title = _SetHeaderObject("Title C", "Title_C.png", 0, 0, xMergin, 0, x, PEOConst.TITLE_HEIGHT);
         
         SceneObjectText _text = new SceneObjectText(title, titleText);
         _text.SetFontSize(12);
@@ -29,12 +20,25 @@ public class PEOSceneBase extends Scene {
         _text.SetAlign(CENTER, BASELINE);
         _text.GetColorInfo().SetColor(0, 0, 0);
         
-        title = new SceneObject("Title R");
-        AddObject(title);
-        AddChild(title);
-        title.GetDrawBack().SetEnable(false);
-        title.GetTransform().InitTransform(0, 0, 0, 0, 0, 0, PEOConst.TITLE_MERGIN_WIDTH + x, 0, 1, 1, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
-        new SceneObjectImage(title, PEOConst.EDITOR_GENERAL_PATH + "Title_R.png");
+        _SetHeaderObject("Header L", "Header_L.png", 0, 0, PEOConst.SLIDE_SPACE, PEOConst.TITLE_HEIGHT, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.HEADER_HEIGHT);
+        _SetHeaderObject("Header R", "Header_R.png", 1, 0, -PEOConst.SLIDE_SPACE, PEOConst.TITLE_HEIGHT, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.HEADER_HEIGHT);
+        title = _SetHeaderObject("Header C", "Header_C.png", 0, 0, 0, PEOConst.TITLE_HEIGHT, 0, PEOConst.HEADER_HEIGHT);
+        SceneObjectTransform t = title.GetTransform();
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(1, 0);
+        t.GetPivot().SetPivot(0.5, 0);
+        t.SetOffsetMin(PEOConst.TITLE_MERGIN_WIDTH, 0);
+        t.SetOffsetMax(-PEOConst.TITLE_MERGIN_WIDTH, 0);
+    }
+    
+    private SceneObject _SetHeaderObject(String name, String imagePath, float aX, float aY, float x, float y, float w, float h) {
+        SceneObject o = new SceneObject(name);
+        o.GetTransform().InitTransform(aX, aY, aX, aY, aX, aY, x, y, 1, 1, 0, w, h);
+        o.GetDrawBack().SetEnable(false);
+        AddObject(o);
+        AddChild(o);
+        new SceneObjectImage(o, PEOConst.EDITOR_GENERAL_PATH + imagePath);
+        return o;
     }
     
     protected void _SetDragHandler(SceneObject o, IEvent dragEvent) {

@@ -14,12 +14,11 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         SceneObject slider;
 
         slider = new SceneObject("View to Hierarchy Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 0);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, 2, 0);
+        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -29,12 +28,11 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         );
         
         slider = new SceneObject("Hierarchy to Inspector Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, 2, 0);
+        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -42,6 +40,16 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
             }
         }
         );
+        
+        SceneObject back = new SceneObject("BackGroung");
+        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
+        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
+        AddObject(back);
+        AddChild(back);
+        t = back.GetTransform();
+        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
+        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
+        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
     }
 
     /**
@@ -56,6 +64,6 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         h2i = peoScenePositionManager.GetHtoI();
         
         GetTransform().SetTranslation(v2h, h);
-        GetTransform().SetSize(h2i - v2h, height - h);
+        GetTransform().SetSize(h2i - v2h, height - h - PEOConst.EXPLAIN_BAR_HEIGHT);
     }
 }

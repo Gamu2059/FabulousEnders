@@ -17,7 +17,7 @@ TransformManager transformManager;
 PEOScenePositionManager peoScenePositionManager;
 
 void setup() {
-    size(displayWidth, displayHeight);
+    surface.setSize(displayWidth * 3 / 4, displayHeight * 3 / 4);
     surface.setLocation(0, 0);
     try {
         InitManager();
@@ -30,19 +30,23 @@ void setup() {
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
         
-        PEOSceneViewBase view = new PEOSceneViewBase("hoge");
+        PEOSceneExplain explain = new PEOSceneExplain();
+        sceneManager.AddScene(explain);
+        sceneManager.LoadScene(explain.GetName());
+        
+        PEOSceneViewBase view = new PEOSceneViewBase("hoge", "Scene");
         sceneManager.AddScene(view);
         sceneManager.LoadScene(view.GetName());
         
-        PEOSceneProjectBase project = new PEOSceneProjectBase("huga");
+        PEOSceneProjectBase project = new PEOSceneProjectBase("huga", "Project");
         sceneManager.AddScene(project);
         sceneManager.LoadScene(project.GetName());
         
-        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy");
+        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy", "Heararchy");
         sceneManager.AddScene(heararchy);
         sceneManager.LoadScene(heararchy.GetName());
         
-        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector");
+        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector", "Inspector");
         sceneManager.AddScene(inspector);
         sceneManager.LoadScene(inspector.GetName());
 
@@ -385,14 +389,6 @@ public interface Copyable<R> {
     public void CopyTo(R copy);
 }
 public final class DrawColor {
-    public static final int MAX_RED = 255;
-    public static final int MAX_GREEN = 255;
-    public static final int MAX_BLUE = 255;
-    public static final int MAX_HUE = 360;
-    public static final int MAX_SATURATION = 100;
-    public static final int MAX_BRIGHTNESS = 100;
-    public static final int MAX_ALPHA = 255;
-
     private boolean _isRGB;
     public boolean IsRGB() {
         return _isRGB;
@@ -411,10 +407,10 @@ public final class DrawColor {
         return _p1;
     }
     public void SetRedOrHue(float value) {
-        if (_isRGB && value > MAX_RED) {
-            value %= MAX_RED;
-        } else if (!_isRGB && value > MAX_HUE) {
-            value %= MAX_HUE;
+        if (_isRGB && value > PConst.MAX_RED) {
+            value %= PConst.MAX_RED;
+        } else if (!_isRGB && value > PConst.MAX_HUE) {
+            value %= PConst.MAX_HUE;
         }
         _p1 = value;
     }
@@ -423,10 +419,10 @@ public final class DrawColor {
         return _p2;
     }
     public void SetGreenOrSaturation(float value) {
-        if (_isRGB && value > MAX_GREEN) {
-            value %= MAX_GREEN;
-        } else if (!_isRGB && value > MAX_SATURATION) {
-            value %= MAX_SATURATION;
+        if (_isRGB && value > PConst.MAX_GREEN) {
+            value %= PConst.MAX_GREEN;
+        } else if (!_isRGB && value > PConst.MAX_SATURATION) {
+            value %= PConst.MAX_SATURATION;
         }
         _p2 = value;
     }
@@ -435,10 +431,10 @@ public final class DrawColor {
         return _p3;
     }
     public void SetBlueOrBrightness(float value) {
-        if (_isRGB && value > MAX_BLUE) {
-            value %= MAX_BLUE;
-        } else if (!_isRGB && value > MAX_BRIGHTNESS) {
-            value %= MAX_BRIGHTNESS;
+        if (_isRGB && value > PConst.MAX_BLUE) {
+            value %=PConst. MAX_BLUE;
+        } else if (!_isRGB && value > PConst.MAX_BRIGHTNESS) {
+            value %= PConst.MAX_BRIGHTNESS;
         }
         _p3 = value;
     }
@@ -447,8 +443,8 @@ public final class DrawColor {
         return _alpha;
     }
     public void SetAlpha(float value) {
-        if (value > MAX_ALPHA) {
-            value %= MAX_ALPHA;
+        if (value > PConst.MAX_ALPHA) {
+            value %= PConst.MAX_ALPHA;
         }
         _alpha = value;
     }
@@ -471,19 +467,19 @@ public final class DrawColor {
     }
 
     public DrawColor() {
-        _InitParameterOnConstructor(true, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+        _InitParameterOnConstructor(true, PConst.MAX_RED, PConst.MAX_GREEN, PConst.MAX_BLUE, PConst.MAX_ALPHA);
     }
 
     public DrawColor(boolean isRGB) {
         if (_isRGB) {
-            _InitParameterOnConstructor(_isRGB, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+            _InitParameterOnConstructor(_isRGB, PConst.MAX_RED, PConst.MAX_GREEN, PConst.MAX_BLUE, PConst.MAX_ALPHA);
         } else {
-            _InitParameterOnConstructor(_isRGB, MAX_HUE, MAX_SATURATION, MAX_BRIGHTNESS, MAX_ALPHA);
+            _InitParameterOnConstructor(_isRGB, PConst.MAX_HUE, PConst.MAX_SATURATION, PConst.MAX_BRIGHTNESS, PConst.MAX_ALPHA);
         }
     }
 
     public DrawColor(boolean isRGB, float p1, float p2, float p3) {
-        _InitParameterOnConstructor(isRGB, p1, p2, p3, MAX_ALPHA);
+        _InitParameterOnConstructor(isRGB, p1, p2, p3, PConst.MAX_ALPHA);
     }
 
     public DrawColor(boolean isRGB, float p1, float p2, float p3, float p4) {
@@ -497,9 +493,9 @@ public final class DrawColor {
 
     private void _ChangeColorMode() {
         if (_isRGB) {
-            colorMode(RGB, MAX_RED, MAX_GREEN, MAX_BLUE, MAX_ALPHA);
+            colorMode(RGB, PConst.MAX_RED, PConst.MAX_GREEN, PConst.MAX_BLUE, PConst.MAX_ALPHA);
         } else {
-            colorMode(HSB, MAX_HUE, MAX_SATURATION, MAX_BRIGHTNESS, MAX_ALPHA);
+            colorMode(HSB, PConst.MAX_HUE, PConst.MAX_SATURATION, PConst.MAX_BRIGHTNESS, PConst.MAX_ALPHA);
         }
     }
 
@@ -556,31 +552,10 @@ public final static class GeneralCalc {
         return a;
     }
 }
-public final static class GeneralJudge {
-    /**
-    指定したクラスが指定したインターフェースを実装しているかどうか。
-    */
-    //public static boolean IsImplemented(Class<?> clazz, Class<?> intrfc) {
-    //    if (clazz == null || intrfc == null) {
-    //        return false;
-    //    }
-    //    // インターフェースを実装したクラスであるかどうかをチェック
-    //    if (!clazz.isInterface() && intrfc.isAssignableFrom(clazz)
-    //            && !Modifier.isAbstract(clazz.getModifiers())) {
-    //        return true;
-    //    }
-    //    return false;
-    //}
-}
 public interface IEvent {
     public void Event();
 }
 public final class ImageManager {
-    // イメージのルートパス
-    public static final String IMAGE_PATH = "image/";
-    
-    public static final String OPERATION_BAR_PATH="Engine/OperationBar/";
-    
     private HashMap<String, PImage> _images;
     private HashMap<String, PImage> GetImageHash() {
         return _images;
@@ -591,7 +566,7 @@ public final class ImageManager {
     }
 
     public PImage GetImage(String path) {
-        path = IMAGE_PATH + path;
+        path = PConst.IMAGE_PATH + path;
         if (GetImageHash().containsKey(path)) {
             return GetImageHash().get(path);
         }
@@ -939,7 +914,7 @@ public final class InputManager {
         return !_isMousePressed && _preMousePressed;
     }
 }
-public class Key {
+public final class Key {
     // 使用するキーの総数
     public final static int KEY_NUM = 45;
 
@@ -997,6 +972,68 @@ public class Key {
     public final static int _DEL = 42;
     public final static int _BACK = 43;
     public final static int _SHIFT = 44;
+}
+/**
+ 定数を定義するクラス。
+ pjsでもエンジンでも扱える共通の値。
+ */
+public final class PConst {
+    // 色
+    public static final int MAX_RED = 255;
+    public static final int MAX_GREEN = 255;
+    public static final int MAX_BLUE = 255;
+    public static final int MAX_HUE = 360;
+    public static final int MAX_SATURATION = 100;
+    public static final int MAX_BRIGHTNESS = 100;
+    public static final int MAX_ALPHA = 255;
+    
+    // 画像のルートパス
+    public static final String IMAGE_PATH = "image/";
+}
+/**
+ エンジン専用の定数を定義するクラス。
+ */
+public final class PEOConst {
+    // 画像パス
+    public static final String ENGINE = "Engine/";
+    public static final String OPERATION_BAR_PATH = ENGINE + "OperationBar/";
+    public static final String EDITOR_PATH = ENGINE + "Editor/";
+    public static final String EDITOR_GENERAL_PATH = EDITOR_PATH + "General/";
+    
+    // エディタサイズ
+    public static final float SLIDE_SPACE = 1.5;
+    
+    public static final float MENU_BAR_HEIGHT = 20;
+    public static final float OPERATION_BAR_HEIGHT = 32;
+    public static final float EXPLAIN_BAR_HEIGHT = 20;
+    public static final float BAR_HEIGHT = MENU_BAR_HEIGHT + OPERATION_BAR_HEIGHT;
+    
+    public static final float MIN_VIEW_WIDTH = 220;
+    public static final float MIN_VIEW_HEIGHT = 220;
+    public static final float MIN_PROJECT_HEIGHT = 220;
+    public static final float MIN_HIERARCHY_WIDTH = 220;
+    public static final float MIN_INSPECTOR_WIDTH = 280;
+    
+    // エディタヘッダ
+    public static final float TITLE_HEIGHT = 16;
+    public static final float TITLE_MERGIN_WIDTH = 6;
+    public static final float HEADER_HEIGHT = 18;
+}
+public final static class PEOGeneralJudge {
+    /**
+    指定したクラスが指定したインターフェースを実装しているかどうか。
+    */
+    //public static boolean IsImplemented(Class<?> clazz, Class<?> intrfc) {
+    //    if (clazz == null || intrfc == null) {
+    //        return false;
+    //    }
+    //    // インターフェースを実装したクラスであるかどうかをチェック
+    //    if (!clazz.isInterface() && intrfc.isAssignableFrom(clazz)
+    //            && !Modifier.isAbstract(clazz.getModifiers())) {
+    //        return true;
+    //    }
+    //    return false;
+    //}
 }
 /**
  メニューアイテムオブジェクト。
@@ -1100,17 +1137,46 @@ public class PEOMenuBar extends SceneObject {
     }
 }
 public class PEOSceneBase extends Scene {
-    public PEOSceneBase(String name) {
+    public PEOSceneBase(String name, String titleText) {
         super(name);
+        
+        textFont(fontManager.GetFont("FFScala"));
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        float x = textWidth(titleText) + 20;
+        float xMergin = PEOConst.SLIDE_SPACE + PEOConst.TITLE_MERGIN_WIDTH;
+        
+        SceneObject title;
+        
+        _SetHeaderObject("Title L", "Title_L.png", 0, 0, PEOConst.SLIDE_SPACE, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
+        _SetHeaderObject("Title R", "Title_R.png", 0, 0, xMergin + x, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
+        title = _SetHeaderObject("Title C", "Title_C.png", 0, 0, xMergin, 0, x, PEOConst.TITLE_HEIGHT);
+        
+        SceneObjectText _text = new SceneObjectText(title, titleText);
+        _text.SetFontSize(12);
+        _text.SetUsingFontName("FFScala");
+        _text.SetAlign(CENTER, BASELINE);
+        _text.GetColorInfo().SetColor(0, 0, 0);
+        
+        _SetHeaderObject("Header L", "Header_L.png", 0, 0, PEOConst.SLIDE_SPACE, PEOConst.TITLE_HEIGHT, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.HEADER_HEIGHT);
+        _SetHeaderObject("Header R", "Header_R.png", 1, 0, -PEOConst.SLIDE_SPACE, PEOConst.TITLE_HEIGHT, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.HEADER_HEIGHT);
+        title = _SetHeaderObject("Header C", "Header_C.png", 0, 0, 0, PEOConst.TITLE_HEIGHT, 0, PEOConst.HEADER_HEIGHT);
+        SceneObjectTransform t = title.GetTransform();
+        t.GetAnchor().SetMin(0, 0);
+        t.GetAnchor().SetMax(1, 0);
+        t.GetPivot().SetPivot(0.5, 0);
+        t.SetOffsetMin(PEOConst.TITLE_MERGIN_WIDTH, 0);
+        t.SetOffsetMax(-PEOConst.TITLE_MERGIN_WIDTH, 0);
     }
-
-    protected void _SetTransform(SceneObject o, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY, float sX, float sY) {
-        if (o == null) return;
-        SceneObjectTransform t = o.GetTransform();
-        t.GetAnchor().SetMin(minAX, minAY);
-        t.GetAnchor().SetMax(maxAX, maxAY);
-        t.GetPivot().SetPivot(pX, pY);
-        t.SetSize(sX, sY);
+    
+    private SceneObject _SetHeaderObject(String name, String imagePath, float aX, float aY, float x, float y, float w, float h) {
+        SceneObject o = new SceneObject(name);
+        o.GetTransform().InitTransform(aX, aY, aX, aY, aX, aY, x, y, 1, 1, 0, w, h);
+        o.GetDrawBack().SetEnable(false);
+        AddObject(o);
+        AddChild(o);
+        new SceneObjectImage(o, PEOConst.EDITOR_GENERAL_PATH + imagePath);
+        return o;
     }
     
     protected void _SetDragHandler(SceneObject o, IEvent dragEvent) {
@@ -1133,14 +1199,26 @@ public class PEOSceneBase extends Scene {
         dh.GetDraggedActionHandler().SetEvent("mouse dragged", dragEvent);
     }
 }
+public class PEOSceneExplain extends Scene {
+    public PEOSceneExplain() {
+        super("Explain");
+        
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
+        SceneObjectTransform t = GetTransform();
+        t.SetSize(0, PEOConst.MENU_BAR_HEIGHT);
+        t.GetAnchor().SetMin(0, 1);
+        t.GetAnchor().SetMax(1, 1);
+        t.GetPivot().SetPivot(0.5, 1);
+    }
+}
 /**
  ヒエラルキーの基底クラス。
  */
 public class PEOSceneHeararchyBase extends PEOSceneBase {
-    public PEOSceneHeararchyBase(String name) {
-        super(name);
+    public PEOSceneHeararchyBase(String name, String title) {
+        super(name, title);
 
-        GetDrawBack().GetBackColorInfo().SetColor(200, 100, 100);
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(0, 0);
@@ -1149,12 +1227,11 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         SceneObject slider;
 
         slider = new SceneObject("View to Hierarchy Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 0);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 0, 0, 0, 1, 0, 0.5, 4, 0);
+        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -1164,12 +1241,11 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         );
         
         slider = new SceneObject("Hierarchy to Inspector Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 1, 0, 1, 1, 1, 0.5, 4, 0);
+        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -1177,6 +1253,16 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
             }
         }
         );
+        
+        SceneObject back = new SceneObject("BackGroung");
+        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
+        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
+        AddObject(back);
+        AddChild(back);
+        t = back.GetTransform();
+        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
+        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
+        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
     }
 
     /**
@@ -1186,22 +1272,22 @@ public class PEOSceneHeararchyBase extends PEOSceneBase {
         super._OnUpdate();
 
         float v2h, h2i, h;
-        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h = PEOConst.BAR_HEIGHT;
         v2h = peoScenePositionManager.GetVtoH();
         h2i = peoScenePositionManager.GetHtoI();
         
         GetTransform().SetTranslation(v2h, h);
-        GetTransform().SetSize(h2i - v2h, height - h);
+        GetTransform().SetSize(h2i - v2h, height - h - PEOConst.EXPLAIN_BAR_HEIGHT);
     }
 }
 /**
  インスペクターの基底クラス。
  */
 public class PEOSceneInspectorBase extends PEOSceneBase {
-    public PEOSceneInspectorBase(String name) {
-        super(name);
+    public PEOSceneInspectorBase(String name, String title) {
+        super(name, title);
 
-        GetDrawBack().GetBackColorInfo().SetColor(100, 200, 200);
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(0, 0);
@@ -1210,12 +1296,11 @@ public class PEOSceneInspectorBase extends PEOSceneBase {
         SceneObject slider;
         
         slider = new SceneObject("Hierarchy to Inspector Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 0, 0, 0, 1, 0, 0.5, 4, 0);
+        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -1223,6 +1308,16 @@ public class PEOSceneInspectorBase extends PEOSceneBase {
             }
         }
         );
+        
+        SceneObject back = new SceneObject("BackGroung");
+        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
+        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
+        AddObject(back);
+        AddChild(back);
+        t = back.GetTransform();
+        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
+        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
+        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
     }
 
     /**
@@ -1232,11 +1327,11 @@ public class PEOSceneInspectorBase extends PEOSceneBase {
         super._OnUpdate();
 
         float h2i, h;
-        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h = PEOConst.BAR_HEIGHT;
         h2i = peoScenePositionManager.GetHtoI();
         
         GetTransform().SetTranslation(h2i, h);
-        GetTransform().SetSize(width - h2i, height - h);
+        GetTransform().SetSize(width - h2i, height - h - PEOConst.EXPLAIN_BAR_HEIGHT);
     }
 }
 public class PEOSceneMenuBar extends Scene {
@@ -1245,7 +1340,7 @@ public class PEOSceneMenuBar extends Scene {
 
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
         SceneObjectTransform t = GetTransform();
-        t.SetSize(width, peoScenePositionManager.MENU_BAR_HEIGHT);
+        t.SetSize(width, PEOConst.MENU_BAR_HEIGHT);
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(1, 0);
         t.GetPivot().SetPivot(0.5, 0);
@@ -1282,11 +1377,11 @@ public class PEOSceneOperationBar extends Scene {
         super("Operation Bar");
 
         GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        
+
         float selfH, menuH;
-        selfH = peoScenePositionManager.OPERATION_BAR_HEIGHT;
-        menuH = peoScenePositionManager.MENU_BAR_HEIGHT;
-        _SetTransform(GetTransform(), width, selfH, 0, menuH, 0, 0, 1, 0, 0.5, 0);
+        selfH = PEOConst.OPERATION_BAR_HEIGHT;
+        menuH = PEOConst.MENU_BAR_HEIGHT;
+        GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, menuH, 1, 1, 0, width, selfH);
 
         SceneObject opeObj;
 
@@ -1295,65 +1390,33 @@ public class PEOSceneOperationBar extends Scene {
             "Translate", 
             "Rotate", 
             "Scale", 
-            "Pivot"
+            "Pivot", 
+            "Play"
         };
 
         float x = 10;
+        String basePath;
         for (int i=0; i<paths.length; i++, x+=32) {
+            basePath = PEOConst.OPERATION_BAR_PATH + paths[i];
+
             opeObj = new SceneObject(paths[i]+" Ope");
             opeObj.GetDrawBack().SetEnable(false);
             AddObject(opeObj);
             AddChild(opeObj);
-            _SetTransform(opeObj.GetTransform(), 32, 22, x, 0, 0, 0.5, 0, 0.5, 0, 0.5);
-            _SetImage(opeObj, paths[i]+"_Off.png");
-            _SetToggleButton(opeObj, paths[i]+"_On.png", paths[i]+"_Off.png");
+            if (i < paths.length - 1) {
+                opeObj.GetTransform().InitTransform(0, 0.5, 0, 0.5, 0, 0.5, x, 0, 1, 1, 0, 32, 22);
+            } else {
+                opeObj.GetTransform().InitTransform(0.5, 0.5, 0.5, 0.5, 0, 0.5, 0, 0, 1, 1, 0, 32, 22);
+            }
+            new SceneObjectImage(opeObj, basePath +"_Off.png");
+            new SceneObjectToggleButton(opeObj, opeObj.GetName() + " OperationBar Label", basePath +"_On.png", basePath +"_Off.png");
         }
-
-        opeObj = new SceneObject("Play Ope");
-        opeObj.GetDrawBack().SetEnable(false);
-        AddObject(opeObj);
-        AddChild(opeObj);
-        _SetTransform(opeObj.GetTransform(), 32, 22, 0, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
-        _SetImage(opeObj, "Play_Off.png");
-        _SetToggleButton(opeObj, "Play_On.png", "Play_Off.png");
-    }
-
-    private void _SetTransform(SceneObjectTransform t, float w, float h, float x, float y, float minAX, float minAY, float maxAX, float maxAY, float pX, float pY) {
-        if (t == null) return;
-        t.SetTranslation(x, y);
-        t.SetSize(w, h);
-        t.GetAnchor().SetMin(minAX, minAY);
-        t.GetAnchor().SetMax(maxAX, maxAY);
-        t.GetPivot().SetPivot(pX, pY);
-    }
-
-    private void _SetImage(SceneObject o, String fileName) {
-        if (o == null) return;
-        SceneObjectImage img = new SceneObjectImage();
-        o.AddBehavior(img);
-        img.SetUsingImageName(ImageManager.OPERATION_BAR_PATH + fileName);
-    }
-
-    private void _SetToggleButton(SceneObject o, String onFile, String offFile) {
-        if (o == null) return;
-        String path = ImageManager.OPERATION_BAR_PATH;
-        SceneObjectToggleButton btn = new SceneObjectToggleButton(o.GetName() + " OperationBar Label" , path + onFile, path + offFile);
-        o.AddBehavior(btn);
     }
 }
 /**
  開発エンジン専用。
  */
 public final class PEOScenePositionManager {
-    public final float MENU_BAR_HEIGHT = 20;
-    public final float OPERATION_BAR_HEIGHT = 32;
-    
-    public final float MIN_VIEW_WIDTH = 220;
-    public final float MIN_VIEW_HEIGHT = 220;
-    public final float MIN_PROJECT_HEIGHT = 120;
-    public final float MIN_HIERARCHY_WIDTH = 220;
-    public final float MIN_INSPECTOR_WIDTH = 280;
-
     private float _viewToHierarchy;
     public float GetVtoH() {
         return _viewToHierarchy;
@@ -1381,18 +1444,18 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnVtoH(float pos) {
         if (_viewToHierarchy > pos) {
-            if (MIN_VIEW_WIDTH <= pos) {
+            if (PEOConst.MIN_VIEW_WIDTH <= pos) {
                 _viewToHierarchy = pos;
                 return true;
             }
             return false;
         } else {
-            if (_hierarchyToInspector - pos >= MIN_HIERARCHY_WIDTH) {
+            if (_hierarchyToInspector - pos >= PEOConst.MIN_HIERARCHY_WIDTH) {
                 _viewToHierarchy = pos;
                 return true;
             } else {
                 // インスペクタも巻き込む場合
-                if (SlideOnHtoI(pos + MIN_HIERARCHY_WIDTH)) {
+                if (SlideOnHtoI(pos + PEOConst.MIN_HIERARCHY_WIDTH)) {
                     _viewToHierarchy = pos;
                     return true;
                 }
@@ -1407,19 +1470,19 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnHtoI(float pos) {
         if (_hierarchyToInspector > pos) {
-            if (pos - _viewToHierarchy >= MIN_HIERARCHY_WIDTH) {
+            if (pos - _viewToHierarchy >= PEOConst.MIN_HIERARCHY_WIDTH) {
                 _hierarchyToInspector = pos;
                 return true;
             } else {
                 // ビューも巻き込む場合
-                if (SlideOnVtoH(pos - MIN_HIERARCHY_WIDTH)) {
+                if (SlideOnVtoH(pos - PEOConst.MIN_HIERARCHY_WIDTH)) {
                     _hierarchyToInspector = pos;
                     return true;
                 }
                 return false;
             }
         } else {
-            if (width - pos >= MIN_INSPECTOR_WIDTH) {
+            if (width - pos >= PEOConst.MIN_INSPECTOR_WIDTH) {
                 _hierarchyToInspector = pos;
                 return true;
             }
@@ -1433,13 +1496,13 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnVtoP(float pos) {
         if (_viewToProject > pos) {
-            if (MIN_VIEW_HEIGHT + MENU_BAR_HEIGHT + OPERATION_BAR_HEIGHT <= pos) {
+            if (PEOConst.BAR_HEIGHT + PEOConst.MIN_VIEW_HEIGHT <= pos) {
                 _viewToProject = pos;
                 return true;
             }
             return false;
         } else {
-            if (height - pos >= MIN_PROJECT_HEIGHT) {
+            if (height - PEOConst.EXPLAIN_BAR_HEIGHT - pos >= PEOConst.MIN_PROJECT_HEIGHT) {
                 _viewToProject = pos;
                 return true;
             }
@@ -1451,24 +1514,24 @@ public final class PEOScenePositionManager {
  プロジェクトビューの基底クラス。
  */
 public class PEOSceneProjectBase extends PEOSceneBase {
-    public PEOSceneProjectBase(String name) {
-        super(name);
+    public PEOSceneProjectBase(String name, String title) {
+        super(name, title);
 
-        GetDrawBack().GetBackColorInfo().SetColor(0, 100, 150);
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
         t.GetAnchor().SetMin(0, 1);
         t.GetAnchor().SetMax(0, 1);
         t.GetPivot().SetPivot(0, 1);
+        t.SetTranslation(0, -PEOConst.EXPLAIN_BAR_HEIGHT);
 
         SceneObject slider;
 
         slider = new SceneObject("Project to Hierarchy Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 0, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 1, 0, 1, 1, 1, 0.5, 4, 0);
+        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -1478,12 +1541,11 @@ public class PEOSceneProjectBase extends PEOSceneBase {
         );
         
         slider = new SceneObject("View to Project Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 0, 0, 1, 0, 0.5, 0, 0, 4);
+        slider.GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, 0, 1, 1, 0, 0, PEOConst.SLIDE_SPACE);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dy = mouseY - pmouseY;
@@ -1491,6 +1553,16 @@ public class PEOSceneProjectBase extends PEOSceneBase {
             }
         }
         );
+        
+        SceneObject back = new SceneObject("BackGroung");
+        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
+        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
+        AddObject(back);
+        AddChild(back);
+        t = back.GetTransform();
+        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
+        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
+        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
     }
 
     /**
@@ -1503,19 +1575,19 @@ public class PEOSceneProjectBase extends PEOSceneBase {
         v2h = peoScenePositionManager.GetVtoH();
         v2p = peoScenePositionManager.GetVtoP();
         
-        GetTransform().SetSize(v2h, height - v2p);
+        GetTransform().SetSize(v2h, height - v2p - PEOConst.EXPLAIN_BAR_HEIGHT);
     }
 }
 /**
  メインビューの基底クラス。
  */
 public class PEOSceneViewBase extends PEOSceneBase {
-    public PEOSceneViewBase(String name) {
-        super(name);
+    public PEOSceneViewBase(String name, String title) {
+        super(name, title);
 
-        GetDrawBack().GetBackColorInfo().SetColor(0, 255, 0);
+        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
         SceneObjectTransform t = GetTransform();
-        float h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        float h = PEOConst.BAR_HEIGHT;
         t.SetTranslation(0, h);
         t.GetAnchor().SetMin(0, 0);
         t.GetAnchor().SetMax(0, 0);
@@ -1524,12 +1596,11 @@ public class PEOSceneViewBase extends PEOSceneBase {
         SceneObject slider;
 
         slider = new SceneObject("View to Hierarchy Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(200, 0, 0, 100);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 1, 0, 1, 1, 1, 0.5, 4, 0);
+        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -1537,14 +1608,13 @@ public class PEOSceneViewBase extends PEOSceneBase {
             }
         }
         );
-        
+
         slider = new SceneObject("View to Project Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200, 100);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        _SetTransform(slider, 0, 1, 1, 1, 0.5, 1, 0, 4);
+        slider.GetTransform().InitTransform(0, 1, 1, 1, 0.5, 1, 0, 0, 1, 1, 0, 0, PEOConst.SLIDE_SPACE);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dy = mouseY - pmouseY;
@@ -1552,6 +1622,16 @@ public class PEOSceneViewBase extends PEOSceneBase {
             }
         }
         );
+
+        SceneObject back = new SceneObject("BackGroung");
+        back.GetDrawBack().GetBackColorInfo().SetColor(70, 70, 70);
+        back.GetDrawBack().GetBorderColorInfo().SetColor(50, 50, 50);
+        AddObject(back);
+        AddChild(back);
+        t = back.GetTransform();
+        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
+        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
+        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
     }
 
     /**
@@ -1561,10 +1641,10 @@ public class PEOSceneViewBase extends PEOSceneBase {
         super._OnUpdate();
 
         float v2h, v2p, h;
-        h = peoScenePositionManager.MENU_BAR_HEIGHT + peoScenePositionManager.OPERATION_BAR_HEIGHT;
+        h = PEOConst.BAR_HEIGHT;
         v2h = peoScenePositionManager.GetVtoH();
         v2p = peoScenePositionManager.GetVtoP();
-        
+
         GetTransform().SetSize(v2h, v2p - h);
     }
 }
@@ -2848,6 +2928,13 @@ public class SceneObjectImage extends SceneObjectDrawBase {
         super();
         SetUsingImageName(imagePath);
     }
+    
+    public SceneObjectImage(SceneObject o, String imagePath) {
+        super();
+        SetUsingImageName(imagePath);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
 
     public void Start() {
         super.Start();
@@ -2905,7 +2992,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
         return _verticalAlign;
     }
     public void SetVerticalAlign(int value) {
-        if (value == TOP || value == CENTER || value == BOTTOM) {
+        if (value == TOP || value == CENTER || value == BOTTOM || value == BASELINE) {
             _verticalAlign = value;
             switch(value) {
             case TOP:
@@ -2918,7 +3005,7 @@ public class SceneObjectText extends SceneObjectDrawBase {
                 _yRate = 1;
                 break;
             default:
-                _yRate = 0;
+                _yRate = 0.8;
                 break;
             }
         }
@@ -3008,6 +3095,13 @@ public class SceneObjectText extends SceneObjectDrawBase {
         _InitParameterOnConstructor(text);
     }
 
+    public SceneObjectText(SceneObject o, String text) {
+        super();   
+        _InitParameterOnConstructor(text);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
+
     private void _InitParameterOnConstructor(String text) {
         SetText(text);
         SetAlign(LEFT, TOP);
@@ -3059,6 +3153,17 @@ public class SceneObjectToggleButton extends SceneObjectButton {
 
     public SceneObjectToggleButton(String eventLabel, String offImg, String onImg) {
         super(eventLabel);
+        _InitParametersOnConstructor(offImg, onImg);
+    }
+    
+    public SceneObjectToggleButton(SceneObject o, String eventLabel, String offImg, String onImg) {
+        super(eventLabel);
+        _InitParametersOnConstructor(offImg, onImg);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
+    
+    private void _InitParametersOnConstructor(String offImg, String onImg) {
         _isOn = true;
         _offImg = offImg;
         _onImg = onImg;
@@ -3134,6 +3239,21 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _anchor.SetMin(minX, minY);
         _anchor.SetMax(maxX, maxY);
     }
+
+    private PVector _offsetMin, _offsetMax;
+    public PVector GetOffsetMin() {
+        return _offsetMin;
+    }
+    public void SetOffsetMin(float x, float y) {
+        _offsetMin.set(x, y);
+    }
+    public PVector GetOffsetMax() {
+        return _offsetMax;
+    }
+    public void SetOffsetMax(float x, float y) {
+        _offsetMax.set(x, y);
+    }
+
 
     private Pivot _pivot;
     public Pivot GetPivot() {
@@ -3220,11 +3340,23 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
 
         _anchor = new Anchor();
         _pivot = new Pivot(0.5, 0.5);
+        _offsetMin = new PVector();
+        _offsetMax = new PVector();
 
         _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
         _transformProcessor = new TransformProcessor();
+    }
+
+    public void InitTransform(float minAX, float minAY, float maxAX, float maxAY, float pX, float pY, float tX, float tY, float sX, float sY, float rad, float sizeX, float sizeY) {
+        GetAnchor().SetMin(minAX, minAY);
+        GetAnchor().SetMax(maxAX, maxAY);
+        GetPivot().SetPivot(pX, pY);
+        SetTranslation(tX, tY);
+        SetScale(sX, sY);
+        SetRotate(rad);
+        SetSize(sizeX, sizeY);
     }
 
     /**
@@ -3266,19 +3398,19 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         if (GetParent() != null) {
             // アンカーの座標へ移動
             float aX, aY;
-            aX = (GetAnchor().GetMaxX() + GetAnchor().GetMinX()) / 2 * GetParent().GetSize().x;
-            aY = (GetAnchor().GetMaxY() + GetAnchor().GetMinY()) / 2 * GetParent().GetSize().y;
+            aX = ((GetAnchor().GetMaxX() + GetAnchor().GetMinX()) * GetParent().GetSize().x + GetOffsetMin().x + GetOffsetMax().x) /2 ;
+            aY = ((GetAnchor().GetMaxY() + GetAnchor().GetMinY()) * GetParent().GetSize().y + GetOffsetMin().y + GetOffsetMax().y) / 2;
 
             _transformProcessor.AddTranslate(aX, aY);
             _matrix.translate(aX, aY);
 
             if (GetAnchor().GetMaxX() != GetAnchor().GetMinX()) {
-                aX = (GetAnchor().GetMaxX() - GetAnchor().GetMinX()) * GetParent().GetSize().x;
+                aX = (GetAnchor().GetMaxX() - GetAnchor().GetMinX()) * GetParent().GetSize().x - GetOffsetMin().x + GetOffsetMax().x;
                 x = 0;
                 SetSize(aX, GetSize().y);
             }
             if (GetAnchor().GetMaxY() != GetAnchor().GetMinY()) {
-                aY = (GetAnchor().GetMaxY() - GetAnchor().GetMinY()) * GetParent().GetSize().y;
+                aY = (GetAnchor().GetMaxY() - GetAnchor().GetMinY()) * GetParent().GetSize().y - GetOffsetMin().y + GetOffsetMax().y;
                 y = 0;
                 SetSize(GetSize().x, aY);
             }

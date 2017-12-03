@@ -17,7 +17,7 @@ TransformManager transformManager;
 PEOScenePositionManager peoScenePositionManager;
 
 void setup() {
-    size(displayWidth, displayHeight);
+    surface.setSize(displayWidth * 3 / 4, displayHeight * 3 / 4);
     surface.setLocation(0, 0);
     try {
         InitManager();
@@ -29,6 +29,10 @@ void setup() {
         PEOSceneOperationBar operation = new PEOSceneOperationBar();
         sceneManager.AddScene(operation);
         sceneManager.LoadScene(operation.GetName());
+        
+        PEOSceneExplain explain = new PEOSceneExplain();
+        sceneManager.AddScene(explain);
+        sceneManager.LoadScene(explain.GetName());
         
         PEOSceneViewBase view = new PEOSceneViewBase("hoge", "Scene");
         sceneManager.AddScene(view);

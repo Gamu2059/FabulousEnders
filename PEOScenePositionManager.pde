@@ -81,13 +81,13 @@ public final class PEOScenePositionManager {
      */
     public boolean SlideOnVtoP(float pos) {
         if (_viewToProject > pos) {
-            if (PEOConst.BAR_HEIGHT + PEOConst.OPERATION_BAR_HEIGHT <= pos) {
+            if (PEOConst.BAR_HEIGHT + PEOConst.MIN_VIEW_HEIGHT <= pos) {
                 _viewToProject = pos;
                 return true;
             }
             return false;
         } else {
-            if (height - pos >= PEOConst.MIN_PROJECT_HEIGHT) {
+            if (height - PEOConst.EXPLAIN_BAR_HEIGHT - pos >= PEOConst.MIN_PROJECT_HEIGHT) {
                 _viewToProject = pos;
                 return true;
             }

@@ -10,16 +10,16 @@ public class PEOSceneProjectBase extends PEOSceneBase {
         t.GetAnchor().SetMin(0, 1);
         t.GetAnchor().SetMax(0, 1);
         t.GetPivot().SetPivot(0, 1);
+        t.SetTranslation(0, -PEOConst.EXPLAIN_BAR_HEIGHT);
 
         SceneObject slider;
 
         slider = new SceneObject("Project to Hierarchy Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 0, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, 2, 0);
+        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dx = mouseX - pmouseX;
@@ -29,12 +29,11 @@ public class PEOSceneProjectBase extends PEOSceneBase {
         );
         
         slider = new SceneObject("View to Project Slider");
-        //slider.GetDrawBack().SetEnable(false);
-        slider.GetDrawBack().GetBackColorInfo().SetColor(0, 200, 200);
+        slider.GetDrawBack().SetEnable(false);
         AddObject(slider);
         AddChild(slider);
 
-        slider.GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, 0, 1, 1, 0, 0, 2);
+        slider.GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, 0, 1, 1, 0, 0, PEOConst.SLIDE_SPACE);
         _SetDragHandler(slider, new IEvent() {
             public void Event() {
                 float dy = mouseY - pmouseY;
@@ -42,6 +41,16 @@ public class PEOSceneProjectBase extends PEOSceneBase {
             }
         }
         );
+        
+        SceneObject back = new SceneObject("BackGroung");
+        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
+        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
+        AddObject(back);
+        AddChild(back);
+        t = back.GetTransform();
+        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
+        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
+        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
     }
 
     /**
@@ -54,6 +63,6 @@ public class PEOSceneProjectBase extends PEOSceneBase {
         v2h = peoScenePositionManager.GetVtoH();
         v2p = peoScenePositionManager.GetVtoP();
         
-        GetTransform().SetSize(v2h, height - v2p);
+        GetTransform().SetSize(v2h, height - v2p - PEOConst.EXPLAIN_BAR_HEIGHT);
     }
 }
