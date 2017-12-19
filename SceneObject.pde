@@ -70,6 +70,18 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public SceneObject(String name) {
+        _InitParameterOnConstructor(name);
+    }
+    
+    public SceneObject(String name, Scene scene) {
+        _InitParameterOnConstructor(name);
+        if (scene != null) {
+            scene.AddObject(this);
+            scene.AddChild(this);
+        }
+    }
+    
+    private void _InitParameterOnConstructor(String name) {
         _name = name;
 
         _behaviors = new ArrayList<SceneObjectBehavior>();
@@ -122,6 +134,16 @@ public class SceneObject implements Comparable<SceneObject> {
                 b.Draw();
             }
         }
+    }
+    
+    public void Destroy() {
+        SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            b.Destroy();
+        }
+        if (GetScene() == null) return;
+        GetScene().RemoveObject(this);
     }
 
     public boolean IsAbleActiveObject() {

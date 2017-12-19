@@ -12,14 +12,14 @@ public class SceneObjectToggleButton extends SceneObjectButton {
         super(eventLabel);
         _InitParametersOnConstructor(offImg, onImg);
     }
-    
+
     public SceneObjectToggleButton(SceneObject o, String eventLabel, String offImg, String onImg) {
         super(eventLabel);
         _InitParametersOnConstructor(offImg, onImg);
         if (o == null) return;
         o.AddBehavior(this);
     }
-    
+
     private void _InitParametersOnConstructor(String offImg, String onImg) {
         _isOn = true;
         _offImg = offImg;
@@ -28,7 +28,7 @@ public class SceneObjectToggleButton extends SceneObjectButton {
 
     public void Start() {
         super.Start();
-        
+
         SceneObjectBehavior beh = GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
         if (beh instanceof SceneObjectImage) {
             _img = (SceneObjectImage) beh;
@@ -47,5 +47,11 @@ public class SceneObjectToggleButton extends SceneObjectButton {
             }
         }
         );
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectToggleButton is destroyed");
+        }
     }
 }

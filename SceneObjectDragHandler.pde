@@ -65,4 +65,10 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
             _isDragging = false;
         }
     }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDragHandler is destroyed");
+        }
+    }
 }
