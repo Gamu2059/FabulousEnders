@@ -8,48 +8,25 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+// pjsで実行するときはfalseにする
+boolean isProcessing = true;
+
 // マネージャインスタンス
 InputManager inputManager;
 SceneManager sceneManager;
 ImageManager imageManager;
 FontManager fontManager;
 TransformManager transformManager;
-PEOScenePositionManager peoScenePositionManager;
 
 void setup() {
-    surface.setSize(displayWidth * 3 / 4, displayHeight * 3 / 4);
-    surface.setLocation(0, 0);
+    size(890, 500);
     try {
         InitManager();
         
-        PEOSceneMenuBar menu = new PEOSceneMenuBar();
-        sceneManager.AddScene(menu);
-        sceneManager.LoadScene(menu.GetName());
+        SceneTitle t = new SceneTitle();
+        sceneManager.AddScene(t);
+        sceneManager.LoadScene(t.GetName());
         
-        PEOSceneOperationBar operation = new PEOSceneOperationBar();
-        sceneManager.AddScene(operation);
-        sceneManager.LoadScene(operation.GetName());
-        
-        PEOSceneExplain explain = new PEOSceneExplain();
-        sceneManager.AddScene(explain);
-        sceneManager.LoadScene(explain.GetName());
-        
-        PEOSceneViewBase view = new PEOSceneViewBase("hoge", "Scene");
-        sceneManager.AddScene(view);
-        sceneManager.LoadScene(view.GetName());
-        
-        PEOSceneProjectBase project = new PEOSceneProjectBase("huga", "Project");
-        sceneManager.AddScene(project);
-        sceneManager.LoadScene(project.GetName());
-        
-        PEOSceneHeararchyBase heararchy = new PEOSceneHeararchyBase("heararchy", "Heararchy");
-        sceneManager.AddScene(heararchy);
-        sceneManager.LoadScene(heararchy.GetName());
-        
-        PEOSceneInspectorBase inspector = new PEOSceneInspectorBase("inspector", "Inspector");
-        sceneManager.AddScene(inspector);
-        sceneManager.LoadScene(inspector.GetName());
-
         sceneManager.Start();
     } 
     catch(Exception e) {
@@ -63,13 +40,9 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
-    
-    peoScenePositionManager = new PEOScenePositionManager();
 }
 
 void draw() {
-    // これをつけているとpjsで動きません
-    surface.setTitle("Game Maker fps : " + frameRate);
     try {
         background(0);
         sceneManager.Update();
@@ -282,6 +255,11 @@ public final class ClassID {
     
     public static final int CID_TOGGLE_BUTTON = 7;
     public static final int CID_DRAG_HANDLER = 8;
+    
+    public static final int CID_TITLE_BUTTON = 1000;
+    public static final int CID_TITLE_DUST_EFFECT = 1001;
+    public static final int CID_TITLE_DUST_IMAGE = 1002;
+    public static final int CID_TITLE_BUTTON_BACK = 1003;
 }
 public class Collection<R extends Comparable> {
     /**
@@ -516,27 +494,6 @@ public final class DrawColor {
             GetAlpha() == d.GetAlpha();
     }
 }
-public final class FontManager {
-    private HashMap<String, PFont> _fonts;
-    private HashMap<String, PFont> GetFontHash() {
-        return _fonts;
-    }
-
-    public FontManager() {
-        _fonts = new HashMap<String, PFont>();
-    }
-
-    public PFont GetFont(String path) {
-        if (GetFontHash().containsKey(path)) {
-            return GetFontHash().get(path);
-        }
-        PFont font =  createFont(path, 100, true);
-        if (font != null) {
-            GetFontHash().put(path, font);
-        }
-        return font;
-    }
-}
 public final static class GeneralCalc {
     /**
      指定した座標同士のラジアン角を返す。
@@ -555,26 +512,627 @@ public final static class GeneralCalc {
 public interface IEvent {
     public void Event();
 }
-public final class ImageManager {
-    private HashMap<String, PImage> _images;
-    private HashMap<String, PImage> GetImageHash() {
-        return _images;
+public final class Key {
+    // 使用するキーの総数
+    public final static int KEY_NUM = 45;
+
+    // キーコード定数
+    public final static int KEYCODE_0 = 48;
+    public final static int KEYCODE_A = 65;
+
+    // 数字
+    public final static int _0 = 0;
+    public final static int _1 = 1;
+    public final static int _2 = 2;
+    public final static int _3 = 3;
+    public final static int _4 = 4;
+    public final static int _5 = 5;
+    public final static int _6 = 6;
+    public final static int _7 = 7;
+    public final static int _8 = 8;
+    public final static int _9 = 9;
+
+    // アルファベット
+    public final static int _A = 10;
+    public final static int _B = 11;
+    public final static int _C = 12;
+    public final static int _D = 13;
+    public final static int _E = 14;
+    public final static int _F = 15;
+    public final static int _G = 16;
+    public final static int _H = 17;
+    public final static int _I = 18;
+    public final static int _J = 19;
+    public final static int _K = 20;
+    public final static int _L = 21;
+    public final static int _M = 22;
+    public final static int _N = 23;
+    public final static int _O = 24;
+    public final static int _P = 25;
+    public final static int _Q = 26;
+    public final static int _R = 27;
+    public final static int _S = 28;
+    public final static int _T = 29;
+    public final static int _U = 30;
+    public final static int _V = 31;
+    public final static int _W = 32;
+    public final static int _X = 33;
+    public final static int _Y = 34;
+    public final static int _Z = 35;
+
+    // 特殊キー
+    public final static int _UP = 36;
+    public final static int _DOWN = 37;
+    public final static int _RIGHT = 38;
+    public final static int _LEFT = 39;
+    public final static int _ENTER = 40;
+    //public final static int _ESC = 41;
+    public final static int _DEL = 42;
+    public final static int _BACK = 43;
+    public final static int _SHIFT = 44;
+}
+public final class JsonArray extends JsonUtility {
+    private ArrayList<String> _elem;
+
+    public JsonArray() {
+        _elem = new ArrayList<String>();
     }
 
-    public ImageManager() {
-        _images = new HashMap<String, PImage>();
+    public boolean IsNull() {
+        return _elem == null;
     }
 
-    public PImage GetImage(String path) {
-        path = PConst.IMAGE_PATH + path;
-        if (GetImageHash().containsKey(path)) {
-            return GetImageHash().get(path);
+    public boolean IsEmpty() {
+        return _elem.isEmpty();
+    }
+
+    public String GetString(int index, String defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
         }
-        PImage image = requestImage(path);
-        if (image != null) {
-            GetImageHash().put(path, image);
+
+        String obj = _elem.get(index);
+        if (obj == null) {
+            return defaultValue;
         }
-        return image;
+        return _RemoveEscape(obj);
+    }
+
+    public int GetInt(int index, int defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(index);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return int(obj);
+    }
+
+    public float GetFloat(int index, float defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(index);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return float(obj);
+    }
+
+    public boolean GetBoolean(int index, boolean defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(index);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return boolean(obj);
+    }
+
+    public JsonObject GetJsonObject(int index) {
+        if (IsNull()) {
+            return null;
+        }
+
+        String obj = _elem.get(index);
+        if (obj == null) {
+            return null;
+        }
+        JsonObject jsonObj = new JsonObject();
+        jsonObj.Parse(obj);
+        return jsonObj;
+    }
+
+    public JsonArray GetJsonArray(int index) {
+        if (IsNull()) {
+            return null;
+        }
+
+        String obj = _elem.get(index);
+        if (obj == null) {
+            return null;
+        }
+        JsonArray jsonArray = new JsonArray();
+        jsonArray.Parse(obj);
+        return jsonArray;
+    }
+
+    public void AddElement(Object elem) {
+        _elem.add(elem.toString());
+    }
+
+    public void SetElement(int index, Object elem) {
+        _elem.set(index, elem.toString());
+    }
+
+    public void RemoveElement(int index) {
+        _elem.remove(index);
+    }
+
+    public int Size() {
+        return _elem.size();
+    }
+
+    /**
+     指定した文字列からデータを生成し、それを自身に格納する。
+     */
+    public void Parse(String jsonContents) {
+        if (jsonContents == null) return;
+
+        // 最初が '[' 最後が ']' でなければ生成しない
+        if (!_IsProper(jsonContents, beginArrayToken, endArrayToken)) return;
+
+        _elem = _Split(jsonContents.substring(1, jsonContents.length() - 1));
+        String temp;
+        for (int i=0; i<_elem.size(); i++) {
+            temp = _elem.get(i);
+            if (_IsProper(temp, stringToken, stringToken)) {
+                _elem.set(i, _RemoveSideString(temp));
+            }
+        }
+    }
+
+    /**
+     Json文字列を ',' で区切ってリストで返す。
+     */
+    protected ArrayList<String> _Split(String jsonContents) {
+        ArrayList<String> jsonPair = new ArrayList<String>();
+        boolean isLiteral = false, isArray = false;
+        int objDepth = 0;
+        char temp;
+        int lastSplitIdx = 0;
+        String pair;
+        for (int i=0; i<jsonContents.length(); i++) {
+            temp = jsonContents.charAt(i);
+
+            if (temp == stringToken) {
+                if (i == 0 || jsonContents.charAt(i - 1) != escapeToken) {
+                    isLiteral = !isLiteral;
+                }
+            }
+            if (!isLiteral) {
+                if (temp == beginArrayToken) {
+                    isArray = true;
+                } else if (temp == endArrayToken) {
+                    isArray = false;
+                } else if (temp == beginObjectToken) {
+                    objDepth++;
+                } else if (temp == endObjectToken) {
+                    objDepth--;
+                }
+            }
+
+            if (temp == commaToken && !isLiteral && !isArray && objDepth == 0) {
+                jsonPair.add(trim(jsonContents.substring(lastSplitIdx, i)));
+                lastSplitIdx = i + 1;
+            }
+        }
+        jsonPair.add(trim(jsonContents.substring(lastSplitIdx)));
+
+        return jsonPair;
+    }
+
+    public String toString() {
+        try {
+            String elem, pair;
+            String[] product = new String[_elem.size()];
+            for (int i=0; i<_elem.size(); i++) {
+                elem = _elem.get(i);
+                if (elem == null) {
+                    continue;
+                }
+                if (_IsProper(elem, beginObjectToken, endObjectToken)) {
+                    pair = elem;
+                } else if (_IsProper(elem, beginArrayToken, endArrayToken)) {
+                    pair = elem;
+                } else {
+                    pair = stringToken + elem + stringToken;
+                }
+                product[i] = pair;
+            }
+            return beginArrayToken + newLineToken + join(product, ",\n") + newLineToken + endArrayToken;
+        } 
+        catch(Exception e) {
+            println(e);
+            println("JsonArray can not express oneself!");
+            return null;
+        }
+    }
+}
+public final class JsonObject extends JsonUtility {
+    private HashMap<String, String> _elem;
+    private ArrayList<String> _names;
+
+    public JsonObject() {
+        _elem = new HashMap<String, String>();
+        _names = new ArrayList<String>();
+    }
+
+    public boolean IsNull() {
+        return _elem == null;
+    }
+
+    public boolean IsEmpty() {
+        return _elem.isEmpty();
+    }
+
+    public String GetString(String name, String defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(name);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return _RemoveEscape(obj);
+    }
+
+    public int GetInt(String name, int defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(name);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return int(obj);
+    }
+
+    public float GetFloat(String name, float defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(name);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return float(obj);
+    }
+
+    public boolean GetBoolean(String name, boolean defaultValue) {
+        if (IsNull()) {
+            return defaultValue;
+        }
+
+        String obj = _elem.get(name);
+        if (obj == null) {
+            return defaultValue;
+        }
+        return boolean(obj);
+    }
+
+    public JsonObject GetJsonObject(String name) {
+        if (IsNull()) {
+            return null;
+        }
+
+        String obj = _elem.get(name);
+        if (obj == null) {
+            return null;
+        }
+        JsonObject jsonObj = new JsonObject();
+        jsonObj.Parse(obj);
+        return jsonObj;
+    }
+
+    public JsonArray GetJsonArray(String name) {
+        if (IsNull()) {
+            return null;
+        }
+
+        String obj = _elem.get(name);
+        if (obj == null) {
+            return null;
+        }
+        JsonArray jsonArray = new JsonArray();
+        jsonArray.Parse(obj);
+        return jsonArray;
+    }
+
+    /**
+     全てのパラメータは文字列で管理されるべきなので、Setterはこれのみ。
+     */
+    public void SetElement(String name, Object elem) {
+        if (!_elem.containsKey(name)) {
+            _names.add(name);
+        }
+        _elem.put(name, elem.toString());
+    }
+
+    /**
+     指定した文字列からデータを生成し、それを自身に格納する。
+     */
+    public void Parse(String jsonContents) {
+        if (jsonContents == null) return;
+
+        // 最初が '{' 最後が '}' でなければ生成しない
+        if (!_IsProper(jsonContents, beginObjectToken, endObjectToken)) return;
+
+        _elem.clear();
+        _names.clear();
+
+        ArrayList<String> jsonPair = _Split(_RemoveSideString(jsonContents));
+        String[] pair = new String[2];
+        char temp;
+
+        for (int i=0; i<jsonPair.size(); i++) {
+            String jsonElem = jsonPair.get(i);
+
+            for (int j=0; j<jsonElem.length(); j++) {
+                temp = jsonElem.charAt(j);
+
+                if (temp == colonToken) {
+                    pair[0] = trim(jsonElem.substring(0, j));
+                    pair[1] = trim(jsonElem.substring(j+1));
+
+                    for (int k=0; k<pair.length; k++) {
+                        if (_IsProper(pair[k], stringToken, stringToken)) {
+                            pair[k] = _RemoveSideString(pair[k]);
+                        }
+                    }
+
+                    SetElement(pair[0], pair[1]);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     Json文字列を ',' で区切ってリストで返す。
+     */
+    protected ArrayList<String> _Split(String jsonContents) {
+        ArrayList<String> jsonPair = new ArrayList<String>();
+        boolean isLiteral = false, isArray = false;
+        char temp;
+        int lastSplitIdx = 0;
+        for (int i=0; i<jsonContents.length(); i++) {
+            temp = jsonContents.charAt(i);
+
+            if (temp == stringToken) {
+                if (i == 0 || jsonContents.charAt(i - 1) != escapeToken) {
+                    isLiteral = !isLiteral;
+                }
+            }
+            if (!isLiteral) {
+                if (temp == beginArrayToken) {
+                    isArray = true;
+                } else if (temp == endArrayToken) {
+                    isArray = false;
+                }
+            }
+
+            if (temp == commaToken && !isLiteral && !isArray) {
+                jsonPair.add(trim(jsonContents.substring(lastSplitIdx, i)));
+                lastSplitIdx = i + 1;
+            }
+        }
+        jsonPair.add(trim(jsonContents.substring(lastSplitIdx)));
+
+        return jsonPair;
+    }
+    
+    public String toString() {
+        try {
+            String name, elem, pair;
+            String[] product = new String[_names.size()];
+            for (int i=0; i<_names.size(); i++) {
+                name = _names.get(i);
+                elem = _elem.get(name);
+                if (elem == null) {
+                    continue;
+                }
+                if (_IsProper(elem, beginObjectToken, endObjectToken)) {
+                    pair = elem;
+                } else if (_IsProper(elem, beginArrayToken, endArrayToken)) {
+                    pair = elem;
+                } else {
+                    pair = stringToken + elem + stringToken;
+                }
+                product[i] = stringToken + _InsertEscape(name) + stringToken + " : " + pair;
+            }
+            return beginObjectToken + newLineToken + join(product, ",\n") + newLineToken + endObjectToken;
+        } 
+        catch(Exception e) {
+            println(e);
+            println("JsonObject can not express oneself!");
+            return null;
+        }
+    }
+}
+public abstract class JsonUtility {
+    // pjsでなぜかchar型と直接的な比較を行うと失敗するので、このような冗長な定義をしています。
+    public final char beginObjectToken = "{".charAt(0);
+    public final char endObjectToken = "}".charAt(0);
+    public final char beginArrayToken = "[".charAt(0);
+    public final char endArrayToken = "]".charAt(0);
+    public final char stringToken = "\"".charAt(0);
+    public final char escapeToken = "\\".charAt(0);
+    public final char commaToken = ",".charAt(0);
+    public final char colonToken = ":".charAt(0);
+    public final String newLineToken = "\n";
+
+    public void Load(String path) {
+        try {
+            String[] jsonText = loadStrings(path);
+            String json = join(trim(jsonText), "");
+            Parse(json);
+        } 
+        catch (Exception e) {
+            println(e);
+        }
+    }
+
+    public void Save(String path) {
+        try {
+            saveStrings(path, new String[]{toString()});
+        } 
+        catch(Exception e) {
+            println(e);
+        }
+    }
+
+    public abstract void Parse(String content);
+    protected abstract ArrayList<String> _Split(String content);
+
+    protected boolean _IsProper(String content, char beginToken, char endToken) {
+        return content.charAt(0) == beginToken && content.charAt(content.length() - 1) == endToken;
+    }
+
+    protected String _InsertEscape(String content) {
+        if (content == null) return null;
+
+        ArrayList<String> product = new ArrayList<String>();
+        int lastSplitIndex = 0;
+        char temp;
+        for (int i=0; i<content.length(); i++) {
+            temp = content.charAt(i);
+
+            if (temp == escapeToken || temp == stringToken) {
+                product.add(content.substring(lastSplitIndex, i) + escapeToken);
+                lastSplitIndex = i;
+            }
+        }
+        product.add(content.substring(lastSplitIndex, content.length()));
+        String[] proArray = new String[product.size()];
+        for (int i=0; i< proArray.length; i++) {
+            proArray[i] = product.get(i);
+        }
+
+        return join(proArray, "");
+    }
+
+    protected String _RemoveEscape(String content) {
+        if (content == null) return null;
+
+        ArrayList<String> product = new ArrayList<String>();
+        int lastSplitIndex = 0;
+        char temp, temp2;
+        for (int i=0; i<content.length(); i++) {
+            temp = content.charAt(i);
+
+            if (temp == escapeToken && i < content.length() - 1) {
+                temp2 = content.charAt(i + 1);
+                if (temp2 == escapeToken || temp2 == stringToken) {
+                    product.add(content.substring(lastSplitIndex, i));
+                    lastSplitIndex = i + 1;
+                }
+            }
+        }
+        product.add(content.substring(lastSplitIndex, content.length()));
+        String[] proArray = new String[product.size()];
+        for (int i=0; i< proArray.length; i++) {
+            proArray[i] = product.get(i);
+        }
+
+        return join(proArray, "");
+    }
+
+    protected String _RemoveSideString(String content) {
+        if (content == null) return null;
+        return content.substring(1, content.length() - 1);
+    }
+}
+/**
+ 定数を定義するクラス。
+ pjsでもエンジンでも扱える共通の値。
+ */
+public final class PConst {
+    // 色
+    public static final int MAX_RED = 255;
+    public static final int MAX_GREEN = 255;
+    public static final int MAX_BLUE = 255;
+    public static final int MAX_HUE = 360;
+    public static final int MAX_SATURATION = 100;
+    public static final int MAX_BRIGHTNESS = 100;
+    public static final int MAX_ALPHA = 255;
+    
+    // 画像のルートパス
+    public static final String IMAGE_PATH = "data/image/";
+}
+/**
+ 平面上のある領域の基準点を保持する責任を持つ。
+ */
+public class Pivot {
+    private PVector _pivot;
+    public PVector GetPivot() {
+        return _pivot;
+    }
+    public void SetPivot(PVector value) {
+        if (value == null) return;
+        _pivot.set(value.x, value.y);
+    }
+    public void SetPivot(float x, float y) {
+        if (x < 0 || 1 < x || y < 0 || 1 < y) return;
+        _pivot.set(x, y);
+    }
+
+    public final static float P_LEFT = 0;
+    public final static float P_CENTER = 0.5;
+    public final static float P_RIGHT = 1;
+    public final static float P_TOP = 0;
+    public final static float P_BOTTOM = 1;
+
+    public Pivot() {
+        _InitParametersOnConstructor(null);
+    }
+
+    public Pivot(PVector value) {
+        _InitParametersOnConstructor(value);
+    }
+
+    public Pivot(float x, float y) {
+        _InitParametersOnConstructor(new PVector(x, y));
+    }
+
+    private void _InitParametersOnConstructor(PVector pivot) {
+        _pivot = new PVector(P_LEFT, P_TOP);
+        if (pivot == null) pivot = new PVector(P_LEFT, P_TOP);
+        SetPivot(pivot);
+    }
+
+    public float GetX() {
+        return GetPivot().x;
+    }
+
+    public float GetY() {
+        return GetPivot().y;
+    }
+
+    public void SetX(float value) {
+        SetPivot(value, GetY());
+    }
+
+    public void SetY(float value) {
+        SetPivot(GetX(), value);
     }
 }
 public final class InputManager {
@@ -680,14 +1238,18 @@ public final class InputManager {
     private void _InitInputEvent() {
         GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
             public void Event() {
-                println("Mouse Enterd on Window!");
+                if (isProcessing) {
+                    println("Mouse Enterd on Window!");
+                }
             }
         }
         );
 
         GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
             public void Event() {
-                println("Mouse Exited from Window!");
+                if (isProcessing) {
+                    println("Mouse Exited from Window!");
+                }
             }
         }
         );
@@ -914,795 +1476,312 @@ public final class InputManager {
         return !_isMousePressed && _preMousePressed;
     }
 }
-public final class Key {
-    // 使用するキーの総数
-    public final static int KEY_NUM = 45;
 
-    // キーコード定数
-    public final static int KEYCODE_0 = 48;
-    public final static int KEYCODE_A = 65;
+public final class FontManager {
+    private HashMap<String, PFont> _fonts;
+    private HashMap<String, PFont> GetFontHash() {
+        return _fonts;
+    }
 
-    // 数字
-    public final static int _0 = 0;
-    public final static int _1 = 1;
-    public final static int _2 = 2;
-    public final static int _3 = 3;
-    public final static int _4 = 4;
-    public final static int _5 = 5;
-    public final static int _6 = 6;
-    public final static int _7 = 7;
-    public final static int _8 = 8;
-    public final static int _9 = 9;
+    public FontManager() {
+        _fonts = new HashMap<String, PFont>();
+    }
 
-    // アルファベット
-    public final static int _A = 10;
-    public final static int _B = 11;
-    public final static int _C = 12;
-    public final static int _D = 13;
-    public final static int _E = 14;
-    public final static int _F = 15;
-    public final static int _G = 16;
-    public final static int _H = 17;
-    public final static int _I = 18;
-    public final static int _J = 19;
-    public final static int _K = 20;
-    public final static int _L = 21;
-    public final static int _M = 22;
-    public final static int _N = 23;
-    public final static int _O = 24;
-    public final static int _P = 25;
-    public final static int _Q = 26;
-    public final static int _R = 27;
-    public final static int _S = 28;
-    public final static int _T = 29;
-    public final static int _U = 30;
-    public final static int _V = 31;
-    public final static int _W = 32;
-    public final static int _X = 33;
-    public final static int _Y = 34;
-    public final static int _Z = 35;
-
-    // 特殊キー
-    public final static int _UP = 36;
-    public final static int _DOWN = 37;
-    public final static int _RIGHT = 38;
-    public final static int _LEFT = 39;
-    public final static int _ENTER = 40;
-    //public final static int _ESC = 41;
-    public final static int _DEL = 42;
-    public final static int _BACK = 43;
-    public final static int _SHIFT = 44;
+    public PFont GetFont(String path) {
+        if (GetFontHash().containsKey(path)) {
+            return GetFontHash().get(path);
+        }
+        PFont font =  createFont(path, 100, true);
+        if (font != null) {
+            GetFontHash().put(path, font);
+        }
+        return font;
+    }
 }
-/**
- 定数を定義するクラス。
- pjsでもエンジンでも扱える共通の値。
- */
-public final class PConst {
-    // 色
-    public static final int MAX_RED = 255;
-    public static final int MAX_GREEN = 255;
-    public static final int MAX_BLUE = 255;
-    public static final int MAX_HUE = 360;
-    public static final int MAX_SATURATION = 100;
-    public static final int MAX_BRIGHTNESS = 100;
-    public static final int MAX_ALPHA = 255;
-    
-    // 画像のルートパス
-    public static final String IMAGE_PATH = "image/";
+
+public final class ImageManager {
+    private HashMap<String, PImage> _images;
+    private HashMap<String, PImage> GetImageHash() {
+        return _images;
+    }
+
+    public ImageManager() {
+        _images = new HashMap<String, PImage>();
+    }
+
+    public PImage GetImage(String path) {
+        path = PConst.IMAGE_PATH + path;
+        if (GetImageHash().containsKey(path)) {
+            return GetImageHash().get(path);
+        }
+        PImage image = requestImage(path);
+        if (image != null) {
+            GetImageHash().put(path, image);
+        }
+        return image;
+    }
 }
-/**
- エンジン専用の定数を定義するクラス。
- */
-public final class PEOConst {
-    // 画像パス
-    public static final String ENGINE = "Engine/";
-    public static final String OPERATION_BAR_PATH = ENGINE + "OperationBar/";
-    public static final String EDITOR_PATH = ENGINE + "Editor/";
-    public static final String EDITOR_GENERAL_PATH = EDITOR_PATH + "General/";
-    
-    // エディタサイズ
-    public static final float SLIDE_SPACE = 1.5;
-    
-    public static final float MENU_BAR_HEIGHT = 20;
-    public static final float OPERATION_BAR_HEIGHT = 32;
-    public static final float EXPLAIN_BAR_HEIGHT = 20;
-    public static final float BAR_HEIGHT = MENU_BAR_HEIGHT + OPERATION_BAR_HEIGHT;
-    
-    public static final float MIN_VIEW_WIDTH = 220;
-    public static final float MIN_VIEW_HEIGHT = 220;
-    public static final float MIN_PROJECT_HEIGHT = 220;
-    public static final float MIN_HIERARCHY_WIDTH = 220;
-    public static final float MIN_INSPECTOR_WIDTH = 280;
-    
-    // エディタヘッダ
-    public static final float TITLE_HEIGHT = 16;
-    public static final float TITLE_MERGIN_WIDTH = 6;
-    public static final float HEADER_HEIGHT = 18;
+
+public class TransformManager {
+    public static final int MAX_DEPTH = 32;
+
+    private int _depth;
+
+    public TransformManager() {
+        _depth = 0;
+    }
+
+    public boolean PushDepth() {
+        if (_depth >= MAX_DEPTH) return false;
+        _depth++;
+        return true;
+    }
+
+    public boolean PopDepth() {
+        if (_depth < 0) return false;
+        _depth--;
+        return true;
+    }
+
+    public void ResetDepth() {
+        _depth = 0;
+    }
 }
-public final static class PEOGeneralJudge {
+
+public class SceneManager {
     /**
-    指定したクラスが指定したインターフェースを実装しているかどうか。
-    */
-    //public static boolean IsImplemented(Class<?> clazz, Class<?> intrfc) {
-    //    if (clazz == null || intrfc == null) {
-    //        return false;
-    //    }
-    //    // インターフェースを実装したクラスであるかどうかをチェック
-    //    if (!clazz.isInterface() && intrfc.isAssignableFrom(clazz)
-    //            && !Modifier.isAbstract(clazz.getModifiers())) {
-    //        return true;
-    //    }
-    //    return false;
-    //}
-}
-/**
- メニューアイテムオブジェクト。
- */
-public class PEOMenu extends SceneObject {
-    private SceneObjectText _text;
-    public SceneObjectText GetText() {
-        return _text;
+     保持しているシーン。
+     */
+    private HashMap<String, Scene> _scenes;
+
+    /**
+     実際に描画するシーンのリスト。
+     シーンの優先度によって描画順が替わる。
+     */
+    private ArrayList<Scene> _drawScenes;
+
+    /**
+     入力を受け付けることができるシーン。
+     */
+    private Scene _activeScene;
+    public Scene GetActiveScene() {
+        return _activeScene;
     }
 
-    private SceneObjectButton _button;
+    /**
+     ソートに用いる。
+     */
+    private Collection<Scene> _collection;
 
-    private DrawColor _dc;
-
-    public PEOMenu(String name, String t) {
-        super(name);
-        
-        _dc = GetDrawBack().GetBackColorInfo();
-        GetDrawBack().SetEnableBorder(false);
-        _dc.SetColor(204, 232, 255, 0);
-
-        _text = new SceneObjectText();
-        _text.SetText(t);
-        _text.SetFontSize(12);
-        _text.SetUsingFontName("FFScala");
-        _text.SetAlign(CENTER, CENTER);
-        _text.GetColorInfo().SetColor(0, 0, 0);
-        AddBehavior(_text);
-
-        _button = new SceneObjectButton(name + t + " PMenu Label");
-        AddBehavior(_button);
-        _button.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
-            public void Event() {
-                _dc.SetAlpha(255);
-            }
-        }
-        );
-        _button.GetDisabledActiveHandler().SetEvent("mouse exited", new IEvent() {
-            public void Event() {
-                _dc.SetAlpha(0);
-            }
-        }
-        );
-    }
-}
-/**
- メニューバーオブジェクト。
- */
-public class PEOMenuBar extends SceneObject {
-    private ArrayList<PEOMenu> _menus;
-
-    private boolean _isStart;
-
-    public PEOMenuBar(String name) {
-        super(name);
-
-        _menus = new ArrayList<PEOMenu>();
-
-        SceneObjectDrawBack db = GetDrawBack();
-        db.GetBackColorInfo().SetColor(255, 255, 255);
-        db.SetEnableBorder(false);
+    private SceneObjectTransform _transform, _dummyTransform;
+    public SceneObjectTransform GetTransform() {
+        return _transform;
     }
 
-    public void AddMenu(PEOMenu menu) {
-        if (menu == null) return;
-        if (_menus.contains(menu)) return;
-        _menus.add(menu);
+    private IEvent _sceneOverWriteOptionEvent;
+    public IEvent GetSceneOverWriteOptionEvent() {
+        return _sceneOverWriteOptionEvent;
+    }
+    public void SetSceneOverWriteOptionEvent(IEvent value) {
+        _sceneOverWriteOptionEvent = value;
+    }
+
+    public SceneManager () {
+        _scenes = new HashMap<String, Scene>();
+        _drawScenes = new ArrayList<Scene>();
+        _collection = new Collection<Scene>();
+
+        _transform = new SceneObjectTransform();
+        _transform.SetSize(width, height);
+        _transform.SetPivot(0, 0);
+
+        _dummyTransform = new SceneObjectTransform();
+    }
+
+    /**
+     シーンマップから描画シーンリストにシーンを追加する。
+     */
+    public void LoadScene(String sceneName) {
+        // シーンマップに存在しないなら何もしない
+        if (!_scenes.containsKey(sceneName)) return;
+        Scene s = _scenes.get(sceneName);
+
+        // 既に描画リストに存在するなら何もしない
+        if (_drawScenes.contains(s)) return;
+
+        s.Load();
+    }
+
+    /**
+     描画シーンリストからシーンを外す。
+     */
+    public void ReleaseScene(String sceneName) {
+        // シーンマップに存在しないなら何もしない
+        if (!_scenes.containsKey(sceneName)) return;
+        Scene s = _scenes.get(sceneName);
+
+        // 描画リストに存在しないなら何もしない
+        if (!_drawScenes.contains(s)) return;        
+
+        s.Release();
     }
 
     public void Start() {
-        // 自身の他の振る舞いに処理が行き渡るようにする
-        super.Start();
-
-        if (_isStart) return;
-        _isStart = true;
-
-        if (_menus == null) return;
-        PEOMenu p;
-        SceneObjectTransform tr;
-        SceneObjectText t;
-        float x, sum = 0;
-
-        for (int i=0; i<_menus.size(); i++) {
-            p = _menus.get(i);
-            t = p.GetText();
-            textFont(fontManager.GetFont(t.GetUsingFontName()));
-            textSize(t.GetFontSize());
-            textAlign(t.GetHorizontalAlign(), t. GetVerticalAlign());
-            textLeading(t.GetLineSpace());
-
-            x = textWidth(t.GetText()) + 20;
-            tr = p.GetTransform();
-            tr.SetParent(GetTransform(), true);
-            tr.SetSize(x, 0);
-            tr.GetAnchor().SetMin(0, 0);
-            tr.GetAnchor().SetMax(0, 1);
-            tr.GetPivot().SetPivot(0, 0.5);
-            tr.SetTranslation(sum, 0);
-            sum += x;
-        }
-    }
-}
-public class PEOSceneBase extends Scene {
-    public PEOSceneBase(String name, String titleText) {
-        super(name);
-        
-        textFont(fontManager.GetFont("FFScala"));
-        textSize(12);
-        textAlign(CENTER, CENTER);
-        float x = textWidth(titleText) + 20;
-        float xMergin = PEOConst.SLIDE_SPACE + PEOConst.TITLE_MERGIN_WIDTH;
-        
-        SceneObject title;
-        
-        _SetHeaderObject("Title L", "Title_L.png", 0, 0, PEOConst.SLIDE_SPACE, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
-        _SetHeaderObject("Title R", "Title_R.png", 0, 0, xMergin + x, 0, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.TITLE_HEIGHT);
-        title = _SetHeaderObject("Title C", "Title_C.png", 0, 0, xMergin, 0, x, PEOConst.TITLE_HEIGHT);
-        
-        SceneObjectText _text = new SceneObjectText(title, titleText);
-        _text.SetFontSize(12);
-        _text.SetUsingFontName("FFScala");
-        _text.SetAlign(CENTER, BASELINE);
-        _text.GetColorInfo().SetColor(0, 0, 0);
-        
-        _SetHeaderObject("Header L", "Header_L.png", 0, 0, PEOConst.SLIDE_SPACE, PEOConst.TITLE_HEIGHT, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.HEADER_HEIGHT);
-        _SetHeaderObject("Header R", "Header_R.png", 1, 0, -PEOConst.SLIDE_SPACE, PEOConst.TITLE_HEIGHT, PEOConst.TITLE_MERGIN_WIDTH, PEOConst.HEADER_HEIGHT);
-        title = _SetHeaderObject("Header C", "Header_C.png", 0, 0, 0, PEOConst.TITLE_HEIGHT, 0, PEOConst.HEADER_HEIGHT);
-        SceneObjectTransform t = title.GetTransform();
-        t.GetAnchor().SetMin(0, 0);
-        t.GetAnchor().SetMax(1, 0);
-        t.GetPivot().SetPivot(0.5, 0);
-        t.SetOffsetMin(PEOConst.TITLE_MERGIN_WIDTH, 0);
-        t.SetOffsetMax(-PEOConst.TITLE_MERGIN_WIDTH, 0);
-    }
-    
-    private SceneObject _SetHeaderObject(String name, String imagePath, float aX, float aY, float x, float y, float w, float h) {
-        SceneObject o = new SceneObject(name);
-        o.GetTransform().InitTransform(aX, aY, aX, aY, aX, aY, x, y, 1, 1, 0, w, h);
-        o.GetDrawBack().SetEnable(false);
-        AddObject(o);
-        AddChild(o);
-        new SceneObjectImage(o, PEOConst.EDITOR_GENERAL_PATH + imagePath);
-        return o;
-    }
-    
-    protected void _SetDragHandler(SceneObject o, IEvent dragEvent) {
-        if (o == null) return;
-        SceneObjectDragHandler dh = new SceneObjectDragHandler(GetName() + o.GetName() + " DragHandler Label");
-        o.AddBehavior(dh);
-
-        dh.GetEnabledActiveHandler().SetEvent("mouse entered", new IEvent() {
-            public void Event() {
-                cursor(MOVE);
-            }
-        }
-        );
-        dh.GetDisabledActiveHandler().SetEvent("mouse exited", new IEvent() {
-            public void Event() {
-                cursor(ARROW);
-            }
-        }
-        );
-        dh.GetDraggedActionHandler().SetEvent("mouse dragged", dragEvent);
-    }
-}
-public class PEOSceneExplain extends Scene {
-    public PEOSceneExplain() {
-        super("Explain");
-        
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        SceneObjectTransform t = GetTransform();
-        t.SetSize(0, PEOConst.MENU_BAR_HEIGHT);
-        t.GetAnchor().SetMin(0, 1);
-        t.GetAnchor().SetMax(1, 1);
-        t.GetPivot().SetPivot(0.5, 1);
-    }
-}
-/**
- ヒエラルキーの基底クラス。
- */
-public class PEOSceneHeararchyBase extends PEOSceneBase {
-    public PEOSceneHeararchyBase(String name, String title) {
-        super(name, title);
-
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        SceneObjectTransform t = GetTransform();
-        t.GetAnchor().SetMin(0, 0);
-        t.GetAnchor().SetMax(0, 0);
-        t.GetPivot().SetPivot(0, 0);
-
-        SceneObject slider;
-
-        slider = new SceneObject("View to Hierarchy Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dx = mouseX - pmouseX;
-                peoScenePositionManager.SlideOnVtoH(mouseX + dx);
-            }
-        }
-        );
-        
-        slider = new SceneObject("Hierarchy to Inspector Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dx = mouseX - pmouseX;
-                peoScenePositionManager.SlideOnHtoI(mouseX + dx);
-            }
-        }
-        );
-        
-        SceneObject back = new SceneObject("BackGroung");
-        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
-        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
-        AddObject(back);
-        AddChild(back);
-        t = back.GetTransform();
-        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
-        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
-        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
+        _InitScenes();
     }
 
     /**
-     アップデートの段階でサイズを取得して調整する。
+     フレーム更新を行う。
      */
-    protected void _OnUpdate() {
-        super._OnUpdate();
-
-        float v2h, h2i, h;
-        h = PEOConst.BAR_HEIGHT;
-        v2h = peoScenePositionManager.GetVtoH();
-        h2i = peoScenePositionManager.GetHtoI();
-        
-        GetTransform().SetTranslation(v2h, h);
-        GetTransform().SetSize(h2i - v2h, height - h - PEOConst.EXPLAIN_BAR_HEIGHT);
-    }
-}
-/**
- インスペクターの基底クラス。
- */
-public class PEOSceneInspectorBase extends PEOSceneBase {
-    public PEOSceneInspectorBase(String name, String title) {
-        super(name, title);
-
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        SceneObjectTransform t = GetTransform();
-        t.GetAnchor().SetMin(0, 0);
-        t.GetAnchor().SetMax(0, 0);
-        t.GetPivot().SetPivot(0, 0);
-
-        SceneObject slider;
-        
-        slider = new SceneObject("Hierarchy to Inspector Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(0, 0, 0, 1, 0, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dx = mouseX - pmouseX;
-                peoScenePositionManager.SlideOnHtoI(mouseX + dx);
-            }
-        }
-        );
-        
-        SceneObject back = new SceneObject("BackGroung");
-        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
-        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
-        AddObject(back);
-        AddChild(back);
-        t = back.GetTransform();
-        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
-        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
-        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
+    public void Update() {
+        _OnUpdate();
+        _OnTransform();
+        _OnSorting();
+        _OnCheckMouseActiveScene();
+        _OnDraw();
+        _OnCheckScene();
     }
 
-    /**
-     アップデートの段階でサイズを取得して調整する。
-     */
-    protected void _OnUpdate() {
-        super._OnUpdate();
-
-        float h2i, h;
-        h = PEOConst.BAR_HEIGHT;
-        h2i = peoScenePositionManager.GetHtoI();
-        
-        GetTransform().SetTranslation(h2i, h);
-        GetTransform().SetSize(width - h2i, height - h - PEOConst.EXPLAIN_BAR_HEIGHT);
-    }
-}
-public class PEOSceneMenuBar extends Scene {
-    public PEOSceneMenuBar() {
-        super("Menu Bar");
-
-        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 0);
-        SceneObjectTransform t = GetTransform();
-        t.SetSize(width, PEOConst.MENU_BAR_HEIGHT);
-        t.GetAnchor().SetMin(0, 0);
-        t.GetAnchor().SetMax(1, 0);
-        t.GetPivot().SetPivot(0.5, 0);
-
-        PEOMenuBar menuBarObj = new PEOMenuBar("Menu Bar");
-        AddObject(menuBarObj);
-        AddChild(menuBarObj);
-
-        PEOMenu menuObj;
-        menuObj = new PEOMenu("File Menu", "File");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PEOMenu("Edit Menu", "Edit");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PEOMenu("GameObject Menu", "GameObject");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PEOMenu("Behavior Menu", "Behavior");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-        
-        menuObj = new PEOMenu("Window Menu", "Window");
-        AddObject(menuObj);
-        menuBarObj.AddMenu(menuObj);
-    }
-}
-public class PEOSceneOperationBar extends Scene {
-
-    public PEOSceneOperationBar() {
-        super("Operation Bar");
-
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-
-        float selfH, menuH;
-        selfH = PEOConst.OPERATION_BAR_HEIGHT;
-        menuH = PEOConst.MENU_BAR_HEIGHT;
-        GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, menuH, 1, 1, 0, width, selfH);
-
-        SceneObject opeObj;
-
-        String[] paths = new String[]{
-            "Hand", 
-            "Translate", 
-            "Rotate", 
-            "Scale", 
-            "Pivot", 
-            "Play"
-        };
-
-        float x = 10;
-        String basePath;
-        for (int i=0; i<paths.length; i++, x+=32) {
-            basePath = PEOConst.OPERATION_BAR_PATH + paths[i];
-
-            opeObj = new SceneObject(paths[i]+" Ope");
-            opeObj.GetDrawBack().SetEnable(false);
-            AddObject(opeObj);
-            AddChild(opeObj);
-            if (i < paths.length - 1) {
-                opeObj.GetTransform().InitTransform(0, 0.5, 0, 0.5, 0, 0.5, x, 0, 1, 1, 0, 32, 22);
-            } else {
-                opeObj.GetTransform().InitTransform(0.5, 0.5, 0.5, 0.5, 0, 0.5, 0, 0, 1, 1, 0, 32, 22);
-            }
-            new SceneObjectImage(opeObj, basePath +"_Off.png");
-            new SceneObjectToggleButton(opeObj, opeObj.GetName() + " OperationBar Label", basePath +"_On.png", basePath +"_Off.png");
+    private void _OnUpdate() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            s.Update();
         }
     }
-}
-/**
- 開発エンジン専用。
- */
-public final class PEOScenePositionManager {
-    private float _viewToHierarchy;
-    public float GetVtoH() {
-        return _viewToHierarchy;
+
+    private void _OnTransform() {
+
+        GetTransform().TransformMatrixOnRoot();
     }
 
-    private float _viewToProject;
-    public float GetVtoP() {
-        return _viewToProject;
+    private void _OnSorting() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            s.Sorting();
+        }
     }
 
-    private float _hierarchyToInspector;
-    public float GetHtoI() {
-        return _hierarchyToInspector;
-    }
+    private void _OnCheckMouseActiveScene() {
+        if (!inputManager.IsMouseMode()) return;
+        if (_drawScenes == null) return;
 
-    public PEOScenePositionManager() {
-        _viewToHierarchy = 0.6 * width;
-        _viewToProject = 0.7 * height;
-        _hierarchyToInspector = 0.8 * width;
-    }
+        Scene s;
+        boolean f = false;
+        for (int i=_drawScenes.size()-1; i>=0; i--) {
+            s = _drawScenes.get(i);
+            if (s.IsAbleActiveScene()) {
+                f = true;
+                // 現在のASが次のASになるならば、何もせずに処理を終わる。
+                if (s == _activeScene) break;
 
-    /**
-     ViewとHierarchyの間を設定する。
-     それ以上サイズを変えられない場合はfalse、サイズを変えた場合はtrueを返す。
-     */
-    public boolean SlideOnVtoH(float pos) {
-        if (_viewToHierarchy > pos) {
-            if (PEOConst.MIN_VIEW_WIDTH <= pos) {
-                _viewToHierarchy = pos;
-                return true;
-            }
-            return false;
-        } else {
-            if (_hierarchyToInspector - pos >= PEOConst.MIN_HIERARCHY_WIDTH) {
-                _viewToHierarchy = pos;
-                return true;
-            } else {
-                // インスペクタも巻き込む場合
-                if (SlideOnHtoI(pos + PEOConst.MIN_HIERARCHY_WIDTH)) {
-                    _viewToHierarchy = pos;
-                    return true;
+                if (_activeScene != null) {
+                    _activeScene.OnDisabledActive();
                 }
-                return false;
+                _activeScene = s;
             }
+        }
+        // 何もアクティブにならなければアクティブシーンも無効化する
+        if (!f) {
+            if (_activeScene != null) {
+                _activeScene.OnDisabledActive();
+                _activeScene = null;
+            }
+        }
+        if (_activeScene != null) {
+            _activeScene.CheckMouseActiveObject();
+        }
+    }
+
+    private void _OnDraw() {
+        if (_drawScenes == null) return;
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            if (i > 0 && _sceneOverWriteOptionEvent != null) {
+                _sceneOverWriteOptionEvent.Event();
+            }
+            s = _drawScenes.get(i);
+            s.Draw();
         }
     }
 
     /**
-     HierarchyとInspectorの間を設定する。
-     それ以上サイズを変えられない場合はfalse、サイズを変えた場合はtrueを返す。
+     シーンの読込と解放を処理する。
      */
-    public boolean SlideOnHtoI(float pos) {
-        if (_hierarchyToInspector > pos) {
-            if (pos - _viewToHierarchy >= PEOConst.MIN_HIERARCHY_WIDTH) {
-                _hierarchyToInspector = pos;
-                return true;
-            } else {
-                // ビューも巻き込む場合
-                if (SlideOnVtoH(pos - PEOConst.MIN_HIERARCHY_WIDTH)) {
-                    _hierarchyToInspector = pos;
-                    return true;
-                }
-                return false;
-            }
-        } else {
-            if (width - pos >= PEOConst.MIN_INSPECTOR_WIDTH) {
-                _hierarchyToInspector = pos;
-                return true;
-            }
-            return false;
+    private void _OnCheckScene() {
+        Scene s;
+        for (int i=0; i<_drawScenes.size(); i++) {
+            s = _drawScenes.get(i);
+            if (!s.IsReleaseFlag()) continue;
+
+            _drawScenes.remove(s);
+            s.OnDisabled();
+            s.GetTransform().SetParent(_dummyTransform, false);
+        }
+        boolean f = false;
+        for (String n : _scenes.keySet()) {
+            s = _scenes.get(n);
+            if (!s.IsLoadFlag()) continue;
+
+            _drawScenes.add(s);
+            s.OnEnabled();
+            s.GetTransform().SetParent(_transform, false);
+            f = true;
+        }
+        if (f) {
+            _collection.SortList(_drawScenes);
         }
     }
 
     /**
-     ViewとProjectの間を設定する。
-     それ以上サイズを変えられない場合はfalse、サイズを変えた場合はtrueを返す。
+     シーンインスタンスを初期化する。
+     主にシーンそのもののソーティングと、シーン内のソーティングなどである。
      */
-    public boolean SlideOnVtoP(float pos) {
-        if (_viewToProject > pos) {
-            if (PEOConst.BAR_HEIGHT + PEOConst.MIN_VIEW_HEIGHT <= pos) {
-                _viewToProject = pos;
-                return true;
-            }
-            return false;
-        } else {
-            if (height - PEOConst.EXPLAIN_BAR_HEIGHT - pos >= PEOConst.MIN_PROJECT_HEIGHT) {
-                _viewToProject = pos;
-                return true;
-            }
-            return false;
+    private void _InitScenes() {
+        if (_scenes == null) return;
+        Scene s;
+        for (String name : _scenes.keySet()) {
+            s = _scenes.get(name);
+            s.InitScene();
         }
-    }
-}
-/**
- プロジェクトビューの基底クラス。
- */
-public class PEOSceneProjectBase extends PEOSceneBase {
-    public PEOSceneProjectBase(String name, String title) {
-        super(name, title);
 
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        SceneObjectTransform t = GetTransform();
-        t.GetAnchor().SetMin(0, 1);
-        t.GetAnchor().SetMax(0, 1);
-        t.GetPivot().SetPivot(0, 1);
-        t.SetTranslation(0, -PEOConst.EXPLAIN_BAR_HEIGHT);
-
-        SceneObject slider;
-
-        slider = new SceneObject("Project to Hierarchy Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dx = mouseX - pmouseX;
-                peoScenePositionManager.SlideOnVtoH(mouseX + dx);
-            }
-        }
-        );
-        
-        slider = new SceneObject("View to Project Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(0, 0, 1, 0, 0.5, 0, 0, 0, 1, 1, 0, 0, PEOConst.SLIDE_SPACE);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dy = mouseY - pmouseY;
-                peoScenePositionManager.SlideOnVtoP(mouseY + dy);
-            }
-        }
-        );
-        
-        SceneObject back = new SceneObject("BackGroung");
-        back.GetDrawBack().GetBackColorInfo().SetColor(194, 194, 194);
-        back.GetDrawBack().GetBorderColorInfo().SetColor(130, 130, 130);
-        AddObject(back);
-        AddChild(back);
-        t = back.GetTransform();
-        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
-        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
-        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
+        if (_drawScenes == null) return;
+        _collection.SortList(_drawScenes);
     }
 
     /**
-     アップデートの段階でサイズを取得して調整する。
+     シーンマップにシーンを追加する。
+     ただし、既に子として追加されている場合は追加できない。
+     
+     @return 追加に成功した場合はtrueを返す
      */
-    protected void _OnUpdate() {
-        super._OnUpdate();
-
-        float v2h, v2p;
-        v2h = peoScenePositionManager.GetVtoH();
-        v2p = peoScenePositionManager.GetVtoP();
-        
-        GetTransform().SetSize(v2h, height - v2p - PEOConst.EXPLAIN_BAR_HEIGHT);
-    }
-}
-/**
- メインビューの基底クラス。
- */
-public class PEOSceneViewBase extends PEOSceneBase {
-    public PEOSceneViewBase(String name, String title) {
-        super(name, title);
-
-        GetDrawBack().GetBackColorInfo().SetColor(162, 162, 162);
-        SceneObjectTransform t = GetTransform();
-        float h = PEOConst.BAR_HEIGHT;
-        t.SetTranslation(0, h);
-        t.GetAnchor().SetMin(0, 0);
-        t.GetAnchor().SetMax(0, 0);
-        t.GetPivot().SetPivot(0, 0);
-
-        SceneObject slider;
-
-        slider = new SceneObject("View to Hierarchy Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(1, 0, 1, 1, 1, 0.5, 0, 0, 1, 1, 0, PEOConst.SLIDE_SPACE, 0);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dx = mouseX - pmouseX;
-                peoScenePositionManager.SlideOnVtoH(mouseX + dx);
-            }
-        }
-        );
-
-        slider = new SceneObject("View to Project Slider");
-        slider.GetDrawBack().SetEnable(false);
-        AddObject(slider);
-        AddChild(slider);
-
-        slider.GetTransform().InitTransform(0, 1, 1, 1, 0.5, 1, 0, 0, 1, 1, 0, 0, PEOConst.SLIDE_SPACE);
-        _SetDragHandler(slider, new IEvent() {
-            public void Event() {
-                float dy = mouseY - pmouseY;
-                peoScenePositionManager.SlideOnVtoP(mouseY + dy);
-            }
-        }
-        );
-
-        SceneObject back = new SceneObject("BackGroung");
-        back.GetDrawBack().GetBackColorInfo().SetColor(70, 70, 70);
-        back.GetDrawBack().GetBorderColorInfo().SetColor(50, 50, 50);
-        AddObject(back);
-        AddChild(back);
-        t = back.GetTransform();
-        t.InitTransform(0, 0, 1, 1, 0.5, 0.5, 0, 0, 1, 1, 0, 0, 0);
-        t.SetOffsetMin(PEOConst.SLIDE_SPACE+1, PEOConst.TITLE_HEIGHT+PEOConst.HEADER_HEIGHT);
-        t.SetOffsetMax(-PEOConst.SLIDE_SPACE-1, -PEOConst.SLIDE_SPACE-3);
+    public boolean AddScene(Scene scene) {
+        if (scene == null) return false;
+        if (GetScene(scene.GetName()) != null) return false;
+        _scenes.put(scene.GetName(), scene);
+        scene.GetTransform().SetParent(_dummyTransform, false);
+        return true;
     }
 
     /**
-     アップデートの段階でサイズを取得して調整する。
+     シーンマップの中からnameと一致する名前のシーンを返す。
+     
+     @return nameと一致する名前のシーン 存在しなければNull
      */
-    protected void _OnUpdate() {
-        super._OnUpdate();
-
-        float v2h, v2p, h;
-        h = PEOConst.BAR_HEIGHT;
-        v2h = peoScenePositionManager.GetVtoH();
-        v2p = peoScenePositionManager.GetVtoP();
-
-        GetTransform().SetSize(v2h, v2p - h);
-    }
-}
-/**
- 平面上のある領域の基準点を保持する責任を持つ。
- */
-public class Pivot {
-    private PVector _pivot;
-    public PVector GetPivot() {
-        return _pivot;
-    }
-    public void SetPivot(PVector value) {
-        if (value == null) return;
-        _pivot.set(value.x, value.y);
-    }
-    public void SetPivot(float x, float y) {
-        if (x < 0 || 1 < x || y < 0 || 1 < y) return;
-        _pivot.set(x, y);
+    public Scene GetScene(String name) {
+        return _scenes.get(name);
     }
 
-    public final static float P_LEFT = 0;
-    public final static float P_CENTER = 0.5;
-    public final static float P_RIGHT = 1;
-    public final static float P_TOP = 0;
-    public final static float P_BOTTOM = 1;
-
-    public Pivot() {
-        _InitParametersOnConstructor(null);
-    }
-
-    public Pivot(PVector value) {
-        _InitParametersOnConstructor(value);
-    }
-
-    public Pivot(float x, float y) {
-        _InitParametersOnConstructor(new PVector(x, y));
-    }
-
-    private void _InitParametersOnConstructor(PVector pivot) {
-        _pivot = new PVector(P_LEFT, P_TOP);
-        if (pivot == null) pivot = new PVector(P_LEFT, P_TOP);
-        SetPivot(pivot);
-    }
-
-    public float GetX() {
-        return GetPivot().x;
-    }
-
-    public float GetY() {
-        return GetPivot().y;
-    }
-
-    public void SetX(float value) {
-        SetPivot(value, GetY());
-    }
-
-    public void SetY(float value) {
-        SetPivot(GetX(), value);
+    /**
+     シーンマップの中からnameと一致するシーンを削除する。
+     
+     @return nameと一致する名前のシーン 存在しなければNull
+     */
+    public Scene RemoveScene(String name) {
+        return _scenes.remove(name);
     }
 }
 public class Scene implements Comparable<Scene> {
@@ -2058,242 +2137,6 @@ public class Scene implements Comparable<Scene> {
         return GetScenePriority() - o.GetScenePriority();
     }
 }
-public class SceneManager {
-    /**
-     保持しているシーン。
-     */
-    private HashMap<String, Scene> _scenes;
-
-    /**
-     実際に描画するシーンのリスト。
-     シーンの優先度によって描画順が替わる。
-     */
-    private ArrayList<Scene> _drawScenes;
-
-    /**
-     入力を受け付けることができるシーン。
-     */
-    private Scene _activeScene;
-    public Scene GetActiveScene() {
-        return _activeScene;
-    }
-
-    /**
-     ソートに用いる。
-     */
-    private Collection<Scene> _collection;
-
-    private SceneObjectTransform _transform, _dummyTransform;
-    public SceneObjectTransform GetTransform() {
-        return _transform;
-    }
-
-    private IEvent _sceneOverWriteOptionEvent;
-    public IEvent GetSceneOverWriteOptionEvent() {
-        return _sceneOverWriteOptionEvent;
-    }
-    public void SetSceneOverWriteOptionEvent(IEvent value) {
-        _sceneOverWriteOptionEvent = value;
-    }
-
-    public SceneManager () {
-        _scenes = new HashMap<String, Scene>();
-        _drawScenes = new ArrayList<Scene>();
-        _collection = new Collection<Scene>();
-
-        _transform = new SceneObjectTransform();
-        _transform.SetSize(width, height);
-        _transform.SetPivot(0, 0);
-
-        _dummyTransform = new SceneObjectTransform();
-    }
-
-    /**
-     シーンマップから描画シーンリストにシーンを追加する。
-     */
-    public void LoadScene(String sceneName) {
-        // シーンマップに存在しないなら何もしない
-        if (!_scenes.containsKey(sceneName)) return;
-        Scene s = _scenes.get(sceneName);
-
-        // 既に描画リストに存在するなら何もしない
-        if (_drawScenes.contains(s)) return;
-
-        s.Load();
-    }
-
-    /**
-     描画シーンリストからシーンを外す。
-     */
-    public void ReleaseScene(String sceneName) {
-        // シーンマップに存在しないなら何もしない
-        if (!_scenes.containsKey(sceneName)) return;
-        Scene s = _scenes.get(sceneName);
-
-        // 描画リストに存在しないなら何もしない
-        if (!_drawScenes.contains(s)) return;        
-
-        s.Release();
-    }
-
-    public void Start() {
-        _InitScenes();
-    }
-
-    /**
-     フレーム更新を行う。
-     */
-    public void Update() {
-        _OnUpdate();
-        _OnTransform();
-        _OnSorting();
-        _OnCheckMouseActiveScene();
-        _OnDraw();
-        _OnCheckScene();
-    }
-
-    private void _OnUpdate() {
-        if (_drawScenes == null) return;
-        Scene s;
-        for (int i=0; i<_drawScenes.size(); i++) {
-            s = _drawScenes.get(i);
-            s.Update();
-        }
-    }
-
-    private void _OnTransform() {
-
-        GetTransform().TransformMatrixOnRoot();
-    }
-
-    private void _OnSorting() {
-        if (_drawScenes == null) return;
-        Scene s;
-        for (int i=0; i<_drawScenes.size(); i++) {
-            s = _drawScenes.get(i);
-            s.Sorting();
-        }
-    }
-
-    private void _OnCheckMouseActiveScene() {
-        if (!inputManager.IsMouseMode()) return;
-        if (_drawScenes == null) return;
-
-        Scene s;
-        boolean f = false;
-        for (int i=_drawScenes.size()-1; i>=0; i--) {
-            s = _drawScenes.get(i);
-            if (s.IsAbleActiveScene()) {
-                f = true;
-                // 現在のASが次のASになるならば、何もせずに処理を終わる。
-                if (s == _activeScene) break;
-
-                if (_activeScene != null) {
-                    _activeScene.OnDisabledActive();
-                }
-                _activeScene = s;
-            }
-        }
-        // 何もアクティブにならなければアクティブシーンも無効化する
-        if (!f) {
-            if (_activeScene != null) {
-                _activeScene.OnDisabledActive();
-                _activeScene = null;
-            }
-        }
-        if (_activeScene != null) {
-            _activeScene.CheckMouseActiveObject();
-        }
-    }
-
-    private void _OnDraw() {
-        if (_drawScenes == null) return;
-        Scene s;
-        for (int i=0; i<_drawScenes.size(); i++) {
-            if (i > 0 && _sceneOverWriteOptionEvent != null) {
-                _sceneOverWriteOptionEvent.Event();
-            }
-            s = _drawScenes.get(i);
-            s.Draw();
-        }
-    }
-
-    /**
-     シーンの読込と解放を処理する。
-     */
-    private void _OnCheckScene() {
-        Scene s;
-        for (int i=0; i<_drawScenes.size(); i++) {
-            s = _drawScenes.get(i);
-            if (!s.IsReleaseFlag()) continue;
-
-            _drawScenes.remove(s);
-            s.OnDisabled();
-            s.GetTransform().SetParent(_dummyTransform, false);
-        }
-        boolean f = false;
-        for (String n : _scenes.keySet()) {
-            s = _scenes.get(n);
-            if (!s.IsLoadFlag()) continue;
-
-            _drawScenes.add(s);
-            s.OnEnabled();
-            s.GetTransform().SetParent(_transform, false);
-            f = true;
-        }
-        if (f) {
-            _collection.SortList(_drawScenes);
-        }
-    }
-
-    /**
-     シーンインスタンスを初期化する。
-     主にシーンそのもののソーティングと、シーン内のソーティングなどである。
-     */
-    private void _InitScenes() {
-        if (_scenes == null) return;
-        Scene s;
-        for (String name : _scenes.keySet()) {
-            s = _scenes.get(name);
-            s.InitScene();
-        }
-
-        if (_drawScenes == null) return;
-        _collection.SortList(_drawScenes);
-    }
-
-    /**
-     シーンマップにシーンを追加する。
-     ただし、既に子として追加されている場合は追加できない。
-     
-     @return 追加に成功した場合はtrueを返す
-     */
-    public boolean AddScene(Scene scene) {
-        if (scene == null) return false;
-        if (GetScene(scene.GetName()) != null) return false;
-        _scenes.put(scene.GetName(), scene);
-        scene.GetTransform().SetParent(_dummyTransform, false);
-        return true;
-    }
-
-    /**
-     シーンマップの中からnameと一致する名前のシーンを返す。
-     
-     @return nameと一致する名前のシーン 存在しなければNull
-     */
-    public Scene GetScene(String name) {
-        return _scenes.get(name);
-    }
-
-    /**
-     シーンマップの中からnameと一致するシーンを削除する。
-     
-     @return nameと一致する名前のシーン 存在しなければNull
-     */
-    public Scene RemoveScene(String name) {
-        return _scenes.remove(name);
-    }
-}
 public class SceneObject implements Comparable<SceneObject> {
     private String _name;
     public String GetName() {
@@ -2366,6 +2209,18 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public SceneObject(String name) {
+        _InitParameterOnConstructor(name);
+    }
+    
+    public SceneObject(String name, Scene scene) {
+        _InitParameterOnConstructor(name);
+        if (scene != null) {
+            scene.AddObject(this);
+            scene.AddChild(this);
+        }
+    }
+    
+    private void _InitParameterOnConstructor(String name) {
         _name = name;
 
         _behaviors = new ArrayList<SceneObjectBehavior>();
@@ -2418,6 +2273,16 @@ public class SceneObject implements Comparable<SceneObject> {
                 b.Draw();
             }
         }
+    }
+    
+    public void Destroy() {
+        SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            b.Destroy();
+        }
+        if (GetScene() == null) return;
+        GetScene().RemoveObject(this);
     }
 
     public boolean IsAbleActiveObject() {
@@ -2586,145 +2451,6 @@ public class SceneObject implements Comparable<SceneObject> {
         return GetTransform().compareTo(o.GetTransform());
     }
 }
-public class SceneObjectBehavior {
-    /**
-     残念ながら全てのビヘイビアクラスがこれを継承して適切な値を返さなければならない。
-     */
-    public int GetID() {
-        return ClassID.CID_BEHAVIOR;
-    }
-
-    /**
-     振る舞いは一回だけオブジェクトを設定することができる。
-     */
-    private SceneObject _object;
-    public SceneObject GetObject() {
-        return _object;
-    }
-    public void SetObject(SceneObject value) {
-        if (_isSettedObject) return;
-        if (value == null) return;
-        _isSettedObject = true;
-        _object = value;
-    }
-    private boolean _isSettedObject;
-
-    public Scene GetScene() {
-        if (GetObject() == null) return null;
-        return GetObject().GetScene();
-    }
-
-    private boolean _enable;
-    public boolean IsEnable() {
-        return _enable;
-    }
-    public void SetEnable(boolean value) {
-        _enable = value;
-        if (_enable) {
-            _OnEnabled();
-        } else {
-            _OnDisabled();
-        }
-    }
-
-    private boolean _isStart;
-    public boolean IsStart() {
-        return _isStart;
-    }
-
-    public SceneObjectBehavior() {
-        SetEnable(true);
-    }
-
-    public final boolean IsBehaviorAs(int id) {
-        return GetID() == id;
-    }
-
-    public void Start() {
-        _isStart = true;
-    }
-
-    public void Update() {
-    }
-
-    public void Draw() {
-    }
-
-    public void Stop() {
-    }
-
-    protected void _OnEnabled() {
-        _isStart = false;
-    }
-
-    protected void _OnDisabled() {
-    }
-
-    public void OnEnabledActive() {
-    }
-
-    public void OnDisabledActive() {
-    }
-
-    public boolean equals(Object o) {
-        return this == o;
-    }
-}
-public class SceneObjectButton extends SceneObjectBehavior {
-    public int GetID() {
-        return ClassID.CID_BUTTON;
-    }
-
-    private boolean _isActive;
-    private String _eventLabel;
-
-    private ActionEvent _decideHandler;
-    public ActionEvent GetDecideHandler() {
-        return _decideHandler;
-    }
-
-    private ActionEvent _enabledActiveHandler;
-    public ActionEvent GetEnabledActiveHandler() {
-        return _enabledActiveHandler;
-    }
-
-    private ActionEvent _disabledActiveHandler;
-    public ActionEvent GetDisabledActiveHandler() {
-        return _disabledActiveHandler;
-    }
-
-    public SceneObjectButton(String eventLabel) {
-        super();
-
-        _eventLabel = eventLabel;
-        _decideHandler = new ActionEvent();
-        _enabledActiveHandler = new ActionEvent();
-        _disabledActiveHandler = new ActionEvent();
-    }
-
-    public void OnEnabledActive() {
-        super.OnEnabledActive();
-        _isActive = true;
-        GetEnabledActiveHandler().InvokeAllEvents();
-    }
-
-    public void OnDisabledActive() {
-        super.OnDisabledActive();
-        _isActive = false;
-        GetDisabledActiveHandler().InvokeAllEvents();
-    }
-
-    public void Start() {
-        super.Start();
-        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
-            public void Event() {
-                if (!_isActive) return;
-                GetDecideHandler().InvokeAllEvents();
-            }
-        }
-        );
-    }
-}
 public class SceneObjectDragHandler extends SceneObjectBehavior {
     public int GetID() {
         return ClassID.CID_DRAG_HANDLER;
@@ -2792,407 +2518,107 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
             _isDragging = false;
         }
     }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDragHandler is destroyed");
+        }
+    }
 }
-public class SceneObjectDrawBack extends SceneObjectBehavior { //<>// //<>//
+public abstract class SceneObjectBehavior {
+    /**
+     残念ながら全てのビヘイビアクラスがこれを継承して適切な値を返さなければならない。
+     */
     public int GetID() {
-        return ClassID.CID_DRAW_BACK;
-    }
-    
-    private DrawColor _backColorInfo;
-    public DrawColor GetBackColorInfo() {
-        return _backColorInfo;
-    }
-
-    private DrawColor _borderColorInfo;
-    public DrawColor GetBorderColorInfo() {
-        return _borderColorInfo;
+        return ClassID.CID_BEHAVIOR;
     }
 
     /**
-     背景の描画が有効かどうかを保持するフラグ。
-     falseの場合、領域内部は透過される。
+     振る舞いは一回だけオブジェクトを設定することができる。
      */
-    private boolean _enableBack;
-    public boolean IsEnableBack() {
-        return _enableBack;
+    private SceneObject _object;
+    public SceneObject GetObject() {
+        return _object;
     }
-    public void SetEnableBack(boolean value) {
-        _enableBack = value;
+    public final void SetObject(SceneObject value) {
+        if (_isSettedObject) return;
+        if (value == null) return;
+        _isSettedObject = true;
+        _object = value;
+    }
+    private boolean _isSettedObject;
+
+    public final Scene GetScene() {
+        if (GetObject() == null) return null;
+        return GetObject().GetScene();
     }
 
-    /**
-     ボーダの描画が有効かどうかを保持するフラグ。
-     falseの場合、領域周辺のボーダは描画されない。
-     */
-    private boolean _enableBorder;
-    public boolean IsEnableBorder() {
-        return _enableBorder;
+    private boolean _enable;
+    public boolean IsEnable() {
+        return _enable;
     }
-    public void SetEnableBorder(boolean value) {
-        _enableBorder = value;
-    }
-    private float _borderSize;
-    public float GetBorderSize() {
-        return _borderSize;
-    }
-    public void SetBorderSize(float value) {
-        _borderSize = value;
-    }
-
-    private int _borderType;
-    public int GetBorderType() {
-        return _borderType;
-    }
-    public void SetBorderType(int value) {
-        _borderType = value;
-    }
-
-    private PVector _size;
-
-    public SceneObjectDrawBack() {
-        DrawColor backInfo, borderInfo;
-        backInfo = new DrawColor(true, 100, 100, 100, 255);
-        borderInfo = new DrawColor(true, 0, 0, 0, 255);
-
-        _InitParameterOnConstructor(true, backInfo, true, borderInfo, 1, ROUND);
-    }
-
-    private void _InitParameterOnConstructor(boolean enableBack, DrawColor backInfo, boolean enableBorder, DrawColor borderInfo, float borderSize, int borderType) {
-        _enableBack = enableBack;
-        _backColorInfo = backInfo;
-
-        _enableBorder = enableBorder;
-        _borderColorInfo = borderInfo;
-        _borderSize = borderSize;
-        _borderType = borderType;
-    }
-
-    public void Start() {
-        _size = GetObject().GetTransform().GetSize();
-    }
-
-    public void Draw() {
-        if (_size == null) return;
-
-        if (_enableBorder) {
-            stroke(_borderColorInfo.GetColor());
-            strokeWeight(_borderSize);
-            strokeCap(_borderType);
+    public final void SetEnable(boolean value) {
+        _enable = value;
+        if (_enable) {
+            _OnEnabled();
         } else {
-            noStroke();
-        }
-        if (_enableBack) {
-            fill(_backColorInfo.GetColor());
-        } else {
-            fill(0, 0);
-        }
-        rect(0, 0, _size.x, _size.y);
-    }
-}
-public class SceneObjectDrawBase extends SceneObjectBehavior {
-    public int GetID() {
-        return ClassID.CID_DRAW_BASE;
-    }
-    
-    private DrawColor _colorInfo;
-    public DrawColor GetColorInfo() {
-        return _colorInfo;
-    }
-
-    public SceneObjectDrawBase() {
-        _colorInfo = new DrawColor();
-    }
-}
-public class SceneObjectImage extends SceneObjectDrawBase {
-    public int GetID() {
-        return ClassID.CID_IMAGE;
-    }
-    
-    private String _usingImageName;
-    public String GetUsingImageName() {
-        return _usingImageName;
-    }
-    public void SetUsingImageName(String value) {
-        if (value != null) {
-            _usingImageName = value;
+            _OnDisabled();
         }
     }
 
-    private PVector _objSize;
-
-    public SceneObjectImage() {
-        super();
+    private boolean _isStart;
+    public boolean IsStart() {
+        return _isStart;
     }
 
-    public SceneObjectImage(String imagePath) {
-        super();
-        SetUsingImageName(imagePath);
+    public SceneObjectBehavior() {
+        SetEnable(true);
     }
-    
-    public SceneObjectImage(SceneObject o, String imagePath) {
-        super();
-        SetUsingImageName(imagePath);
-        if (o == null) return;
-        o.AddBehavior(this);
+
+    public final boolean IsBehaviorAs(int id) {
+        return GetID() == id;
     }
 
     public void Start() {
-        super.Start();
-        _objSize = GetObject().GetTransform().GetSize();
-    }
-
-    public void Draw() {
-        PImage img = imageManager.GetImage(GetUsingImageName());
-        if (img == null) {
-            return;
-        }
-        tint(GetColorInfo().GetColor());
-        image(img, 0, 0, _objSize.x, _objSize.y);
-    }
-}
-public class SceneObjectText extends SceneObjectDrawBase {
-    public int GetID() {
-        return ClassID.CID_TEXT;
-    }
-
-    private String _text;
-    public String GetText() {
-        return _text;
-    }
-    public void SetText(String value) {
-        _text = value == null ? "" : value;
-    }
-
-    private int _horizontalAlign;
-    public int GetHorizontalAlign() {
-        return _horizontalAlign;
-    }
-    public void SetHorizontalAlign(int value) {
-        if (value == LEFT || value == CENTER || value == RIGHT) {
-            _horizontalAlign = value;
-            switch(value) {
-            case LEFT:
-                _xRate = 0;
-                break;
-            case CENTER:
-                _xRate = 0.5;
-                break;
-            case RIGHT:
-                _xRate = 1;
-                break;
-            default:
-                _xRate = 0;
-                break;
-            }
-        }
-    }
-
-    private int _verticalAlign;
-    public int GetVerticalAlign() {
-        return _verticalAlign;
-    }
-    public void SetVerticalAlign(int value) {
-        if (value == TOP || value == CENTER || value == BOTTOM || value == BASELINE) {
-            _verticalAlign = value;
-            switch(value) {
-            case TOP:
-                _yRate = 0;
-                break;
-            case CENTER:
-                _yRate = 0.5;
-                break;
-            case BOTTOM:
-                _yRate = 1;
-                break;
-            default:
-                _yRate = 0.8;
-                break;
-            }
-        }
-    }
-
-    public void SetAlign(int value1, int value2) {
-        SetHorizontalAlign(value1);
-        SetVerticalAlign(value2);
-    }
-
-    /**
-     フォントはマネージャから取得するので、参照を分散させないように文字列で対応する。
-     */
-    private String _usingFontName;
-    public String GetUsingFontName() {
-        return _usingFontName;
-    }
-    public void SetUsingFontName(String value) {
-        _usingFontName = value;
-    }
-
-    private float _fontSize;
-    public float GetFontSize() {
-        return _fontSize;
-    }
-    public void SetFontSize(float value) {
-        if (0 <= value && value <= 100) {
-            _fontSize = value;
-        }
-    }
-
-    private float _lineSpace;
-    public float GetLineSpace() {
-        return _lineSpace;
-    }
-    /**
-     行間をピクセル単位で指定する。
-     ただし、最初からフォントサイズと同じ大きさの行間が設定されている。
-     */
-    public void SetLineSpace(float value) {
-        float space = _fontSize + value;
-        if (0 <= space) {
-            _lineSpace = space;
-        }
-    }
-
-    /**
-     文字列の描画モード。
-     falseの場合、通常と同じように一斉に描画する。
-     trueの場合、ゲームのセリフのように一文字ずつ描画する。
-     ただし、trueの場合は、alignで設定されているのがLEFT TOP以外だと違和感のある描画になる。
-     */
-    private boolean _isDrawInOrder;
-    public boolean IsDrawInOrder() {
-        return _isDrawInOrder;
-    }
-    public void SetDrawInOrder(boolean value) {
-        _isDrawInOrder = value;
-    }
-
-    private float _drawSpeed;
-    public float GetDrawSpeed() {
-        return _drawSpeed;
-    }
-    public void SetDrawSpeed(float value) {
-        if (value <= 0 || value >= 60) {
-            return;
-        }
-        _drawSpeed = value;
-    }
-
-    private float _deltaTime;
-    private int _drawingIndex;
-    private String _tempText;
-
-    private PVector _objSize;
-    private float _xRate, _yRate;
-
-
-    public SceneObjectText() {
-        super();
-        _InitParameterOnConstructor("");
-    }
-
-    public SceneObjectText(String text) {
-        super();
-        _InitParameterOnConstructor(text);
-    }
-
-    public SceneObjectText(SceneObject o, String text) {
-        super();   
-        _InitParameterOnConstructor(text);
-        if (o == null) return;
-        o.AddBehavior(this);
-    }
-
-    private void _InitParameterOnConstructor(String text) {
-        SetText(text);
-        SetAlign(LEFT, TOP);
-        SetFontSize(20);
-        SetLineSpace(0);
-        SetUsingFontName("MS Gothic");
-    }
-
-    public void Start() {
-        super.Start();
-        _objSize = GetObject().GetTransform().GetSize();
+        _isStart = true;
     }
 
     public void Update() {
-        _deltaTime += 1/frameRate;
-        if (_deltaTime >= 1/_drawSpeed) {
-            _deltaTime = 0;
-            if (_drawingIndex < GetText().length()) {
-                _drawingIndex++;
-            }
-        }
     }
 
     public void Draw() {
-        if (GetText() == null) return;
-        fill(GetColorInfo().GetColor());
-        textFont(fontManager.GetFont(GetUsingFontName()));
-        textSize(GetFontSize());
-        textAlign(GetHorizontalAlign(), GetVerticalAlign());
-        textLeading(GetLineSpace());
+    }
 
-        if (_isDrawInOrder) {
-            _tempText = GetText().substring(0, _drawingIndex);
-        } else {
-            _tempText = GetText();
-        }
-        text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
+    public void Stop() {
+    }
+
+    public final void Destroy() {
+        //_OnDestroy();
+        if (GetObject() == null) return;
+        GetObject().RemoveBehavior(this);
+    }
+
+    protected abstract void _OnDestroy();
+
+    protected void _OnEnabled() {
+        _isStart = false;
+    }
+
+    protected void _OnDisabled() {
+    }
+
+    public void OnEnabledActive() {
+    }
+
+    public void OnDisabledActive() {
+    }
+
+    public boolean equals(Object o) {
+        return this == o;
     }
 }
-public class SceneObjectToggleButton extends SceneObjectButton {
-    public int GetID() {
-        return ClassID.CID_TOGGLE_BUTTON;
-    }
 
-    private boolean _isOn;
-    private String _offImg, _onImg;
-
-    private SceneObjectImage _img;
-
-    public SceneObjectToggleButton(String eventLabel, String offImg, String onImg) {
-        super(eventLabel);
-        _InitParametersOnConstructor(offImg, onImg);
-    }
-    
-    public SceneObjectToggleButton(SceneObject o, String eventLabel, String offImg, String onImg) {
-        super(eventLabel);
-        _InitParametersOnConstructor(offImg, onImg);
-        if (o == null) return;
-        o.AddBehavior(this);
-    }
-    
-    private void _InitParametersOnConstructor(String offImg, String onImg) {
-        _isOn = true;
-        _offImg = offImg;
-        _onImg = onImg;
-    }
-
-    public void Start() {
-        super.Start();
-        
-        SceneObjectBehavior beh = GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
-        if (beh instanceof SceneObjectImage) {
-            _img = (SceneObjectImage) beh;
-        }
-
-        GetDecideHandler().AddEvent("Toggle", new IEvent() {
-            public void Event() {
-                _isOn = !_isOn;
-
-                if (_img == null) return;
-                if (_isOn) {
-                    _img.SetUsingImageName(_onImg);
-                } else {
-                    _img.SetUsingImageName(_offImg);
-                }
-            }
-        }
-        );
-    }
-}
-public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> { //<>//
+public final class SceneObjectTransform extends SceneObjectBehavior implements Comparable<SceneObjectTransform> {
     public int GetID() {
         return ClassID.CID_TRANSFORM;
     }
@@ -3544,6 +2970,900 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public int compareTo(SceneObjectTransform o) {
         return GetPriority() - o.GetPriority();
     }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectTransform is destroyed");
+        }
+    }
+}
+
+public class SceneObjectDrawBack extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DRAW_BACK;
+    }
+
+    private DrawColor _backColorInfo;
+    public DrawColor GetBackColorInfo() {
+        return _backColorInfo;
+    }
+
+    private DrawColor _borderColorInfo;
+    public DrawColor GetBorderColorInfo() {
+        return _borderColorInfo;
+    }
+
+    /**
+     背景の描画が有効かどうかを保持するフラグ。
+     falseの場合、領域内部は透過される。
+     */
+    private boolean _enableBack;
+    public boolean IsEnableBack() {
+        return _enableBack;
+    }
+    public void SetEnableBack(boolean value) {
+        _enableBack = value;
+    }
+
+    /**
+     ボーダの描画が有効かどうかを保持するフラグ。
+     falseの場合、領域周辺のボーダは描画されない。
+     */
+    private boolean _enableBorder;
+    public boolean IsEnableBorder() {
+        return _enableBorder;
+    }
+    public void SetEnableBorder(boolean value) {
+        _enableBorder = value;
+    }
+    private float _borderSize;
+    public float GetBorderSize() {
+        return _borderSize;
+    }
+    public void SetBorderSize(float value) {
+        _borderSize = value;
+    }
+
+    private int _borderType;
+    public int GetBorderType() {
+        return _borderType;
+    }
+    public void SetBorderType(int value) {
+        _borderType = value;
+    }
+
+    private PVector _size;
+
+    public SceneObjectDrawBack() {
+        DrawColor backInfo, borderInfo;
+        backInfo = new DrawColor(true, 100, 100, 100, 255);
+        borderInfo = new DrawColor(true, 0, 0, 0, 255);
+
+        // 基本的に非表示
+        SetEnable(false);
+
+        _InitParameterOnConstructor(true, backInfo, true, borderInfo, 1, ROUND);
+    }
+
+    private void _InitParameterOnConstructor(boolean enableBack, DrawColor backInfo, boolean enableBorder, DrawColor borderInfo, float borderSize, int borderType) {
+        _enableBack = enableBack;
+        _backColorInfo = backInfo;
+
+        _enableBorder = enableBorder;
+        _borderColorInfo = borderInfo;
+        _borderSize = borderSize;
+        _borderType = borderType;
+    }
+
+    public void Start() {
+        _size = GetObject().GetTransform().GetSize();
+    }
+
+    public void Draw() {
+        if (_size == null) return;
+
+        if (_enableBorder) {
+            stroke(_borderColorInfo.GetColor());
+            strokeWeight(_borderSize);
+            strokeCap(_borderType);
+        } else {
+            noStroke();
+        }
+        if (_enableBack) {
+            fill(_backColorInfo.GetColor());
+        } else {
+            fill(0, 0);
+        }
+        rect(0, 0, _size.x, _size.y);
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDrawBack is destroyed");
+        }
+    }
+}
+
+public abstract class SceneObjectDrawBase extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DRAW_BASE;
+    }
+
+    private DrawColor _colorInfo;
+    public DrawColor GetColorInfo() {
+        return _colorInfo;
+    }
+
+    public SceneObjectDrawBase() {
+        _colorInfo = new DrawColor();
+    }
+}
+
+public class SceneObjectText extends SceneObjectDrawBase {
+    public int GetID() {
+        return ClassID.CID_TEXT;
+    }
+
+    private String _text;
+    public String GetText() {
+        return _text;
+    }
+    public void SetText(String value) {
+        _text = value == null ? "" : value;
+    }
+
+    private int _horizontalAlign;
+    public int GetHorizontalAlign() {
+        return _horizontalAlign;
+    }
+    public void SetHorizontalAlign(int value) {
+        if (value == LEFT || value == CENTER || value == RIGHT) {
+            _horizontalAlign = value;
+            switch(value) {
+            case LEFT:
+                _xRate = 0;
+                break;
+            case CENTER:
+                _xRate = 0.5;
+                break;
+            case RIGHT:
+                _xRate = 1;
+                break;
+            default:
+                _xRate = 0;
+                break;
+            }
+        }
+    }
+
+    private int _verticalAlign;
+    public int GetVerticalAlign() {
+        return _verticalAlign;
+    }
+    public void SetVerticalAlign(int value) {
+        if (value == TOP || value == CENTER || value == BOTTOM || value == BASELINE) {
+            _verticalAlign = value;
+            switch(value) {
+            case TOP:
+                _yRate = 0;
+                break;
+            case CENTER:
+                _yRate = 0.5;
+                break;
+            case BOTTOM:
+                _yRate = 1;
+                break;
+            default:
+                _yRate = 0.8;
+                break;
+            }
+        }
+    }
+
+    public void SetAlign(int value1, int value2) {
+        SetHorizontalAlign(value1);
+        SetVerticalAlign(value2);
+    }
+
+    /**
+     フォントはマネージャから取得するので、参照を分散させないように文字列で対応する。
+     */
+    private String _usingFontName;
+    public String GetUsingFontName() {
+        return _usingFontName;
+    }
+    public void SetUsingFontName(String value) {
+        _usingFontName = value;
+    }
+
+    private float _fontSize;
+    public float GetFontSize() {
+        return _fontSize;
+    }
+    public void SetFontSize(float value) {
+        if (0 <= value && value <= 100) {
+            _fontSize = value;
+        }
+    }
+
+    private float _lineSpace;
+    public float GetLineSpace() {
+        return _lineSpace;
+    }
+    /**
+     行間をピクセル単位で指定する。
+     ただし、最初からフォントサイズと同じ大きさの行間が設定されている。
+     */
+    public void SetLineSpace(float value) {
+        float space = _fontSize + value;
+        if (0 <= space) {
+            _lineSpace = space;
+        }
+    }
+
+    /**
+     文字列の描画モード。
+     falseの場合、通常と同じように一斉に描画する。
+     trueの場合、ゲームのセリフのように一文字ずつ描画する。
+     ただし、trueの場合は、alignで設定されているのがLEFT TOP以外だと違和感のある描画になる。
+     */
+    private boolean _isDrawInOrder;
+    public boolean IsDrawInOrder() {
+        return _isDrawInOrder;
+    }
+    public void SetDrawInOrder(boolean value) {
+        _isDrawInOrder = value;
+    }
+
+    private float _drawSpeed;
+    public float GetDrawSpeed() {
+        return _drawSpeed;
+    }
+    public void SetDrawSpeed(float value) {
+        if (value <= 0 || value >= 60) {
+            return;
+        }
+        _drawSpeed = value;
+    }
+
+    private float _deltaTime;
+    private int _drawingIndex;
+    private String _tempText;
+
+    private PVector _objSize;
+    private float _xRate, _yRate;
+
+
+    public SceneObjectText() {
+        super();
+        _InitParameterOnConstructor("");
+    }
+
+    public SceneObjectText(String text) {
+        super();
+        _InitParameterOnConstructor(text);
+    }
+
+    public SceneObjectText(SceneObject o, String text) {
+        super();   
+        _InitParameterOnConstructor(text);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
+
+    private void _InitParameterOnConstructor(String text) {
+        SetText(text);
+        SetAlign(LEFT, TOP);
+        SetFontSize(20);
+        SetLineSpace(0);
+        SetUsingFontName("MS Gothic");
+    }
+
+    public void Start() {
+        super.Start();
+        _objSize = GetObject().GetTransform().GetSize();
+    }
+
+    public void Update() {
+        _deltaTime += 1/frameRate;
+        if (_deltaTime >= 1/_drawSpeed) {
+            _deltaTime = 0;
+            if (_drawingIndex < GetText().length()) {
+                _drawingIndex++;
+            }
+        }
+    }
+
+    public void Draw() {
+        if (GetText() == null) return;
+        fill(GetColorInfo().GetColor());
+        textFont(fontManager.GetFont(GetUsingFontName()));
+        textSize(GetFontSize());
+        textAlign(GetHorizontalAlign(), GetVerticalAlign());
+        textLeading(GetLineSpace());
+
+        if (_isDrawInOrder) {
+            _tempText = GetText().substring(0, _drawingIndex);
+        } else {
+            _tempText = GetText();
+        }
+        text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectText is destroyed");
+        }
+    }
+}
+
+public class SceneObjectImage extends SceneObjectDrawBase {
+    public int GetID() {
+        return ClassID.CID_IMAGE;
+    }
+
+    private String _usingImageName;
+    public String GetUsingImageName() {
+        return _usingImageName;
+    }
+    public void SetUsingImageName(String value) {
+        if (value != null) {
+            _usingImageName = value;
+        }
+    }
+
+    //private boolean _isNormalized;
+    //public boolean IsNormalized() {
+    //    return _isNormalized;
+    //}
+    //public void SetNormalized(boolean value) {
+    //    _isNormalized = value;
+    //}
+
+    //private PVector _offsetPos, _offsetSize;
+    //public PVector GetOffsetPos() {
+    //    return _offsetPos;
+    //}
+    //public void SetOffsetPos(float x, float y) {
+    //    if (_offsetPos == null) return;
+    //    _offsetPos.set(x, y);
+    //}
+    //public PVector GetOffsetSize() {
+    //    return _offsetSize;
+    //}
+    //public void SetOffsetSize(float w, float h) {
+    //    if (_offsetSize == null) return;
+    //    _offsetSize.set(w, h);
+    //}
+
+    private PVector _objSize;
+
+    public SceneObjectImage() {
+        super();
+    }
+
+    public SceneObjectImage(String imagePath) {
+        super();
+        _InitParameterOnConstrucor(imagePath);
+    }
+
+    public SceneObjectImage(SceneObject o, String imagePath) {
+        super();
+        _InitParameterOnConstrucor(imagePath);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
+
+    private void _InitParameterOnConstrucor(String imagePath) {
+        SetUsingImageName(imagePath);
+        //_offsetPos = new PVector(0, 0);
+        //_offsetSize = new PVector(width, height);
+        //_isNormalized = false;
+    }
+
+    public void Update() {
+        super.Update();
+        if (_objSize != null) return;
+        _SetObjectSize();
+    }
+
+    public void Draw() {
+        super.Draw();
+
+        PImage img = imageManager.GetImage(GetUsingImageName());
+        if (img == null || _objSize == null) return;
+
+        tint(GetColorInfo().GetColor());
+
+        //int x, y, w, h;
+        //x = int(GetOffsetPos().x * (IsNormalized()?img.width : 1));
+        //y = int(GetOffsetPos().y * (IsNormalized()?img.height : 1));
+        //w = int(GetOffsetSize().x * (IsNormalized()?img.width : 1));
+        //h = int(GetOffsetSize().y * (IsNormalized()?img.height : 1));
+        //image(img.get(x, y, w, h), 0, 0, _objSize.x, _objSize.y);
+        image(img, 0, 0, _objSize.x, _objSize.y);
+    }
+
+    private void _SetObjectSize() {
+        _objSize = GetObject().GetTransform().GetSize();
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectImage is destroyed");
+        }
+    }
+}
+
+public class SceneObjectButton extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_BUTTON;
+    }
+
+    private boolean _isActive;
+    private String _eventLabel;
+
+    private ActionEvent _decideHandler;
+    public ActionEvent GetDecideHandler() {
+        return _decideHandler;
+    }
+
+    private ActionEvent _enabledActiveHandler;
+    public ActionEvent GetEnabledActiveHandler() {
+        return _enabledActiveHandler;
+    }
+
+    private ActionEvent _disabledActiveHandler;
+    public ActionEvent GetDisabledActiveHandler() {
+        return _disabledActiveHandler;
+    }
+
+    public SceneObjectButton(String eventLabel) {
+        super();
+        _InitParameterOnConstructor(eventLabel);
+    }
+
+    public SceneObjectButton(SceneObject obj, String eventLabel) {
+        super();
+        _InitParameterOnConstructor(eventLabel);
+
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    private void _InitParameterOnConstructor(String eventLabel) {
+        _eventLabel = eventLabel;
+        _decideHandler = new ActionEvent();
+        _enabledActiveHandler = new ActionEvent();
+        _disabledActiveHandler = new ActionEvent();
+    }
+
+    public void OnEnabledActive() {
+        super.OnEnabledActive();
+        _isActive = true;
+        GetEnabledActiveHandler().InvokeAllEvents();
+    }
+
+    public void OnDisabledActive() {
+        super.OnDisabledActive();
+        _isActive = false;
+        GetDisabledActiveHandler().InvokeAllEvents();
+    }
+
+    public void Start() {
+        super.Start();
+        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
+            public void Event() {
+                if (!_isActive) return;
+                GetDecideHandler().InvokeAllEvents();
+            }
+        }
+        );
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectButton is destroyed");
+        }
+    }
+}
+public class SceneObjectToggleButton extends SceneObjectButton {
+    public int GetID() {
+        return ClassID.CID_TOGGLE_BUTTON;
+    }
+
+    private boolean _isOn;
+    private String _offImg, _onImg;
+
+    private SceneObjectImage _img;
+
+    public SceneObjectToggleButton(String eventLabel, String offImg, String onImg) {
+        super(eventLabel);
+        _InitParametersOnConstructor(offImg, onImg);
+    }
+
+    public SceneObjectToggleButton(SceneObject o, String eventLabel, String offImg, String onImg) {
+        super(eventLabel);
+        _InitParametersOnConstructor(offImg, onImg);
+        if (o == null) return;
+        o.AddBehavior(this);
+    }
+
+    private void _InitParametersOnConstructor(String offImg, String onImg) {
+        _isOn = true;
+        _offImg = offImg;
+        _onImg = onImg;
+    }
+
+    public void Start() {
+        super.Start();
+
+        SceneObjectBehavior beh = GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
+        if (beh instanceof SceneObjectImage) {
+            _img = (SceneObjectImage) beh;
+        }
+
+        GetDecideHandler().AddEvent("Toggle", new IEvent() {
+            public void Event() {
+                _isOn = !_isOn;
+
+                if (_img == null) return;
+                if (_isOn) {
+                    _img.SetUsingImageName(_onImg);
+                } else {
+                    _img.SetUsingImageName(_offImg);
+                }
+            }
+        }
+        );
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectToggleButton is destroyed");
+        }
+    }
+}
+public final class SceneTitle extends Scene {
+    public SceneTitle() {
+        super("Title Scene");
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
+        GetDrawBack().SetEnable(true);
+
+        SceneObject obj;
+
+        // 背景
+        obj = new SceneObject("Title Back", this);
+        SceneObjectImage backImg = new SceneObjectImage(obj, "title/back.png");
+        backImg.GetColorInfo().SetAlpha(50);
+        obj.SetActivatable(false);
+
+        // タイトル
+        obj = new SceneObject("Title Text", this);
+        obj.GetTransform().SetPriority(10);
+        obj.SetActivatable(false);
+        new SceneObjectImage(obj, "title/title.png");
+
+        // ボタンとか
+        TitleButtonObject btnObj;
+        SceneObjectTransform btnT;
+        String[] names = new String[]{"Title Start", "Title Load", "Title Option"};
+        String[] paths = new String[]{"start", "load", "option"};
+
+        for (int i=0; i<3; i++) {
+            btnObj = new TitleButtonObject(names[i], this, "title/"+ paths[i] +".png", names[i]);
+            btnT = btnObj.GetTransform();
+            btnT.SetPriority(20);
+            btnT.SetTranslation(0, -(2-i) * 50 - 20);
+            btnT.SetSize(180, 50);
+            btnT.SetAnchor(0.5, 1, 0.5, 1);
+            btnT.SetPivot(0.5, 1);
+        }
+
+        // 塵エフェクト
+        SceneObjectTransform objT;
+        String[] dustPaths = new String[20];
+        for (int i=0; i<20; i++) {
+            dustPaths[i] = "title/dust/_" + i/10 + "_" + i%10 + ".png";
+        }
+
+        obj = new SceneObject("DustEffect F", this);
+        objT = obj.GetTransform();
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetTranslation(203, 118);
+        objT.SetSize(100, 0);
+        objT.SetRotate(-1.114);
+        obj.SetActivatable(false);
+        new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 5, 15, radians(-92) - objT.GetRotate(), 70, dustPaths);
+
+        obj = new SceneObject("DustEffect E", this);
+        objT = obj.GetTransform();
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetTranslation(277, 252);
+        objT.SetSize(100, 0);
+        objT.SetRotate(-1.114);
+        obj.SetActivatable(false);
+        new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 5, 15, radians(-90) - objT.GetRotate(), 70, dustPaths);
+
+        // 火の粉エフェクト
+        String[] firePaths = new String[20];
+        for (int i=0; i<20; i++) {
+            firePaths[i] = "title/fire/_" + i/10 + "_" + i%10 + ".png";
+        }
+
+        obj = new SceneObject("FireEffect", this);
+        objT = obj.GetTransform();
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetTranslation(width/2, height);
+        objT.SetSize(width, 0);
+        obj.SetActivatable(false);
+        new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 10, 30, radians(45) - objT.GetRotate(), 30, firePaths);
+
+        // ボタン背景
+        obj = new SceneObject("Button BackGround", this);
+        new SceneObjectImage(obj, "title/menuback.png");
+        new TitleButtonBack(obj);
+    }
+}
+
+public final class TitleButtonObject extends SceneObject {
+    private TitleButton _btn;
+    public TitleButton GetButton() {
+        return _btn;
+    }
+
+    private SceneObjectImage _img;
+    public SceneObjectImage GetImage() {
+        return _img;
+    }
+
+    public TitleButtonObject(String name, Scene scene, String imagePath, String eventLabel) {
+        super(name, scene);
+
+        _img = new SceneObjectImage(this, imagePath);
+        _btn = new TitleButton(this, eventLabel);
+    }
+}
+
+public final class TitleButton extends SceneObjectButton {
+    public int GetID() {
+        return ClassID.CID_TITLE_BUTTON;
+    }
+
+    private SceneObjectImage _img;
+
+    public TitleButton(SceneObject obj, String eventLabel) {
+        super(obj, eventLabel);
+        _SetEventOnConstructor();
+    }
+
+    private void _SetEventOnConstructor() {
+        GetEnabledActiveHandler().AddEvent("title button on enabled active", new IEvent() {
+            public void Event() {
+                _OnEnabledActive();
+            }
+        }
+        );
+        GetDisabledActiveHandler().AddEvent("title button on disabled active", new IEvent() {
+            public void Event() {
+                _OnDisabledActive();
+            }
+        }
+        );
+    }
+
+    public void Start() {
+        super.Start();
+        _img = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
+        OnDisabledActive();
+    }
+
+    private void _OnEnabledActive() {
+        if (_img == null) return;
+        _img.GetColorInfo().SetAlpha(255);
+    }
+
+    private void _OnDisabledActive() {
+        if (_img == null) return;
+        _img.GetColorInfo().SetAlpha(100);
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("TitleButton is destroyed");
+        }
+    }
+}
+
+public final class TitleDustEffect extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_TITLE_DUST_EFFECT;
+    }
+
+    // 次のエフェクトを生成するまでの最低スパンと最高スパン 単位は秒
+    private float _minSpan, _maxSpan;
+    private float _vX, _vY, _alphaD, _relatedRad, _minSize, _maxSize;
+    private String[] _paths;
+
+    private float _cntDwn;
+
+    private SceneObjectTransform _objT;
+
+    public TitleDustEffect(SceneObject obj, float minSpan, float maxSpan, float vX, float vY, float minSize, float maxSize, float relatedRad, float alphaD, String[] paths) {
+        super();
+        _minSpan = minSpan;
+        _maxSpan = maxSpan;
+        _minSize = minSize;
+        _maxSize = maxSize;
+        _paths = paths;
+        _vX = vX;
+        _vY = vY;
+        _relatedRad = relatedRad;
+        _alphaD = alphaD;
+
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Start() {
+        super.Start();
+        _objT = GetObject().GetTransform();
+    }
+
+    public void Update() {
+        super.Update();
+
+        _cntDwn -= 1/frameRate;
+        if (_cntDwn <= 0) {
+            _cntDwn = random(_minSpan, _maxSpan);
+
+            // 生成処理
+            _GenerateDustEffect();
+        }
+    }
+
+    private void _GenerateDustEffect() {
+        SceneObject obj;
+        SceneObjectTransform t;
+        float x, y, d;
+        x = _objT.GetSize().x/2;
+        y = _objT.GetSize().y/2;
+        d = random(_minSize, _maxSize);
+
+        obj = new SceneObject("Title Dust Effect " + random(1000));
+        obj.SetActivatable(false);
+        t = obj.GetTransform();
+
+        GetObject().GetScene().AddObject(obj);
+        t.SetParent(GetObject().GetTransform(), true);
+
+        t.SetAnchor(0.5, 0.5, 0.5, 0.5);
+        t.SetTranslation(random(-x, x), random(-y, y));
+        t.SetSize(d, d);
+
+        new TitleDustImage(obj, _paths[(int)random(_paths.length)], _vX, _vY, _relatedRad, random(0.01, 0.05), _alphaD);
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("TitleDustEffect is destroyed");
+        }
+    }
+}
+
+public final class TitleDustImage extends SceneObjectImage {
+    public int GetID() {
+        return ClassID.CID_TITLE_DUST_IMAGE;
+    }
+
+    private PVector _velocity;
+
+    // 親オブジェクトの角度に対して相対的に飛んでいく角度
+    private float _relatedRad;
+
+    // 自身の角速度
+    private float _radVelocity;
+
+    // 1秒あたりの透明度増加量
+    private float _alphaDuration;
+
+    private SceneObjectTransform _objT;
+
+    public TitleDustImage(SceneObject obj, String imagePath, float vX, float vY, float relatedRad, float rad, float alphaD) {
+        super(obj, imagePath);
+        _velocity = new PVector(vX, vY);
+        _relatedRad = relatedRad;
+        _radVelocity = rad;
+        _alphaDuration = alphaD;
+    }
+
+    public void Start() {
+        super.Start();
+        _objT = GetObject().GetTransform();
+    }
+
+    public void Update() {
+        super.Update();
+        if (_objT == null) return;
+        PVector t = _objT.GetTranslation();
+        _objT.SetTranslation(t.x + _GetX(), t.y + _GetY());
+        _objT.SetRotate(_objT.GetRotate() + _radVelocity);
+
+        float a = GetColorInfo().GetAlpha() - _alphaDuration / frameRate;
+        if (a > 0) {
+            GetColorInfo().SetAlpha(a);
+        } else {
+            GetObject().Destroy();
+        }
+    }
+
+    private float _GetX() {
+        return _velocity.x * cos(_relatedRad) - _velocity.y * sin(_relatedRad);
+    }
+
+    private float _GetY() {
+        return _velocity.x * sin(_relatedRad) + _velocity.y * cos(_relatedRad);
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("TitleDustImage is destroyed");
+        }
+    }
+}
+
+public final class TitleButtonBack extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_TITLE_BUTTON_BACK;
+    }
+
+    private SceneObject _actObj;
+    private SceneObjectTransform _objT;
+    private SceneObjectImage _objImg;
+    private float _rad;
+
+    public TitleButtonBack(SceneObject obj) {
+        super();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Start() {
+        super.Start();
+        
+        GetObject().SetActivatable(false);
+        _objT = GetObject().GetTransform();
+        _objT.SetAnchor(0.5, 1, 0.5, 1);
+        _objT.SetSize(240, 20);
+        _objT.SetPriority(15);
+        
+        _objImg = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
+    }
+    
+    public void Update() {
+        super.Update();
+        
+        _actObj = GetObject().GetScene().GetActiveObject();
+        if (_actObj != null) {
+            _objT.SetScale(1, 1);
+            PVector actPos = _actObj.GetTransform().GetTranslation();
+            _objT.SetTranslation(actPos.x, actPos.y-10);
+        } else {
+            _objT.SetScale(0, 0);
+        }
+        
+        if (_objImg != null) {
+            _objImg.GetColorInfo().SetAlpha(abs(cos(_rad)) * 255);
+        _rad += 2/frameRate;
+        _rad %= TWO_PI;
+        }
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("TitleButtonBack is destroyed");
+        }
+    }
 }
 /** //<>// //<>//
  アフィン変換一回分の情報に責任を持つ。
@@ -3622,31 +3942,6 @@ public class Transform implements Copyable<Transform> {
 
     public String toString() {
         return "translate : " + GetTranslation() + "\nrotate : " + GetRotate() + "\nscale : " + GetScale();
-    }
-}
-public class TransformManager {
-    public static final int MAX_DEPTH = 32;
-
-    private int _depth;
-
-    public TransformManager() {
-        _depth = 0;
-    }
-
-    public boolean PushDepth() {
-        if (_depth >= MAX_DEPTH) return false;
-        _depth++;
-        return true;
-    }
-
-    public boolean PopDepth() {
-        if (_depth < 0) return false;
-        _depth--;
-        return true;
-    }
-
-    public void ResetDepth() {
-        _depth = 0;
     }
 }
 /**

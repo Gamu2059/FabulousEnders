@@ -8,6 +8,9 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+// pjsで実行するときはfalseにする
+boolean isProcessing = true;
+
 // マネージャインスタンス
 InputManager inputManager;
 SceneManager sceneManager;
@@ -16,9 +19,15 @@ FontManager fontManager;
 TransformManager transformManager;
 
 void setup() {
-    surface.setSize(890, 500);
+    size(890, 500);
     try {
         InitManager();
+        
+        SceneTitle t = new SceneTitle();
+        sceneManager.AddScene(t);
+        sceneManager.LoadScene(t.GetName());
+        
+        sceneManager.Start();
     } 
     catch(Exception e) {
         println(e);
