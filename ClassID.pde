@@ -17,4 +17,5 @@ public final class ClassID {
     public static final int CID_TITLE_BUTTON = 1000;
     public static final int CID_TITLE_DUST_EFFECT = 1001;
     public static final int CID_TITLE_DUST_IMAGE = 1002;
+    public static final int CID_TITLE_BUTTON_BACK = 1003;
 }
