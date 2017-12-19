@@ -3,6 +3,7 @@ public final class SceneTitle extends Scene {
         super("Title Scene");
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
+        SetScenePriority(2);
 
         SceneObject obj;
 
