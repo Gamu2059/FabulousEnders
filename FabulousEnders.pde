@@ -23,7 +23,7 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene("Title Scene");
+        sceneManager.LoadScene("One Illust Scene");
 
         sceneManager.Start();
     } 
@@ -43,6 +43,7 @@ void InitManager() {
 void SetScenes() {
     sceneManager.AddScene(new SceneTitle());
     sceneManager.AddScene(new SceneOneIllust());
+    sceneManager.AddScene(new SceneGameOver());
 }
 
 void draw() {

@@ -31,6 +31,7 @@ public final class ClassID {
     
     public static final int CID_TOGGLE_BUTTON = 7;
     public static final int CID_DRAG_HANDLER = 8;
+    public static final int CID_TIMER = 9;
     
     public static final int CID_TITLE_BUTTON = 1000;
     public static final int CID_TITLE_DUST_EFFECT = 1001;

@@ -22,11 +22,9 @@ void setup() {
     size(890, 500);
     try {
         InitManager();
-        
-        SceneTitle t = new SceneTitle();
-        sceneManager.AddScene(t);
-        sceneManager.LoadScene(t.GetName());
-        
+        SetScenes();
+        sceneManager.LoadScene("One Illust Scene");
+
         sceneManager.Start();
     } 
     catch(Exception e) {
@@ -40,6 +38,12 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+}
+
+void SetScenes() {
+    sceneManager.AddScene(new SceneTitle());
+    sceneManager.AddScene(new SceneOneIllust());
+    sceneManager.AddScene(new SceneGameOver());
 }
 
 void draw() {
@@ -240,27 +244,6 @@ public class Anchor {
         SetMax(GetMaxX(), value);
     }
 }
-/**
-ObjectBehavior及びサブクラスを特定するためのIDを定義する責任を持つ。
-*/
-public final class ClassID {
-    // Basic Behavior
-    public static final int CID_BEHAVIOR = 0;
-    public static final int CID_TRANSFORM = 1;
-    public static final int CID_DRAW_BACK = 2;
-    public static final int CID_DRAW_BASE = 3;
-    public static final int CID_IMAGE = 4;
-    public static final int CID_TEXT = 5;
-    public static final int CID_BUTTON = 6;
-    
-    public static final int CID_TOGGLE_BUTTON = 7;
-    public static final int CID_DRAG_HANDLER = 8;
-    
-    public static final int CID_TITLE_BUTTON = 1000;
-    public static final int CID_TITLE_DUST_EFFECT = 1001;
-    public static final int CID_TITLE_DUST_IMAGE = 1002;
-    public static final int CID_TITLE_BUTTON_BACK = 1003;
-}
 public class Collection<R extends Comparable> {
     /**
      配列のソートを行う。
@@ -362,9 +345,6 @@ public class Collection<R extends Comparable> {
         }
         return l;
     }
-}
-public interface Copyable<R> {
-    public void CopyTo(R copy);
 }
 public final class DrawColor {
     private boolean _isRGB;
@@ -508,68 +488,6 @@ public final static class GeneralCalc {
         if (x < 0) a += PI;
         return a;
     }
-}
-public interface IEvent {
-    public void Event();
-}
-public final class Key {
-    // 使用するキーの総数
-    public final static int KEY_NUM = 45;
-
-    // キーコード定数
-    public final static int KEYCODE_0 = 48;
-    public final static int KEYCODE_A = 65;
-
-    // 数字
-    public final static int _0 = 0;
-    public final static int _1 = 1;
-    public final static int _2 = 2;
-    public final static int _3 = 3;
-    public final static int _4 = 4;
-    public final static int _5 = 5;
-    public final static int _6 = 6;
-    public final static int _7 = 7;
-    public final static int _8 = 8;
-    public final static int _9 = 9;
-
-    // アルファベット
-    public final static int _A = 10;
-    public final static int _B = 11;
-    public final static int _C = 12;
-    public final static int _D = 13;
-    public final static int _E = 14;
-    public final static int _F = 15;
-    public final static int _G = 16;
-    public final static int _H = 17;
-    public final static int _I = 18;
-    public final static int _J = 19;
-    public final static int _K = 20;
-    public final static int _L = 21;
-    public final static int _M = 22;
-    public final static int _N = 23;
-    public final static int _O = 24;
-    public final static int _P = 25;
-    public final static int _Q = 26;
-    public final static int _R = 27;
-    public final static int _S = 28;
-    public final static int _T = 29;
-    public final static int _U = 30;
-    public final static int _V = 31;
-    public final static int _W = 32;
-    public final static int _X = 33;
-    public final static int _Y = 34;
-    public final static int _Z = 35;
-
-    // 特殊キー
-    public final static int _UP = 36;
-    public final static int _DOWN = 37;
-    public final static int _RIGHT = 38;
-    public final static int _LEFT = 39;
-    public final static int _ENTER = 40;
-    //public final static int _ESC = 41;
-    public final static int _DEL = 42;
-    public final static int _BACK = 43;
-    public final static int _SHIFT = 44;
 }
 public final class JsonArray extends JsonUtility {
     private ArrayList<String> _elem;
@@ -1077,6 +995,96 @@ public final class PConst {
     
     // 画像のルートパス
     public static final String IMAGE_PATH = "data/image/";
+}
+
+/**
+ObjectBehavior及びサブクラスを特定するためのIDを定義する責任を持つ。
+*/
+public final class ClassID {
+    // Basic Behavior
+    public static final int CID_BEHAVIOR = 0;
+    public static final int CID_TRANSFORM = 1;
+    public static final int CID_DRAW_BACK = 2;
+    public static final int CID_DRAW_BASE = 3;
+    public static final int CID_IMAGE = 4;
+    public static final int CID_TEXT = 5;
+    public static final int CID_BUTTON = 6;
+    
+    public static final int CID_TOGGLE_BUTTON = 7;
+    public static final int CID_DRAG_HANDLER = 8;
+    public static final int CID_TIMER = 9;
+    
+    public static final int CID_TITLE_BUTTON = 1000;
+    public static final int CID_TITLE_DUST_EFFECT = 1001;
+    public static final int CID_TITLE_DUST_IMAGE = 1002;
+    public static final int CID_TITLE_BUTTON_BACK = 1003;
+}
+
+public final class Key {
+    // 使用するキーの総数
+    public final static int KEY_NUM = 45;
+
+    // キーコード定数
+    public final static int KEYCODE_0 = 48;
+    public final static int KEYCODE_A = 65;
+
+    // 数字
+    public final static int _0 = 0;
+    public final static int _1 = 1;
+    public final static int _2 = 2;
+    public final static int _3 = 3;
+    public final static int _4 = 4;
+    public final static int _5 = 5;
+    public final static int _6 = 6;
+    public final static int _7 = 7;
+    public final static int _8 = 8;
+    public final static int _9 = 9;
+
+    // アルファベット
+    public final static int _A = 10;
+    public final static int _B = 11;
+    public final static int _C = 12;
+    public final static int _D = 13;
+    public final static int _E = 14;
+    public final static int _F = 15;
+    public final static int _G = 16;
+    public final static int _H = 17;
+    public final static int _I = 18;
+    public final static int _J = 19;
+    public final static int _K = 20;
+    public final static int _L = 21;
+    public final static int _M = 22;
+    public final static int _N = 23;
+    public final static int _O = 24;
+    public final static int _P = 25;
+    public final static int _Q = 26;
+    public final static int _R = 27;
+    public final static int _S = 28;
+    public final static int _T = 29;
+    public final static int _U = 30;
+    public final static int _V = 31;
+    public final static int _W = 32;
+    public final static int _X = 33;
+    public final static int _Y = 34;
+    public final static int _Z = 35;
+
+    // 特殊キー
+    public final static int _UP = 36;
+    public final static int _DOWN = 37;
+    public final static int _RIGHT = 38;
+    public final static int _LEFT = 39;
+    public final static int _ENTER = 40;
+    //public final static int _ESC = 41;
+    public final static int _DEL = 42;
+    public final static int _BACK = 43;
+    public final static int _SHIFT = 44;
+}
+public interface Copyable<R> {
+    public void CopyTo(R copy);
+}
+
+public interface IEvent {
+    public void Event();
 }
 /**
  平面上のある領域の基準点を保持する責任を持つ。
@@ -2135,6 +2143,14 @@ public class Scene implements Comparable<Scene> {
 
     public int compareTo(Scene o) {
         return GetScenePriority() - o.GetScenePriority();
+    }
+}
+public final class SceneGameOver extends Scene {
+    public SceneGameOver() {
+        super("GameOver Scene");
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
+        GetDrawBack().SetEnable(true);
+        SetScenePriority(1);
     }
 }
 public class SceneObject implements Comparable<SceneObject> {
@@ -3467,6 +3483,55 @@ public class SceneObjectButton extends SceneObjectBehavior {
         }
     }
 }
+public class SceneObjectTimer extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_TIMER;
+    }
+    
+    private float _runSecond;
+    
+    private ActionEvent _event;
+    public ActionEvent GetActionEvent() {
+        return _event;
+    }
+    
+    public SceneObjectTimer() {
+        super();
+        _InitParameterOnConstructor(null);
+    }
+    
+    public SceneObjectTimer(SceneObject obj) {
+        super();
+        _InitParameterOnConstructor(obj);
+    }
+    
+    private void _InitParameterOnConstructor(SceneObject obj) {
+        _runSecond = 0;
+        _event = new ActionEvent();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+    
+    public void Update() {
+        super.Update();
+        
+        if (_runSecond <= 0) return;
+        _runSecond -= 1/frameRate;
+        if (_runSecond <= 0 && _event != null) {
+            _event.InvokeAllEvents();
+        }
+    }
+    
+    public void ResetTimer(float runSecond) {
+        _runSecond = runSecond;
+    }
+    
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectTimer is destroyed");
+        }
+    }
+}
 public class SceneObjectToggleButton extends SceneObjectButton {
     public int GetID() {
         return ClassID.CID_TOGGLE_BUTTON;
@@ -3524,11 +3589,38 @@ public class SceneObjectToggleButton extends SceneObjectButton {
         }
     }
 }
+/**
+ 背景に配置する一枚絵だけを表示するシーン。
+ */
+public final class SceneOneIllust extends Scene {
+    private SceneObjectImage _backImage;
+    public SceneObjectImage GetBackImage() {
+        return _backImage;
+    }
+    
+    public SceneOneIllust() {
+        super("One Illust Scene");
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
+        GetDrawBack().SetEnable(true);
+        SetScenePriority(1);
+        
+        SceneObject obj = new SceneObject("Background", this);
+        _backImage = new SceneObjectImage(obj, null);
+        SceneObjectTimer timer = new SceneObjectTimer(obj);
+        timer.GetActionEvent().SetEvent("aaa",new IEvent(){
+            public void Event() {
+                GetBackImage().SetUsingImageName("title/title.png");
+            }
+        });
+        timer.ResetTimer(1);
+    }
+}
 public final class SceneTitle extends Scene {
     public SceneTitle() {
         super("Title Scene");
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
+        SetScenePriority(2);
 
         SceneObject obj;
 
