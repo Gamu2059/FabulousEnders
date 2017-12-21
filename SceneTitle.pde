@@ -1,48 +1,58 @@
 public final class SceneTitle extends Scene {
+    private String titleBack, titleText, dustF, dustE, fire, buttonBack;
+    private String[] titleButtons;
+    
     public SceneTitle() {
-        super("Title Scene");
+        super(SceneID.SID_TITLE);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
         SetScenePriority(2);
 
+        titleBack = "TitleBack";
+        titleText = "TitleNext";
+        dustF = "DustEffectF";
+        dustE = "DustEffectE";
+        fire = "FireEffect";
+        buttonBack = "ButtonBack";
+        titleButtons = new String[]{"TitleStart", "TitleLoad", "TitleOption"};
+
         SceneObject obj;
+        SceneObjectTransform objT;
 
         // 背景
-        obj = new SceneObject("Title Back", this);
+        obj = new SceneObject(titleBack, this);
         SceneObjectImage backImg = new SceneObjectImage(obj, "title/back.png");
         backImg.GetColorInfo().SetAlpha(50);
         obj.SetActivatable(false);
 
         // タイトル
-        obj = new SceneObject("Title Text", this);
+        obj = new SceneObject(titleText, this);
         obj.GetTransform().SetPriority(10);
         obj.SetActivatable(false);
         new SceneObjectImage(obj, "title/title.png");
 
         // ボタンとか
-        TitleButtonObject btnObj;
-        SceneObjectTransform btnT;
-        String[] names = new String[]{"Title Start", "Title Load", "Title Option"};
         String[] paths = new String[]{"start", "load", "option"};
 
         for (int i=0; i<3; i++) {
-            btnObj = new TitleButtonObject(names[i], this, "title/"+ paths[i] +".png", names[i]);
-            btnT = btnObj.GetTransform();
-            btnT.SetPriority(20);
-            btnT.SetTranslation(0, -(2-i) * 50 - 20);
-            btnT.SetSize(180, 50);
-            btnT.SetAnchor(0.5, 1, 0.5, 1);
-            btnT.SetPivot(0.5, 1);
+            obj = new SceneObject(titleButtons[i], this);
+            objT = obj.GetTransform();
+            objT.SetPriority(20);
+            objT.SetTranslation(0, -(2-i) * 50 - 20);
+            objT.SetSize(180, 50);
+            objT.SetAnchor(0.5, 1, 0.5, 1);
+            objT.SetPivot(0.5, 1);
+            new SceneObjectImage(obj, "title/"+ paths[i] +".png");
+            new TitleButton(obj, titleButtons[i]);
         }
 
         // 塵エフェクト
-        SceneObjectTransform objT;
         String[] dustPaths = new String[20];
         for (int i=0; i<20; i++) {
             dustPaths[i] = "title/dust/_" + i/10 + "_" + i%10 + ".png";
         }
 
-        obj = new SceneObject("DustEffect F", this);
+        obj = new SceneObject(dustF, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(203, 118);
@@ -51,7 +61,7 @@ public final class SceneTitle extends Scene {
         obj.SetActivatable(false);
         new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 5, 15, radians(-92) - objT.GetRotate(), 70, dustPaths);
 
-        obj = new SceneObject("DustEffect E", this);
+        obj = new SceneObject(dustE, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(277, 252);
@@ -66,7 +76,7 @@ public final class SceneTitle extends Scene {
             firePaths[i] = "title/fire/_" + i/10 + "_" + i%10 + ".png";
         }
 
-        obj = new SceneObject("FireEffect", this);
+        obj = new SceneObject(fire, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(width/2, height);
@@ -75,28 +85,28 @@ public final class SceneTitle extends Scene {
         new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 10, 30, radians(45) - objT.GetRotate(), 30, firePaths);
 
         // ボタン背景
-        obj = new SceneObject("Button BackGround", this);
+        obj = new SceneObject(buttonBack, this);
         new SceneObjectImage(obj, "title/menuback.png");
         new TitleButtonBack(obj);
     }
-}
 
-public final class TitleButtonObject extends SceneObject {
-    private TitleButton _btn;
-    public TitleButton GetButton() {
-        return _btn;
+    public void OnEnabled() {
+        super.OnEnabled();
+        
+        SceneObject obj;
+        SceneObjectImage img;
+        
+        obj = GetObject(titleBack);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
     }
 
-    private SceneObjectImage _img;
-    public SceneObjectImage GetImage() {
-        return _img;
+    public void OnDisabled() {
+        super.OnDisabled();
     }
-
-    public TitleButtonObject(String name, Scene scene, String imagePath, String eventLabel) {
-        super(name, scene);
-
-        _img = new SceneObjectImage(this, imagePath);
-        _btn = new TitleButton(this, eventLabel);
+    
+    public void GoTitle() {
+        sceneManager.ReleaseAllScenes();
+        sceneManager.LoadScene(SceneID.SID_TITLE);
     }
 }
 

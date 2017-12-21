@@ -23,9 +23,16 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene("One Illust Scene");
+        sceneManager.LoadScene(SceneID.SID_TITLE);
 
         sceneManager.Start();
+        
+        inputManager.GetMouseClickedHandler().AddEvent("aaa", new IEvent(){
+            public void Event() {
+                SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
+                g.GoGameOver();
+            }
+        });
     } 
     catch(Exception e) {
         println(e);

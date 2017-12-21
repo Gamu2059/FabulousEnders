@@ -23,9 +23,16 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene("One Illust Scene");
+        sceneManager.LoadScene(SceneID.SID_TITLE);
 
         sceneManager.Start();
+        
+        inputManager.GetMouseClickedHandler().AddEvent("aaa", new IEvent(){
+            public void Event() {
+                SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
+                g.GoGameOver();
+            }
+        });
     } 
     catch(Exception e) {
         println(e);
@@ -153,6 +160,9 @@ public final class ActionEvent {
             InvokeEvent(label);
         }
     }
+}
+public class ActionEventDuration {
+    
 }
 /**
  平面上のある領域の基準点を二つ保持する責任を持つ。
@@ -366,9 +376,9 @@ public final class DrawColor {
     }
     public void SetRedOrHue(float value) {
         if (_isRGB && value > PConst.MAX_RED) {
-            value %= PConst.MAX_RED;
+            value = PConst.MAX_RED;
         } else if (!_isRGB && value > PConst.MAX_HUE) {
-            value %= PConst.MAX_HUE;
+            value = PConst.MAX_HUE;
         }
         _p1 = value;
     }
@@ -378,9 +388,9 @@ public final class DrawColor {
     }
     public void SetGreenOrSaturation(float value) {
         if (_isRGB && value > PConst.MAX_GREEN) {
-            value %= PConst.MAX_GREEN;
+            value = PConst.MAX_GREEN;
         } else if (!_isRGB && value > PConst.MAX_SATURATION) {
-            value %= PConst.MAX_SATURATION;
+            value = PConst.MAX_SATURATION;
         }
         _p2 = value;
     }
@@ -390,9 +400,9 @@ public final class DrawColor {
     }
     public void SetBlueOrBrightness(float value) {
         if (_isRGB && value > PConst.MAX_BLUE) {
-            value %=PConst. MAX_BLUE;
+            value = PConst. MAX_BLUE;
         } else if (!_isRGB && value > PConst.MAX_BRIGHTNESS) {
-            value %= PConst.MAX_BRIGHTNESS;
+            value = PConst.MAX_BRIGHTNESS;
         }
         _p3 = value;
     }
@@ -402,7 +412,7 @@ public final class DrawColor {
     }
     public void SetAlpha(float value) {
         if (value > PConst.MAX_ALPHA) {
-            value %= PConst.MAX_ALPHA;
+            value = PConst.MAX_ALPHA;
         }
         _alpha = value;
     }
@@ -979,6 +989,89 @@ public abstract class JsonUtility {
         return content.substring(1, content.length() - 1);
     }
 }
+public abstract class AEventActivator {    
+    protected float _timer;
+    protected boolean _isActive;
+    protected boolean _isBeginning;
+    
+    public abstract void OnInit();
+    public abstract void OnEnd();
+    public abstract void Update();
+
+    public void ResetTimer(float t) {
+        _timer = t;
+    }
+    public void Start() {
+        _isActive = true;
+        if (!_isBeginning) {
+            _isBeginning = true;
+            OnInit();
+        }
+    }
+    public void Stop() {
+        _isActive = false;
+    }
+    protected void End() {
+        _isActive = false;
+        if (_isBeginning) {
+            _isBeginning = false;
+            OnEnd();
+        }
+    }
+}
+
+public abstract class ATimer extends AEventActivator {
+    public void Update() {
+        if (!_isActive || !_isBeginning) return;
+        _timer -= 1/frameRate;
+        if (_timer <= 0) {
+            End();
+        }
+    }
+}
+
+public abstract class ADuration {
+    protected float _timer;
+    protected boolean _isActive;
+    protected boolean _isBeginning;
+    
+    public abstract void OnInit();
+    public abstract void OnEnd();
+
+    public void ResetTimer(float t) {
+        _timer = t;
+    }
+    public void Start() {
+        _isActive = true;
+        if (!_isBeginning) {
+            _isBeginning = true;
+            OnInit();
+        }
+    }
+    public void Stop() {
+        _isActive = false;
+    }
+    protected void End() {
+        _isActive = false;
+        if (_isBeginning) {
+            _isBeginning = false;
+            OnEnd();
+        }
+    }
+    
+    public abstract void OnUpdate();
+    public abstract boolean IsContinue();
+    
+    public void Update() {
+        if (!_isActive || !_isBeginning) return;
+        _timer -= 1/frameRate;
+        if (!IsContinue()) {
+            End();
+            return;
+        }
+        OnUpdate();
+    }
+}
 /**
  定数を定義するクラス。
  pjsでもエンジンでも扱える共通の値。
@@ -1013,11 +1106,18 @@ public final class ClassID {
     public static final int CID_TOGGLE_BUTTON = 7;
     public static final int CID_DRAG_HANDLER = 8;
     public static final int CID_TIMER = 9;
+    public static final int CID_DURATION = 10;
     
     public static final int CID_TITLE_BUTTON = 1000;
     public static final int CID_TITLE_DUST_EFFECT = 1001;
     public static final int CID_TITLE_DUST_IMAGE = 1002;
     public static final int CID_TITLE_BUTTON_BACK = 1003;
+}
+
+public final class SceneID {
+    public static final String SID_TITLE = "Title";
+    public static final String SID_GAMEOVER = "Gameover";
+    public static final String SID_ILLUST = "One Illust";
 }
 
 public final class Key {
@@ -1561,12 +1661,18 @@ public class SceneManager {
      保持しているシーン。
      */
     private HashMap<String, Scene> _scenes;
+    public HashMap<String, Scene> GetScenes() {
+        return _scenes;
+    }
 
     /**
      実際に描画するシーンのリスト。
      シーンの優先度によって描画順が替わる。
      */
     private ArrayList<Scene> _drawScenes;
+    public ArrayList<Scene> GetDrawScenes() {
+        return _drawScenes;
+    }
 
     /**
      入力を受け付けることができるシーン。
@@ -1584,14 +1690,6 @@ public class SceneManager {
     private SceneObjectTransform _transform, _dummyTransform;
     public SceneObjectTransform GetTransform() {
         return _transform;
-    }
-
-    private IEvent _sceneOverWriteOptionEvent;
-    public IEvent GetSceneOverWriteOptionEvent() {
-        return _sceneOverWriteOptionEvent;
-    }
-    public void SetSceneOverWriteOptionEvent(IEvent value) {
-        _sceneOverWriteOptionEvent = value;
     }
 
     public SceneManager () {
@@ -1632,6 +1730,15 @@ public class SceneManager {
         if (!_drawScenes.contains(s)) return;        
 
         s.Release();
+    }
+
+    /**
+     描画シーンを全て外す。
+     */
+    public void ReleaseAllScenes() {
+        for (int i=0; i<_drawScenes.size(); i++) {
+            ReleaseScene(_drawScenes.get(i).GetName());
+        }
     }
 
     public void Start() {
@@ -1708,9 +1815,6 @@ public class SceneManager {
         if (_drawScenes == null) return;
         Scene s;
         for (int i=0; i<_drawScenes.size(); i++) {
-            if (i > 0 && _sceneOverWriteOptionEvent != null) {
-                _sceneOverWriteOptionEvent.Event();
-            }
             s = _drawScenes.get(i);
             s.Draw();
         }
@@ -2146,11 +2250,99 @@ public class Scene implements Comparable<Scene> {
     }
 }
 public final class SceneGameOver extends Scene {
+    private String sceneBack;
+
     public SceneGameOver() {
-        super("GameOver Scene");
-        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
+        super(SceneID.SID_GAMEOVER);
+        GetDrawBack().GetBackColorInfo().SetColor(0, 0, 0);
         GetDrawBack().SetEnable(true);
         SetScenePriority(1);
+
+        sceneBack = "GameOverBack";
+
+        SceneObject obj;
+        SceneObjectButton btn;
+
+        // クリックしたらタイトルに戻るボタン
+        obj = new SceneObject("TitleBackButton", this);
+        obj.GetTransform().SetPriority(10);
+        btn = new SceneObjectButton(obj, "GameOver TitleBackButton");
+        btn.GetDecideHandler().AddEvent("Go Title", new IEvent() {
+            public void Event() {
+                SceneTitle t = (SceneTitle)sceneManager.GetScene(SceneID.SID_TITLE);
+                t.GoTitle();
+            }
+        }
+        );
+
+        // 背景
+        obj = new SceneObject(sceneBack, this);
+        new SceneObjectImage(obj, "gameover/back.png");
+        SceneObjectDuration duration = new SceneObjectDuration(obj);
+        duration.GetDurations().put("Back Gradation", new ADuration() {
+            private SceneObject _obj;
+            private SceneObjectTransform _objT;
+
+            public void Start() {
+                _isActive = true;
+                if (!_isBeginning) {
+                    _isBeginning = true;
+                    OnInit();
+                }
+            }
+
+            public void Update() {
+                if (!_isActive || !_isBeginning) return;
+                _timer -= 1/frameRate;
+                if (!IsContinue()) {
+                    End();
+                    return;
+                }
+                OnUpdate();
+            }
+
+            public void OnInit() {
+                _obj = GetObject(sceneBack);
+                if (_obj == null) return;
+                _objT = _obj.GetTransform();
+                _objT.SetAnchor(0, 0, 1, 0);
+                _objT.SetPivot(0.5, 0);
+                _objT.SetSize(0, 0);
+            }
+
+            public boolean IsContinue() {
+                return _objT.GetSize().y < height;
+            }
+
+            public void OnUpdate() {
+                float y = _objT.GetSize().y;
+                _objT.SetSize(0, y + height/(frameRate*3));
+            }
+
+            public void OnEnd() {
+            }
+        }
+        );
+    }
+
+    public void OnEnabled() {
+        super.OnEnabled();
+
+        SceneObject obj;
+        SceneObjectDuration dur;
+        obj = GetObject(sceneBack);
+        dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+
+        dur.GetDurations().get("Back Gradation").Start();
+    }
+
+    public void OnDisabled() {
+        super.OnDisabled();
+    }
+
+    public void GoGameOver() {
+        sceneManager.ReleaseAllScenes();
+        sceneManager.LoadScene(SceneID.SID_GAMEOVER);
     }
 }
 public class SceneObject implements Comparable<SceneObject> {
@@ -2538,6 +2730,47 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
     protected void _OnDestroy() {
         if (isProcessing) {
             println("SceneObjectDragHandler is destroyed");
+        }
+    }
+}
+public class SceneObjectDuration extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DURATION;
+    }
+
+    private HashMap<String, ADuration> _durations;
+    public HashMap<String, ADuration> GetDurations() {
+        return _durations;
+    }
+
+    public SceneObjectDuration() {
+        super();
+        _InitParameterOnConstructor(null);
+    }
+
+    public SceneObjectDuration(SceneObject obj) {
+        super();
+        _InitParameterOnConstructor(obj);
+    }
+
+    private void _InitParameterOnConstructor(SceneObject obj) {
+        _durations = new HashMap<String, ADuration>();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_durations == null) return;
+        for (String label : _durations.keySet()) {
+            _durations.get(label).Update();
+        }
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDuration is destroyed");
         }
     }
 }
@@ -3487,45 +3720,37 @@ public class SceneObjectTimer extends SceneObjectBehavior {
     public int GetID() {
         return ClassID.CID_TIMER;
     }
-    
-    private float _runSecond;
-    
-    private ActionEvent _event;
-    public ActionEvent GetActionEvent() {
-        return _event;
+
+    private HashMap<String, ATimer> _timers;
+    public HashMap<String, ATimer> GetTimers() {
+        return _timers;
     }
-    
+
     public SceneObjectTimer() {
         super();
         _InitParameterOnConstructor(null);
     }
-    
+
     public SceneObjectTimer(SceneObject obj) {
         super();
         _InitParameterOnConstructor(obj);
     }
-    
+
     private void _InitParameterOnConstructor(SceneObject obj) {
-        _runSecond = 0;
-        _event = new ActionEvent();
+        _timers = new HashMap<String, ATimer>();
         if (obj == null) return;
         obj.AddBehavior(this);
     }
-    
+
     public void Update() {
         super.Update();
-        
-        if (_runSecond <= 0) return;
-        _runSecond -= 1/frameRate;
-        if (_runSecond <= 0 && _event != null) {
-            _event.InvokeAllEvents();
+
+        if (_timers == null) return;
+        for (String label : _timers.keySet()) {
+            _timers.get(label).Update();
         }
     }
-    
-    public void ResetTimer(float runSecond) {
-        _runSecond = runSecond;
-    }
-    
+
     protected void _OnDestroy() {
         if (isProcessing) {
             println("SceneObjectTimer is destroyed");
@@ -3597,69 +3822,80 @@ public final class SceneOneIllust extends Scene {
     public SceneObjectImage GetBackImage() {
         return _backImage;
     }
-    
+
     public SceneOneIllust() {
-        super("One Illust Scene");
+        super(SceneID.SID_ILLUST);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
         SetScenePriority(1);
-        
+
         SceneObject obj = new SceneObject("Background", this);
         _backImage = new SceneObjectImage(obj, null);
-        SceneObjectTimer timer = new SceneObjectTimer(obj);
-        timer.GetActionEvent().SetEvent("aaa",new IEvent(){
-            public void Event() {
-                GetBackImage().SetUsingImageName("title/title.png");
-            }
-        });
-        timer.ResetTimer(1);
+    }
+
+    public void OnEnabled() {
+        super.OnEnabled();
+    }
+
+    public void OnDisabled() {
+        super.OnDisabled();
     }
 }
 public final class SceneTitle extends Scene {
+    private String titleBack, titleText, dustF, dustE, fire, buttonBack;
+    private String[] titleButtons;
+    
     public SceneTitle() {
-        super("Title Scene");
+        super(SceneID.SID_TITLE);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
         SetScenePriority(2);
 
+        titleBack = "TitleBack";
+        titleText = "TitleNext";
+        dustF = "DustEffectF";
+        dustE = "DustEffectE";
+        fire = "FireEffect";
+        buttonBack = "ButtonBack";
+        titleButtons = new String[]{"TitleStart", "TitleLoad", "TitleOption"};
+
         SceneObject obj;
+        SceneObjectTransform objT;
 
         // 背景
-        obj = new SceneObject("Title Back", this);
+        obj = new SceneObject(titleBack, this);
         SceneObjectImage backImg = new SceneObjectImage(obj, "title/back.png");
         backImg.GetColorInfo().SetAlpha(50);
         obj.SetActivatable(false);
 
         // タイトル
-        obj = new SceneObject("Title Text", this);
+        obj = new SceneObject(titleText, this);
         obj.GetTransform().SetPriority(10);
         obj.SetActivatable(false);
         new SceneObjectImage(obj, "title/title.png");
 
         // ボタンとか
-        TitleButtonObject btnObj;
-        SceneObjectTransform btnT;
-        String[] names = new String[]{"Title Start", "Title Load", "Title Option"};
         String[] paths = new String[]{"start", "load", "option"};
 
         for (int i=0; i<3; i++) {
-            btnObj = new TitleButtonObject(names[i], this, "title/"+ paths[i] +".png", names[i]);
-            btnT = btnObj.GetTransform();
-            btnT.SetPriority(20);
-            btnT.SetTranslation(0, -(2-i) * 50 - 20);
-            btnT.SetSize(180, 50);
-            btnT.SetAnchor(0.5, 1, 0.5, 1);
-            btnT.SetPivot(0.5, 1);
+            obj = new SceneObject(titleButtons[i], this);
+            objT = obj.GetTransform();
+            objT.SetPriority(20);
+            objT.SetTranslation(0, -(2-i) * 50 - 20);
+            objT.SetSize(180, 50);
+            objT.SetAnchor(0.5, 1, 0.5, 1);
+            objT.SetPivot(0.5, 1);
+            new SceneObjectImage(obj, "title/"+ paths[i] +".png");
+            new TitleButton(obj, titleButtons[i]);
         }
 
         // 塵エフェクト
-        SceneObjectTransform objT;
         String[] dustPaths = new String[20];
         for (int i=0; i<20; i++) {
             dustPaths[i] = "title/dust/_" + i/10 + "_" + i%10 + ".png";
         }
 
-        obj = new SceneObject("DustEffect F", this);
+        obj = new SceneObject(dustF, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(203, 118);
@@ -3668,7 +3904,7 @@ public final class SceneTitle extends Scene {
         obj.SetActivatable(false);
         new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 5, 15, radians(-92) - objT.GetRotate(), 70, dustPaths);
 
-        obj = new SceneObject("DustEffect E", this);
+        obj = new SceneObject(dustE, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(277, 252);
@@ -3683,7 +3919,7 @@ public final class SceneTitle extends Scene {
             firePaths[i] = "title/fire/_" + i/10 + "_" + i%10 + ".png";
         }
 
-        obj = new SceneObject("FireEffect", this);
+        obj = new SceneObject(fire, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(width/2, height);
@@ -3692,28 +3928,28 @@ public final class SceneTitle extends Scene {
         new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 10, 30, radians(45) - objT.GetRotate(), 30, firePaths);
 
         // ボタン背景
-        obj = new SceneObject("Button BackGround", this);
+        obj = new SceneObject(buttonBack, this);
         new SceneObjectImage(obj, "title/menuback.png");
         new TitleButtonBack(obj);
     }
-}
 
-public final class TitleButtonObject extends SceneObject {
-    private TitleButton _btn;
-    public TitleButton GetButton() {
-        return _btn;
+    public void OnEnabled() {
+        super.OnEnabled();
+        
+        SceneObject obj;
+        SceneObjectImage img;
+        
+        obj = GetObject(titleBack);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
     }
 
-    private SceneObjectImage _img;
-    public SceneObjectImage GetImage() {
-        return _img;
+    public void OnDisabled() {
+        super.OnDisabled();
     }
-
-    public TitleButtonObject(String name, Scene scene, String imagePath, String eventLabel) {
-        super(name, scene);
-
-        _img = new SceneObjectImage(this, imagePath);
-        _btn = new TitleButton(this, eventLabel);
+    
+    public void GoTitle() {
+        sceneManager.ReleaseAllScenes();
+        sceneManager.LoadScene(SceneID.SID_TITLE);
     }
 }
 

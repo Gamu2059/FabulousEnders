@@ -8,12 +8,20 @@ public final class SceneOneIllust extends Scene {
     }
 
     public SceneOneIllust() {
-        super("One Illust Scene");
+        super(SceneID.SID_ILLUST);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
         SetScenePriority(1);
 
         SceneObject obj = new SceneObject("Background", this);
         _backImage = new SceneObjectImage(obj, null);
+    }
+
+    public void OnEnabled() {
+        super.OnEnabled();
+    }
+
+    public void OnDisabled() {
+        super.OnDisabled();
     }
 }

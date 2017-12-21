@@ -32,11 +32,18 @@ public final class ClassID {
     public static final int CID_TOGGLE_BUTTON = 7;
     public static final int CID_DRAG_HANDLER = 8;
     public static final int CID_TIMER = 9;
+    public static final int CID_DURATION = 10;
     
     public static final int CID_TITLE_BUTTON = 1000;
     public static final int CID_TITLE_DUST_EFFECT = 1001;
     public static final int CID_TITLE_DUST_IMAGE = 1002;
     public static final int CID_TITLE_BUTTON_BACK = 1003;
+}
+
+public final class SceneID {
+    public static final String SID_TITLE = "Title";
+    public static final String SID_GAMEOVER = "Gameover";
+    public static final String SID_ILLUST = "One Illust";
 }
 
 public final class Key {
