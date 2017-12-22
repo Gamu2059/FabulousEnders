@@ -22,11 +22,9 @@ void setup() {
     size(890, 500);
     try {
         InitManager();
-        
-        SceneTitle t = new SceneTitle();
-        sceneManager.AddScene(t);
-        sceneManager.LoadScene(t.GetName());
-        
+        SetScenes();
+        sceneManager.LoadScene(SceneID.SID_TITLE);
+
         sceneManager.Start();
     } 
     catch(Exception e) {
@@ -40,6 +38,12 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+}
+
+void SetScenes() {
+    sceneManager.AddScene(new SceneTitle());
+    sceneManager.AddScene(new SceneOneIllust());
+    sceneManager.AddScene(new SceneGameOver());
 }
 
 void draw() {

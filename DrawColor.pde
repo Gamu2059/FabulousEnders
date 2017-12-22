@@ -18,9 +18,9 @@ public final class DrawColor {
     }
     public void SetRedOrHue(float value) {
         if (_isRGB && value > PConst.MAX_RED) {
-            value %= PConst.MAX_RED;
+            value = PConst.MAX_RED;
         } else if (!_isRGB && value > PConst.MAX_HUE) {
-            value %= PConst.MAX_HUE;
+            value = PConst.MAX_HUE;
         }
         _p1 = value;
     }
@@ -30,9 +30,9 @@ public final class DrawColor {
     }
     public void SetGreenOrSaturation(float value) {
         if (_isRGB && value > PConst.MAX_GREEN) {
-            value %= PConst.MAX_GREEN;
+            value = PConst.MAX_GREEN;
         } else if (!_isRGB && value > PConst.MAX_SATURATION) {
-            value %= PConst.MAX_SATURATION;
+            value = PConst.MAX_SATURATION;
         }
         _p2 = value;
     }
@@ -42,9 +42,9 @@ public final class DrawColor {
     }
     public void SetBlueOrBrightness(float value) {
         if (_isRGB && value > PConst.MAX_BLUE) {
-            value %=PConst. MAX_BLUE;
+            value = PConst. MAX_BLUE;
         } else if (!_isRGB && value > PConst.MAX_BRIGHTNESS) {
-            value %= PConst.MAX_BRIGHTNESS;
+            value = PConst.MAX_BRIGHTNESS;
         }
         _p3 = value;
     }
@@ -54,7 +54,7 @@ public final class DrawColor {
     }
     public void SetAlpha(float value) {
         if (value > PConst.MAX_ALPHA) {
-            value %= PConst.MAX_ALPHA;
+            value = PConst.MAX_ALPHA;
         }
         _alpha = value;
     }

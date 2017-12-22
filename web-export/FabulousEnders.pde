@@ -22,12 +22,17 @@ void setup() {
     size(890, 500);
     try {
         InitManager();
-        
-        SceneTitle t = new SceneTitle();
-        sceneManager.AddScene(t);
-        sceneManager.LoadScene(t.GetName());
-        
+        SetScenes();
+        sceneManager.LoadScene(SceneID.SID_GAMEOVER);
+
         sceneManager.Start();
+        
+        inputManager.GetMouseClickedHandler().GetEvents().Add("aaa", new IEvent(){
+            public void Event() {
+                SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
+                g.GoGameOver();
+            }
+        });
     } 
     catch(Exception e) {
         println(e);
@@ -40,6 +45,12 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+}
+
+void SetScenes() {
+    sceneManager.AddScene(new SceneTitle());
+    sceneManager.AddScene(new SceneOneIllust());
+    sceneManager.AddScene(new SceneGameOver());
 }
 
 void draw() {
@@ -100,55 +111,31 @@ void mouseOver() {
 void mouseOut() {
     inputManager.MouseExited();
 }
-/**
- IEventインスタンスをHashMapで管理することに責任を持つ。
- */
 public final class ActionEvent {
-    private HashMap<String, IEvent> _events;
-    private HashMap<String, IEvent> GetEventHash() {
+    private PHash<IEvent> _events;
+    public PHash<IEvent> GetEvents() {
         return _events;
     }
 
     public ActionEvent() {
-        _events = new HashMap<String, IEvent>();
+        _events = new PHash<IEvent>();
     }
 
-    public void AddEvent(String eventLabel, IEvent event) {
-        if (!GetEventHash().containsKey(eventLabel) && event != null) {
-            GetEventHash().put(eventLabel, event);
-        }
-    }
-
-    public void SetEvent(String eventLabel, IEvent event) {
-        if (event != null) {
-            GetEventHash().put(eventLabel, event);
-        }
-    }
-
-    public IEvent GetEvent(String eventLabel) {
-        return GetEventHash().get(eventLabel);
-    }
-
-    public IEvent RemoveEvent(String eventLabel) {
-        return GetEventHash().remove(eventLabel);
-    }
-
-    public void RemoveAllEvents() {
-        GetEventHash().clear();
-    }
-
-    public void InvokeEvent(String eventLabel) {
-        IEvent e = GetEvent(eventLabel);
+    public void InvokeEvent(String label) {
+        IEvent e = _events.Get(label);
         if (e != null) {
             e.Event();
         }
     }
 
     public void InvokeAllEvents() {
-        for (String label : GetEventHash().keySet()) {
+        for (String label : _events.GetElements().keySet()) {
             InvokeEvent(label);
         }
     }
+}
+public class ActionEventDuration {
+    
 }
 /**
  平面上のある領域の基準点を二つ保持する責任を持つ。
@@ -239,27 +226,6 @@ public class Anchor {
     public void SetMaxY(float value) {
         SetMax(GetMaxX(), value);
     }
-}
-/**
-ObjectBehavior及びサブクラスを特定するためのIDを定義する責任を持つ。
-*/
-public final class ClassID {
-    // Basic Behavior
-    public static final int CID_BEHAVIOR = 0;
-    public static final int CID_TRANSFORM = 1;
-    public static final int CID_DRAW_BACK = 2;
-    public static final int CID_DRAW_BASE = 3;
-    public static final int CID_IMAGE = 4;
-    public static final int CID_TEXT = 5;
-    public static final int CID_BUTTON = 6;
-    
-    public static final int CID_TOGGLE_BUTTON = 7;
-    public static final int CID_DRAG_HANDLER = 8;
-    
-    public static final int CID_TITLE_BUTTON = 1000;
-    public static final int CID_TITLE_DUST_EFFECT = 1001;
-    public static final int CID_TITLE_DUST_IMAGE = 1002;
-    public static final int CID_TITLE_BUTTON_BACK = 1003;
 }
 public class Collection<R extends Comparable> {
     /**
@@ -363,9 +329,6 @@ public class Collection<R extends Comparable> {
         return l;
     }
 }
-public interface Copyable<R> {
-    public void CopyTo(R copy);
-}
 public final class DrawColor {
     private boolean _isRGB;
     public boolean IsRGB() {
@@ -386,9 +349,9 @@ public final class DrawColor {
     }
     public void SetRedOrHue(float value) {
         if (_isRGB && value > PConst.MAX_RED) {
-            value %= PConst.MAX_RED;
+            value = PConst.MAX_RED;
         } else if (!_isRGB && value > PConst.MAX_HUE) {
-            value %= PConst.MAX_HUE;
+            value = PConst.MAX_HUE;
         }
         _p1 = value;
     }
@@ -398,9 +361,9 @@ public final class DrawColor {
     }
     public void SetGreenOrSaturation(float value) {
         if (_isRGB && value > PConst.MAX_GREEN) {
-            value %= PConst.MAX_GREEN;
+            value = PConst.MAX_GREEN;
         } else if (!_isRGB && value > PConst.MAX_SATURATION) {
-            value %= PConst.MAX_SATURATION;
+            value = PConst.MAX_SATURATION;
         }
         _p2 = value;
     }
@@ -410,9 +373,9 @@ public final class DrawColor {
     }
     public void SetBlueOrBrightness(float value) {
         if (_isRGB && value > PConst.MAX_BLUE) {
-            value %=PConst. MAX_BLUE;
+            value = PConst. MAX_BLUE;
         } else if (!_isRGB && value > PConst.MAX_BRIGHTNESS) {
-            value %= PConst.MAX_BRIGHTNESS;
+            value = PConst.MAX_BRIGHTNESS;
         }
         _p3 = value;
     }
@@ -422,7 +385,7 @@ public final class DrawColor {
     }
     public void SetAlpha(float value) {
         if (value > PConst.MAX_ALPHA) {
-            value %= PConst.MAX_ALPHA;
+            value = PConst.MAX_ALPHA;
         }
         _alpha = value;
     }
@@ -508,68 +471,6 @@ public final static class GeneralCalc {
         if (x < 0) a += PI;
         return a;
     }
-}
-public interface IEvent {
-    public void Event();
-}
-public final class Key {
-    // 使用するキーの総数
-    public final static int KEY_NUM = 45;
-
-    // キーコード定数
-    public final static int KEYCODE_0 = 48;
-    public final static int KEYCODE_A = 65;
-
-    // 数字
-    public final static int _0 = 0;
-    public final static int _1 = 1;
-    public final static int _2 = 2;
-    public final static int _3 = 3;
-    public final static int _4 = 4;
-    public final static int _5 = 5;
-    public final static int _6 = 6;
-    public final static int _7 = 7;
-    public final static int _8 = 8;
-    public final static int _9 = 9;
-
-    // アルファベット
-    public final static int _A = 10;
-    public final static int _B = 11;
-    public final static int _C = 12;
-    public final static int _D = 13;
-    public final static int _E = 14;
-    public final static int _F = 15;
-    public final static int _G = 16;
-    public final static int _H = 17;
-    public final static int _I = 18;
-    public final static int _J = 19;
-    public final static int _K = 20;
-    public final static int _L = 21;
-    public final static int _M = 22;
-    public final static int _N = 23;
-    public final static int _O = 24;
-    public final static int _P = 25;
-    public final static int _Q = 26;
-    public final static int _R = 27;
-    public final static int _S = 28;
-    public final static int _T = 29;
-    public final static int _U = 30;
-    public final static int _V = 31;
-    public final static int _W = 32;
-    public final static int _X = 33;
-    public final static int _Y = 34;
-    public final static int _Z = 35;
-
-    // 特殊キー
-    public final static int _UP = 36;
-    public final static int _DOWN = 37;
-    public final static int _RIGHT = 38;
-    public final static int _LEFT = 39;
-    public final static int _ENTER = 40;
-    //public final static int _ESC = 41;
-    public final static int _DEL = 42;
-    public final static int _BACK = 43;
-    public final static int _SHIFT = 44;
 }
 public final class JsonArray extends JsonUtility {
     private ArrayList<String> _elem;
@@ -1078,6 +979,151 @@ public final class PConst {
     // 画像のルートパス
     public static final String IMAGE_PATH = "data/image/";
 }
+
+/**
+ObjectBehavior及びサブクラスを特定するためのIDを定義する責任を持つ。
+*/
+public final class ClassID {
+    // Basic Behavior
+    public static final int CID_BEHAVIOR = 0;
+    public static final int CID_TRANSFORM = 1;
+    public static final int CID_DRAW_BACK = 2;
+    public static final int CID_DRAW_BASE = 3;
+    public static final int CID_IMAGE = 4;
+    public static final int CID_TEXT = 5;
+    public static final int CID_BUTTON = 6;
+    
+    public static final int CID_TOGGLE_BUTTON = 7;
+    public static final int CID_DRAG_HANDLER = 8;
+    public static final int CID_TIMER = 9;
+    public static final int CID_DURATION = 10;
+    
+    public static final int CID_TITLE_BUTTON = 1000;
+    public static final int CID_TITLE_DUST_EFFECT = 1001;
+    public static final int CID_TITLE_DUST_IMAGE = 1002;
+    public static final int CID_TITLE_BUTTON_BACK = 1003;
+}
+
+public final class SceneID {
+    public static final String SID_TITLE = "Title";
+    public static final String SID_GAMEOVER = "Gameover";
+    public static final String SID_ILLUST = "One Illust";
+}
+
+public final class Key {
+    // 使用するキーの総数
+    public final static int KEY_NUM = 45;
+
+    // キーコード定数
+    public final static int KEYCODE_0 = 48;
+    public final static int KEYCODE_A = 65;
+
+    // 数字
+    public final static int _0 = 0;
+    public final static int _1 = 1;
+    public final static int _2 = 2;
+    public final static int _3 = 3;
+    public final static int _4 = 4;
+    public final static int _5 = 5;
+    public final static int _6 = 6;
+    public final static int _7 = 7;
+    public final static int _8 = 8;
+    public final static int _9 = 9;
+
+    // アルファベット
+    public final static int _A = 10;
+    public final static int _B = 11;
+    public final static int _C = 12;
+    public final static int _D = 13;
+    public final static int _E = 14;
+    public final static int _F = 15;
+    public final static int _G = 16;
+    public final static int _H = 17;
+    public final static int _I = 18;
+    public final static int _J = 19;
+    public final static int _K = 20;
+    public final static int _L = 21;
+    public final static int _M = 22;
+    public final static int _N = 23;
+    public final static int _O = 24;
+    public final static int _P = 25;
+    public final static int _Q = 26;
+    public final static int _R = 27;
+    public final static int _S = 28;
+    public final static int _T = 29;
+    public final static int _U = 30;
+    public final static int _V = 31;
+    public final static int _W = 32;
+    public final static int _X = 33;
+    public final static int _Y = 34;
+    public final static int _Z = 35;
+
+    // 特殊キー
+    public final static int _UP = 36;
+    public final static int _DOWN = 37;
+    public final static int _RIGHT = 38;
+    public final static int _LEFT = 39;
+    public final static int _ENTER = 40;
+    //public final static int _ESC = 41;
+    public final static int _DEL = 42;
+    public final static int _BACK = 43;
+    public final static int _SHIFT = 44;
+}
+public final class PHash<R> {
+    private HashMap<String, R> _elements;
+    public HashMap<String, R> GetElements() {
+        return _elements;
+    }
+    
+    public PHash() {
+        _elements = new HashMap<String, R>();    
+    }
+    
+    public void Add(String label, R elem) {
+        if (ContainsKey(label)) return;
+        Set(label, elem);
+    }
+    
+    public void Set(String label, R elem) {
+        if (elem == null) return;
+        GetElements().put(label, elem);
+    }
+    
+    public R Get(String label) {
+        return GetElements().get(label);
+    }
+    
+    public R Remove(String label) {
+        return GetElements().remove(label);
+    }
+    
+    public void RemoveAll() {
+        GetElements().clear();
+    }
+    
+    public boolean ContainsKey(String label) {
+        return GetElements().containsKey(label);
+    }
+}
+public interface Copyable<R> {
+    public void CopyTo(R copy);
+}
+
+public interface IEvent {
+    public void Event();
+}
+
+public interface ITimer {
+    public void OnInit();
+    public void OnTimeOut();
+}
+
+public interface IDuration {
+    public void OnInit();
+    public void OnUpdate();
+    public void OnEnd();
+    public boolean IsContinue();
+}
 /**
  平面上のある領域の基準点を保持する責任を持つ。
  */
@@ -1236,7 +1282,7 @@ public final class InputManager {
     }
 
     private void _InitInputEvent() {
-        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
+        GetMouseEnteredHandler().GetEvents().Add("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Enterd on Window!");
@@ -1245,7 +1291,7 @@ public final class InputManager {
         }
         );
 
-        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
+        GetMouseExitedHandler().GetEvents().Add("Mouse Exited Window", new IEvent() {
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Exited from Window!");
@@ -1553,12 +1599,18 @@ public class SceneManager {
      保持しているシーン。
      */
     private HashMap<String, Scene> _scenes;
+    public HashMap<String, Scene> GetScenes() {
+        return _scenes;
+    }
 
     /**
      実際に描画するシーンのリスト。
      シーンの優先度によって描画順が替わる。
      */
     private ArrayList<Scene> _drawScenes;
+    public ArrayList<Scene> GetDrawScenes() {
+        return _drawScenes;
+    }
 
     /**
      入力を受け付けることができるシーン。
@@ -1576,14 +1628,6 @@ public class SceneManager {
     private SceneObjectTransform _transform, _dummyTransform;
     public SceneObjectTransform GetTransform() {
         return _transform;
-    }
-
-    private IEvent _sceneOverWriteOptionEvent;
-    public IEvent GetSceneOverWriteOptionEvent() {
-        return _sceneOverWriteOptionEvent;
-    }
-    public void SetSceneOverWriteOptionEvent(IEvent value) {
-        _sceneOverWriteOptionEvent = value;
     }
 
     public SceneManager () {
@@ -1624,6 +1668,15 @@ public class SceneManager {
         if (!_drawScenes.contains(s)) return;        
 
         s.Release();
+    }
+
+    /**
+     描画シーンを全て外す。
+     */
+    public void ReleaseAllScenes() {
+        for (int i=0; i<_drawScenes.size(); i++) {
+            ReleaseScene(_drawScenes.get(i).GetName());
+        }
     }
 
     public void Start() {
@@ -1700,9 +1753,6 @@ public class SceneManager {
         if (_drawScenes == null) return;
         Scene s;
         for (int i=0; i<_drawScenes.size(); i++) {
-            if (i > 0 && _sceneOverWriteOptionEvent != null) {
-                _sceneOverWriteOptionEvent.Event();
-            }
             s = _drawScenes.get(i);
             s.Draw();
         }
@@ -2137,6 +2187,127 @@ public class Scene implements Comparable<Scene> {
         return GetScenePriority() - o.GetScenePriority();
     }
 }
+public final class SceneGameOver extends Scene {
+    private String sceneBack;
+    private String[] sword;
+
+    public SceneGameOver() {
+        super(SceneID.SID_GAMEOVER);
+        GetDrawBack().GetBackColorInfo().SetColor(0, 0, 0);
+        GetDrawBack().SetEnable(true);
+        SetScenePriority(1);
+
+        sceneBack = "GameOverBack";
+        sword = new String[7];
+        for (int i=0; i<sword.length; i++) {
+            sword[i] = "sword" + i;
+        }
+
+        SceneObject obj;
+        SceneObjectTransform objT;
+        SceneObjectButton btn;
+
+        // クリックしたらタイトルに戻るボタン
+        obj = new SceneObject("TitleBackButton", this);
+        obj.GetTransform().SetPriority(10);
+        btn = new SceneObjectButton(obj, "GameOver TitleBackButton");
+        btn.GetDecideHandler().GetEvents().Add("Go Title", new IEvent() {
+            public void Event() {
+                SceneTitle t = (SceneTitle)sceneManager.GetScene(SceneID.SID_TITLE);
+                t.GoTitle();
+            }
+        }
+        );
+
+        // 背景
+        obj = new SceneObject(sceneBack, this);
+        new SceneObjectImage(obj, "gameover/back.png");
+        SceneObjectDuration duration = new SceneObjectDuration(obj);
+        duration.GetDurations().Set("Back Gradation", new IDuration() {
+            private SceneObject _obj;
+            private SceneObjectTransform _objT;
+
+            public void OnInit() {
+                _obj = GetObject(sceneBack);
+                if (_obj == null) return;
+                _objT = _obj.GetTransform();
+                _objT.SetAnchor(0, 0, 1, 0);
+                _objT.SetPivot(0.5, 0);
+                _objT.SetSize(0, 0);
+            }
+
+            public boolean IsContinue() {
+                return _objT.GetSize().y < height;
+            }
+
+            public void OnUpdate() {
+                float y = _objT.GetSize().y;
+                _objT.SetSize(0, y + height/(frameRate*3));
+            }
+
+            public void OnEnd() {
+            }
+        }
+        );
+        duration.SetUseTimer("Back Gradation", false);
+
+        // 剣
+        for (int i=0; i<sword.length; i++) {
+            obj = new SceneObject(sword[0], this);
+            objT = obj.GetTransform();
+            objT.SetAnchor(0.5, 0.5, 0.5, 0.5);
+            objT.SetPriority(3);
+            new SceneObjectImage(obj, "gameover/" + sword[i] + ".png");
+            SceneObjectDuration dur = new SceneObjectDuration(obj);
+        }
+        obj = GetObject(sword[0]);
+        SceneObjectDuration dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+        dur.GetDurations().Add("Rotate Sword", new IDuration() {
+            private SceneObjectTransform _objT;
+            
+            public void OnInit() {
+                _objT = GetObject(sword[0]).GetTransform();
+            }
+
+            public boolean IsContinue() {
+                return true;
+            }
+
+            public void OnUpdate() {
+                float r = _objT.GetRotate();
+                _objT.SetRotate(r + 1/frameRate);
+            }
+
+            public void OnEnd() {
+            }
+        }
+        );
+    }
+
+    public void OnEnabled() {
+        super.OnEnabled();
+
+        SceneObject obj;
+        SceneObjectDuration dur;
+        obj = GetObject(sceneBack);
+        dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+        dur.Start("Back Gradation");
+        
+        obj = GetObject(sword[0]);
+        obj.GetTransform().SetSize(131, 388);
+        dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+        dur.Start("Rotate Sword");
+    }
+
+    public void OnDisabled() {
+        super.OnDisabled();
+    }
+
+    public void GoGameOver() {
+        sceneManager.ReleaseAllScenes();
+        sceneManager.LoadScene(SceneID.SID_GAMEOVER);
+    }
+}
 public class SceneObject implements Comparable<SceneObject> {
     private String _name;
     public String GetName() {
@@ -2497,7 +2668,7 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseDraggedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseDraggedHandler().GetEvents().Add(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isDragging) return;
                 GetDraggedActionHandler().InvokeAllEvents();
@@ -3452,7 +3623,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseReleasedHandler().GetEvents().Add(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isActive) return;
                 GetDecideHandler().InvokeAllEvents();
@@ -3465,6 +3636,238 @@ public class SceneObjectButton extends SceneObjectBehavior {
         if (isProcessing) {
             println("SceneObjectButton is destroyed");
         }
+    }
+}
+public final class TimerInfo {
+    public float second;
+    public boolean useTimer;
+    public boolean haveBegun;
+    public boolean isActive;
+}
+
+public class SceneObjectTimer extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_TIMER;
+    }
+
+    private PHash<ITimer> _timers;
+    public PHash<ITimer> GetTimers() {
+        return _timers;
+    }
+    private PHash<TimerInfo> _infos;
+
+    public SceneObjectTimer() {
+        super();
+        _InitParameterOnConstructor(null);
+    }
+
+    public SceneObjectTimer(SceneObject obj) {
+        super();
+        _InitParameterOnConstructor(obj);
+    }
+
+    private void _InitParameterOnConstructor(SceneObject obj) {
+        _timers = new PHash<ITimer>();
+        _infos = new PHash<TimerInfo>();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_timers == null) return;
+        TimerInfo i;
+        for (String label : _timers.GetElements().keySet()) {
+            if (!_IsContainsKey(label)) continue;
+            i = _infos.Get(label);
+            if (!i.isActive || !i.haveBegun) continue;
+            i.second -= 1/frameRate;
+            if (i.second <= 0) {
+                _timers.Get(label).OnTimeOut();
+                End(label);
+            }
+        }
+    }
+
+    public void Stop() {
+        super.Stop();
+        for (String label : _infos.GetElements().keySet()) {
+            End(label);
+        }
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectTimer is destroyed");
+        }
+    }
+
+    //////////////////////////////////////////
+    // 以下、操作系メソッド
+    //////////////////////////////////////////
+
+    private boolean _IsContainsKey(String label) {
+        return _timers.ContainsKey(label) && _infos.ContainsKey(label);
+    }
+
+    private TimerInfo _GetTimerInfo(String label) {
+        TimerInfo i = _infos.Get(label);
+        if (i == null) {
+            i = new TimerInfo();
+            _infos.Add(label, i);
+        }
+        return i;
+    }
+
+    public void ResetTimer(String label, float timer) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.second = timer;
+    }
+
+    public void Start(String label) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = true;
+        if (!i.haveBegun) {
+            i.haveBegun = true;
+            _timers.Get(label).OnInit();
+        }
+    }
+
+    public void Stop(String label) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = false;
+    }
+
+    public void End(String label) {
+        if (!_infos.ContainsKey(label)) return;
+        TimerInfo i = _infos.Get(label);
+        i.isActive = false;
+        i.haveBegun = false;
+    }
+}
+
+public class SceneObjectDuration extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DURATION;
+    }
+
+    private PHash<IDuration> _durations;
+    public PHash<IDuration> GetDurations() {
+        return _durations;
+    }
+    private PHash<TimerInfo> _infos;
+
+    public SceneObjectDuration() {
+        super();
+        _InitParameterOnConstructor(null);
+    }
+
+    public SceneObjectDuration(SceneObject obj) {
+        super();
+        _InitParameterOnConstructor(obj);
+    }
+
+    private void _InitParameterOnConstructor(SceneObject obj) {
+        _durations = new PHash<IDuration>();
+        _infos = new PHash<TimerInfo>();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_durations == null) return;
+        TimerInfo i;
+        IDuration d;
+        boolean f;
+        for (String label : _durations.GetElements().keySet()) {
+            if (!_IsContainsKey(label)) continue;
+            i = _infos.Get(label);
+            d = _durations.Get(label);
+            if (!i.isActive || !i.haveBegun) continue;
+
+            if (i.useTimer) {
+                i.second -= 1/frameRate;
+                f = i.second <= 0;
+            } else {
+                f = !d.IsContinue();
+            }
+            if (f) {
+                d.OnEnd();
+                End(label);
+            }
+            d.OnUpdate();
+        }
+    }
+
+    public void Stop() {
+        super.Stop();
+        for (String label : _infos.GetElements().keySet()) {
+            End(label);
+        }
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDuration is destroyed");
+        }
+    }
+
+    //////////////////////////////////////////
+    // 以下、操作系メソッド
+    //////////////////////////////////////////
+
+    private boolean _IsContainsKey(String label) {
+        return _durations.ContainsKey(label) && _infos.ContainsKey(label);
+    }
+
+    private TimerInfo _GetTimerInfo(String label) {
+        TimerInfo i = _infos.Get(label);
+        if (i == null) {
+            i = new TimerInfo();
+            _infos.Add(label, i);
+        }
+        return i;
+    }
+
+    public void ResetTimer(String label, float timer) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.second = timer;
+    }
+
+    public void SetUseTimer(String label, boolean useTimer) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.useTimer = useTimer;
+    }
+
+    public void Start(String label) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = true;
+        if (!i.haveBegun) {
+            i.haveBegun = true;
+            _durations.Get(label).OnInit();
+        }
+    }
+
+    public void Stop(String label) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = false;
+    }
+
+    public void End(String label) {
+        if (!_infos.ContainsKey(label)) return;
+        TimerInfo i = _infos.Get(label);
+        i.isActive = false;
+        i.haveBegun = false;
     }
 }
 public class SceneObjectToggleButton extends SceneObjectButton {
@@ -3503,7 +3906,7 @@ public class SceneObjectToggleButton extends SceneObjectButton {
             _img = (SceneObjectImage) beh;
         }
 
-        GetDecideHandler().AddEvent("Toggle", new IEvent() {
+        GetDecideHandler().GetEvents().Add("Toggle", new IEvent() {
             public void Event() {
                 _isOn = !_isOn;
 
@@ -3524,50 +3927,106 @@ public class SceneObjectToggleButton extends SceneObjectButton {
         }
     }
 }
-public final class SceneTitle extends Scene {
-    public SceneTitle() {
-        super("Title Scene");
+/**
+ 背景に配置する一枚絵だけを表示するシーン。
+ */
+public final class SceneOneIllust extends Scene {
+    private SceneObjectImage _backImage;
+    public SceneObjectImage GetBackImage() {
+        return _backImage;
+    }
+
+    public SceneOneIllust() {
+        super(SceneID.SID_ILLUST);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
         GetDrawBack().SetEnable(true);
+        SetScenePriority(1);
+
+        SceneObject obj = new SceneObject("Background", this);
+        _backImage = new SceneObjectImage(obj, null);
+        
+        SceneObjectTimer timer = new SceneObjectTimer(obj);
+        timer.GetTimers().Add("hoge", new ITimer(){
+            public void OnInit() {
+                println(111);
+                _backImage.SetUsingImageName(null);
+            }
+            
+            public void OnTimeOut() {
+                println("done");
+                _backImage.SetUsingImageName("gameover/back.png");
+            }
+        });
+    }
+
+    public void OnEnabled() {
+        super.OnEnabled();
+        
+        SceneObject o = GetObject("Background");
+        SceneObjectTimer t = (SceneObjectTimer)o.GetBehaviorOnID(ClassID.CID_TIMER);
+        t.ResetTimer("hoge", 1);
+        t.Start("hoge");
+    }
+
+    public void OnDisabled() {
+        super.OnDisabled();
+    }
+}
+public final class SceneTitle extends Scene {
+    private String titleBack, titleText, dustF, dustE, fire, buttonBack;
+    private String[] titleButtons;
+    
+    public SceneTitle() {
+        super(SceneID.SID_TITLE);
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
+        GetDrawBack().SetEnable(true);
+        SetScenePriority(2);
+
+        titleBack = "TitleBack";
+        titleText = "TitleNext";
+        dustF = "DustEffectF";
+        dustE = "DustEffectE";
+        fire = "FireEffect";
+        buttonBack = "ButtonBack";
+        titleButtons = new String[]{"TitleStart", "TitleLoad", "TitleOption"};
 
         SceneObject obj;
+        SceneObjectTransform objT;
 
         // 背景
-        obj = new SceneObject("Title Back", this);
+        obj = new SceneObject(titleBack, this);
         SceneObjectImage backImg = new SceneObjectImage(obj, "title/back.png");
         backImg.GetColorInfo().SetAlpha(50);
         obj.SetActivatable(false);
 
         // タイトル
-        obj = new SceneObject("Title Text", this);
+        obj = new SceneObject(titleText, this);
         obj.GetTransform().SetPriority(10);
         obj.SetActivatable(false);
         new SceneObjectImage(obj, "title/title.png");
 
         // ボタンとか
-        TitleButtonObject btnObj;
-        SceneObjectTransform btnT;
-        String[] names = new String[]{"Title Start", "Title Load", "Title Option"};
         String[] paths = new String[]{"start", "load", "option"};
 
         for (int i=0; i<3; i++) {
-            btnObj = new TitleButtonObject(names[i], this, "title/"+ paths[i] +".png", names[i]);
-            btnT = btnObj.GetTransform();
-            btnT.SetPriority(20);
-            btnT.SetTranslation(0, -(2-i) * 50 - 20);
-            btnT.SetSize(180, 50);
-            btnT.SetAnchor(0.5, 1, 0.5, 1);
-            btnT.SetPivot(0.5, 1);
+            obj = new SceneObject(titleButtons[i], this);
+            objT = obj.GetTransform();
+            objT.SetPriority(20);
+            objT.SetTranslation(0, -(2-i) * 50 - 20);
+            objT.SetSize(180, 50);
+            objT.SetAnchor(0.5, 1, 0.5, 1);
+            objT.SetPivot(0.5, 1);
+            new SceneObjectImage(obj, "title/"+ paths[i] +".png");
+            new TitleButton(obj, titleButtons[i]);
         }
 
         // 塵エフェクト
-        SceneObjectTransform objT;
         String[] dustPaths = new String[20];
         for (int i=0; i<20; i++) {
             dustPaths[i] = "title/dust/_" + i/10 + "_" + i%10 + ".png";
         }
 
-        obj = new SceneObject("DustEffect F", this);
+        obj = new SceneObject(dustF, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(203, 118);
@@ -3576,7 +4035,7 @@ public final class SceneTitle extends Scene {
         obj.SetActivatable(false);
         new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 5, 15, radians(-92) - objT.GetRotate(), 70, dustPaths);
 
-        obj = new SceneObject("DustEffect E", this);
+        obj = new SceneObject(dustE, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(277, 252);
@@ -3591,7 +4050,7 @@ public final class SceneTitle extends Scene {
             firePaths[i] = "title/fire/_" + i/10 + "_" + i%10 + ".png";
         }
 
-        obj = new SceneObject("FireEffect", this);
+        obj = new SceneObject(fire, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetTranslation(width/2, height);
@@ -3600,28 +4059,28 @@ public final class SceneTitle extends Scene {
         new TitleDustEffect(obj, 0.1, 0.5, 0, -1, 10, 30, radians(45) - objT.GetRotate(), 30, firePaths);
 
         // ボタン背景
-        obj = new SceneObject("Button BackGround", this);
+        obj = new SceneObject(buttonBack, this);
         new SceneObjectImage(obj, "title/menuback.png");
         new TitleButtonBack(obj);
     }
-}
 
-public final class TitleButtonObject extends SceneObject {
-    private TitleButton _btn;
-    public TitleButton GetButton() {
-        return _btn;
+    public void OnEnabled() {
+        super.OnEnabled();
+        
+        SceneObject obj;
+        SceneObjectImage img;
+        
+        obj = GetObject(titleBack);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
     }
 
-    private SceneObjectImage _img;
-    public SceneObjectImage GetImage() {
-        return _img;
+    public void OnDisabled() {
+        super.OnDisabled();
     }
-
-    public TitleButtonObject(String name, Scene scene, String imagePath, String eventLabel) {
-        super(name, scene);
-
-        _img = new SceneObjectImage(this, imagePath);
-        _btn = new TitleButton(this, eventLabel);
+    
+    public void GoTitle() {
+        sceneManager.ReleaseAllScenes();
+        sceneManager.LoadScene(SceneID.SID_TITLE);
     }
 }
 
@@ -3638,13 +4097,13 @@ public final class TitleButton extends SceneObjectButton {
     }
 
     private void _SetEventOnConstructor() {
-        GetEnabledActiveHandler().AddEvent("title button on enabled active", new IEvent() {
+        GetEnabledActiveHandler().GetEvents().Add("title button on enabled active", new IEvent() {
             public void Event() {
                 _OnEnabledActive();
             }
         }
         );
-        GetDisabledActiveHandler().AddEvent("title button on disabled active", new IEvent() {
+        GetDisabledActiveHandler().GetEvents().Add("title button on disabled active", new IEvent() {
             public void Event() {
                 _OnDisabledActive();
             }

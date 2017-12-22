@@ -99,7 +99,7 @@ public final class InputManager {
     }
 
     private void _InitInputEvent() {
-        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
+        GetMouseEnteredHandler().GetEvents().Add("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Enterd on Window!");
@@ -108,7 +108,7 @@ public final class InputManager {
         }
         );
 
-        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
+        GetMouseExitedHandler().GetEvents().Add("Mouse Exited Window", new IEvent() {
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Exited from Window!");
@@ -416,12 +416,18 @@ public class SceneManager {
      保持しているシーン。
      */
     private HashMap<String, Scene> _scenes;
+    public HashMap<String, Scene> GetScenes() {
+        return _scenes;
+    }
 
     /**
      実際に描画するシーンのリスト。
      シーンの優先度によって描画順が替わる。
      */
     private ArrayList<Scene> _drawScenes;
+    public ArrayList<Scene> GetDrawScenes() {
+        return _drawScenes;
+    }
 
     /**
      入力を受け付けることができるシーン。
@@ -439,14 +445,6 @@ public class SceneManager {
     private SceneObjectTransform _transform, _dummyTransform;
     public SceneObjectTransform GetTransform() {
         return _transform;
-    }
-
-    private IEvent _sceneOverWriteOptionEvent;
-    public IEvent GetSceneOverWriteOptionEvent() {
-        return _sceneOverWriteOptionEvent;
-    }
-    public void SetSceneOverWriteOptionEvent(IEvent value) {
-        _sceneOverWriteOptionEvent = value;
     }
 
     public SceneManager () {
@@ -487,6 +485,15 @@ public class SceneManager {
         if (!_drawScenes.contains(s)) return;        
 
         s.Release();
+    }
+
+    /**
+     描画シーンを全て外す。
+     */
+    public void ReleaseAllScenes() {
+        for (int i=0; i<_drawScenes.size(); i++) {
+            ReleaseScene(_drawScenes.get(i).GetName());
+        }
     }
 
     public void Start() {
@@ -563,9 +570,6 @@ public class SceneManager {
         if (_drawScenes == null) return;
         Scene s;
         for (int i=0; i<_drawScenes.size(); i++) {
-            if (i > 0 && _sceneOverWriteOptionEvent != null) {
-                _sceneOverWriteOptionEvent.Event();
-            }
             s = _drawScenes.get(i);
             s.Draw();
         }

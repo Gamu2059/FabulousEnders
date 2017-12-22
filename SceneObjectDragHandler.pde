@@ -44,7 +44,7 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseDraggedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseDraggedHandler().GetEvents().Add(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isDragging) return;
                 GetDraggedActionHandler().InvokeAllEvents();
