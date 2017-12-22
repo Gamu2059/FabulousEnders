@@ -1,7 +1,7 @@
 public final class SceneTitle extends Scene {
     private String titleBack, titleText, dustF, dustE, fire, buttonBack;
     private String[] titleButtons;
-    
+
     public SceneTitle() {
         super(SceneID.SID_TITLE);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
@@ -43,7 +43,14 @@ public final class SceneTitle extends Scene {
             objT.SetAnchor(0.5, 1, 0.5, 1);
             objT.SetPivot(0.5, 1);
             new SceneObjectImage(obj, "title/"+ paths[i] +".png");
-            new TitleButton(obj, titleButtons[i]);
+            TitleButton b = new TitleButton(obj, titleButtons[i]);
+            b.GetDecideHandler().GetEvents().Add("Go GameOver", new IEvent() {
+                public void Event() {
+                    SceneGameOver g = (SceneGameOver)sceneManager.GetScene(SceneID.SID_GAMEOVER);
+                    g.GoGameOver();
+                }
+            }
+            );
         }
 
         // 塵エフェクト
@@ -92,10 +99,10 @@ public final class SceneTitle extends Scene {
 
     public void OnEnabled() {
         super.OnEnabled();
-        
+
         SceneObject obj;
         SceneObjectImage img;
-        
+
         obj = GetObject(titleBack);
         img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
     }
@@ -103,7 +110,7 @@ public final class SceneTitle extends Scene {
     public void OnDisabled() {
         super.OnDisabled();
     }
-    
+
     public void GoTitle() {
         sceneManager.ReleaseAllScenes();
         sceneManager.LoadScene(SceneID.SID_TITLE);
@@ -315,19 +322,19 @@ public final class TitleButtonBack extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        
+
         GetObject().SetActivatable(false);
         _objT = GetObject().GetTransform();
         _objT.SetAnchor(0.5, 1, 0.5, 1);
         _objT.SetSize(240, 20);
         _objT.SetPriority(15);
-        
+
         _objImg = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
     }
-    
+
     public void Update() {
         super.Update();
-        
+
         _actObj = GetObject().GetScene().GetActiveObject();
         if (_actObj != null) {
             _objT.SetScale(1, 1);
@@ -336,11 +343,11 @@ public final class TitleButtonBack extends SceneObjectBehavior {
         } else {
             _objT.SetScale(0, 0);
         }
-        
+
         if (_objImg != null) {
             _objImg.GetColorInfo().SetAlpha(abs(cos(_rad)) * 255);
-        _rad += 2/frameRate;
-        _rad %= TWO_PI;
+            _rad += 2/frameRate;
+            _rad %= TWO_PI;
         }
     }
 

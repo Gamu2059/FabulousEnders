@@ -1,5 +1,6 @@
 public final class TimerInfo {
-    public float second;
+    public float settedTime;
+    public float currentTime;
     public boolean useTimer;
     public boolean haveBegun;
     public boolean isActive;
@@ -42,8 +43,8 @@ public class SceneObjectTimer extends SceneObjectBehavior {
             if (!_IsContainsKey(label)) continue;
             i = _infos.Get(label);
             if (!i.isActive || !i.haveBegun) continue;
-            i.second -= 1/frameRate;
-            if (i.second <= 0) {
+            i.settedTime -= 1/frameRate;
+            if (i.settedTime <= 0) {
                 _timers.Get(label).OnTimeOut();
                 End(label);
             }
@@ -83,7 +84,7 @@ public class SceneObjectTimer extends SceneObjectBehavior {
     public void ResetTimer(String label, float timer) {
         if (!_timers.ContainsKey(label)) return;
         TimerInfo i = _GetTimerInfo(label);
-        i.second = timer;
+        i.settedTime = timer;
     }
 
     public void Start(String label) {
@@ -152,14 +153,15 @@ public class SceneObjectDuration extends SceneObjectBehavior {
             if (!i.isActive || !i.haveBegun) continue;
 
             if (i.useTimer) {
-                i.second -= 1/frameRate;
-                f = i.second <= 0;
+                i.currentTime -= 1/frameRate;
+                f = i.currentTime <= 0;
             } else {
                 f = !d.IsContinue();
             }
             if (f) {
                 d.OnEnd();
                 End(label);
+                return;
             }
             d.OnUpdate();
         }
@@ -198,7 +200,15 @@ public class SceneObjectDuration extends SceneObjectBehavior {
     public void ResetTimer(String label, float timer) {
         if (!_durations.ContainsKey(label)) return;
         TimerInfo i = _GetTimerInfo(label);
-        i.second = timer;
+        i.settedTime = timer;
+        i.currentTime = timer;
+        Stop(label);
+    }
+    
+    public float GetSettedTimer(String label) {
+        if (!_durations.ContainsKey(label)) return 0;
+        TimerInfo i = _GetTimerInfo(label);
+        return i.settedTime;
     }
 
     public void SetUseTimer(String label, boolean useTimer) {

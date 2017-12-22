@@ -23,16 +23,9 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_ILLUST);
+        sceneManager.LoadScene(SceneID.SID_TITLE);
 
         sceneManager.Start();
-        
-        inputManager.GetMouseClickedHandler().GetEvents().Add("aaa", new IEvent(){
-            public void Event() {
-                SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
-                g.GoGameOver();
-            }
-        });
     } 
     catch(Exception e) {
         println(e);

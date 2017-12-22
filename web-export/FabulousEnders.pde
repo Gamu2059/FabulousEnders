@@ -23,7 +23,7 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_ILLUST);
+        sceneManager.LoadScene(SceneID.SID_GAMEOVER);
 
         sceneManager.Start();
         
@@ -2189,6 +2189,7 @@ public class Scene implements Comparable<Scene> {
 }
 public final class SceneGameOver extends Scene {
     private String sceneBack;
+    private String[] sword;
 
     public SceneGameOver() {
         super(SceneID.SID_GAMEOVER);
@@ -2197,8 +2198,13 @@ public final class SceneGameOver extends Scene {
         SetScenePriority(1);
 
         sceneBack = "GameOverBack";
+        sword = new String[7];
+        for (int i=0; i<sword.length; i++) {
+            sword[i] = "sword" + i;
+        }
 
         SceneObject obj;
+        SceneObjectTransform objT;
         SceneObjectButton btn;
 
         // クリックしたらタイトルに戻るボタン
@@ -2244,6 +2250,38 @@ public final class SceneGameOver extends Scene {
         }
         );
         duration.SetUseTimer("Back Gradation", false);
+
+        // 剣
+        for (int i=0; i<sword.length; i++) {
+            obj = new SceneObject(sword[0], this);
+            objT = obj.GetTransform();
+            objT.SetAnchor(0.5, 0.5, 0.5, 0.5);
+            objT.SetPriority(3);
+            new SceneObjectImage(obj, "gameover/" + sword[i] + ".png");
+            SceneObjectDuration dur = new SceneObjectDuration(obj);
+        }
+        obj = GetObject(sword[0]);
+        SceneObjectDuration dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+        dur.GetDurations().Add("Rotate Sword", new IDuration() {
+            private SceneObjectTransform _objT;
+            
+            public void OnInit() {
+                _objT = GetObject(sword[0]).GetTransform();
+            }
+
+            public boolean IsContinue() {
+                return true;
+            }
+
+            public void OnUpdate() {
+                float r = _objT.GetRotate();
+                _objT.SetRotate(r + 1/frameRate);
+            }
+
+            public void OnEnd() {
+            }
+        }
+        );
     }
 
     public void OnEnabled() {
@@ -2254,6 +2292,11 @@ public final class SceneGameOver extends Scene {
         obj = GetObject(sceneBack);
         dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
         dur.Start("Back Gradation");
+        
+        obj = GetObject(sword[0]);
+        obj.GetTransform().SetSize(131, 388);
+        dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+        dur.Start("Rotate Sword");
     }
 
     public void OnDisabled() {

@@ -117,7 +117,10 @@ public class Scene implements Comparable<Scene> {
      シーンマネージャのノンアクティブシーンになった時に呼び出される。
      */
     public void OnDisabledActive() {
-        CheckMouseActiveObject();
+        if (_activeObject != null) {
+            _activeObject.OnDisabledActive();
+            _activeObject = null;
+        }
     }
 
     public boolean IsAbleActiveScene() {
@@ -218,7 +221,7 @@ public class Scene implements Comparable<Scene> {
      */
     public void Draw() {
         _DrawScene();
-        
+
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -244,7 +247,7 @@ public class Scene implements Comparable<Scene> {
      */
     public final void AddChild(SceneObject o) {
         if (o == null) return;
-        
+
         o.GetTransform().SetParent(GetTransform(), true);
     }
 
