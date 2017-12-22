@@ -925,7 +925,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseReleasedHandler().GetEvents().Add(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isActive) return;
                 GetDecideHandler().InvokeAllEvents();

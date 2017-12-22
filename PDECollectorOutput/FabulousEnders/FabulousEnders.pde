@@ -23,11 +23,11 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_TITLE);
+        sceneManager.LoadScene(SceneID.SID_ILLUST);
 
         sceneManager.Start();
         
-        inputManager.GetMouseClickedHandler().AddEvent("aaa", new IEvent(){
+        inputManager.GetMouseClickedHandler().GetEvents().Add("aaa", new IEvent(){
             public void Event() {
                 SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
                 g.GoGameOver();
@@ -111,52 +111,25 @@ void mouseOver() {
 void mouseOut() {
     inputManager.MouseExited();
 }
-/**
- IEventインスタンスをHashMapで管理することに責任を持つ。
- */
 public final class ActionEvent {
-    private HashMap<String, IEvent> _events;
-    private HashMap<String, IEvent> GetEventHash() {
+    private PHash<IEvent> _events;
+    public PHash<IEvent> GetEvents() {
         return _events;
     }
 
     public ActionEvent() {
-        _events = new HashMap<String, IEvent>();
+        _events = new PHash<IEvent>();
     }
 
-    public void AddEvent(String eventLabel, IEvent event) {
-        if (!GetEventHash().containsKey(eventLabel) && event != null) {
-            GetEventHash().put(eventLabel, event);
-        }
-    }
-
-    public void SetEvent(String eventLabel, IEvent event) {
-        if (event != null) {
-            GetEventHash().put(eventLabel, event);
-        }
-    }
-
-    public IEvent GetEvent(String eventLabel) {
-        return GetEventHash().get(eventLabel);
-    }
-
-    public IEvent RemoveEvent(String eventLabel) {
-        return GetEventHash().remove(eventLabel);
-    }
-
-    public void RemoveAllEvents() {
-        GetEventHash().clear();
-    }
-
-    public void InvokeEvent(String eventLabel) {
-        IEvent e = GetEvent(eventLabel);
+    public void InvokeEvent(String label) {
+        IEvent e = _events.Get(label);
         if (e != null) {
             e.Event();
         }
     }
 
     public void InvokeAllEvents() {
-        for (String label : GetEventHash().keySet()) {
+        for (String label : _events.GetElements().keySet()) {
             InvokeEvent(label);
         }
     }
@@ -989,89 +962,6 @@ public abstract class JsonUtility {
         return content.substring(1, content.length() - 1);
     }
 }
-public abstract class AEventActivator {    
-    protected float _timer;
-    protected boolean _isActive;
-    protected boolean _isBeginning;
-    
-    public abstract void OnInit();
-    public abstract void OnEnd();
-    public abstract void Update();
-
-    public void ResetTimer(float t) {
-        _timer = t;
-    }
-    public void Start() {
-        _isActive = true;
-        if (!_isBeginning) {
-            _isBeginning = true;
-            OnInit();
-        }
-    }
-    public void Stop() {
-        _isActive = false;
-    }
-    protected void End() {
-        _isActive = false;
-        if (_isBeginning) {
-            _isBeginning = false;
-            OnEnd();
-        }
-    }
-}
-
-public abstract class ATimer extends AEventActivator {
-    public void Update() {
-        if (!_isActive || !_isBeginning) return;
-        _timer -= 1/frameRate;
-        if (_timer <= 0) {
-            End();
-        }
-    }
-}
-
-public abstract class ADuration {
-    protected float _timer;
-    protected boolean _isActive;
-    protected boolean _isBeginning;
-    
-    public abstract void OnInit();
-    public abstract void OnEnd();
-
-    public void ResetTimer(float t) {
-        _timer = t;
-    }
-    public void Start() {
-        _isActive = true;
-        if (!_isBeginning) {
-            _isBeginning = true;
-            OnInit();
-        }
-    }
-    public void Stop() {
-        _isActive = false;
-    }
-    protected void End() {
-        _isActive = false;
-        if (_isBeginning) {
-            _isBeginning = false;
-            OnEnd();
-        }
-    }
-    
-    public abstract void OnUpdate();
-    public abstract boolean IsContinue();
-    
-    public void Update() {
-        if (!_isActive || !_isBeginning) return;
-        _timer -= 1/frameRate;
-        if (!IsContinue()) {
-            End();
-            return;
-        }
-        OnUpdate();
-    }
-}
 /**
  定数を定義するクラス。
  pjsでもエンジンでも扱える共通の値。
@@ -1179,12 +1069,60 @@ public final class Key {
     public final static int _BACK = 43;
     public final static int _SHIFT = 44;
 }
+public final class PHash<R> {
+    private HashMap<String, R> _elements;
+    public HashMap<String, R> GetElements() {
+        return _elements;
+    }
+    
+    public PHash() {
+        _elements = new HashMap<String, R>();    
+    }
+    
+    public void Add(String label, R elem) {
+        if (ContainsKey(label)) return;
+        Set(label, elem);
+    }
+    
+    public void Set(String label, R elem) {
+        if (elem == null) return;
+        GetElements().put(label, elem);
+    }
+    
+    public R Get(String label) {
+        return GetElements().get(label);
+    }
+    
+    public R Remove(String label) {
+        return GetElements().remove(label);
+    }
+    
+    public void RemoveAll() {
+        GetElements().clear();
+    }
+    
+    public boolean ContainsKey(String label) {
+        return GetElements().containsKey(label);
+    }
+}
 public interface Copyable<R> {
     public void CopyTo(R copy);
 }
 
 public interface IEvent {
     public void Event();
+}
+
+public interface ITimer {
+    public void OnInit();
+    public void OnTimeOut();
+}
+
+public interface IDuration {
+    public void OnInit();
+    public void OnUpdate();
+    public void OnEnd();
+    public boolean IsContinue();
 }
 /**
  平面上のある領域の基準点を保持する責任を持つ。
@@ -1344,7 +1282,7 @@ public final class InputManager {
     }
 
     private void _InitInputEvent() {
-        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
+        GetMouseEnteredHandler().GetEvents().Add("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Enterd on Window!");
@@ -1353,7 +1291,7 @@ public final class InputManager {
         }
         );
 
-        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
+        GetMouseExitedHandler().GetEvents().Add("Mouse Exited Window", new IEvent() {
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Exited from Window!");
@@ -2267,7 +2205,7 @@ public final class SceneGameOver extends Scene {
         obj = new SceneObject("TitleBackButton", this);
         obj.GetTransform().SetPriority(10);
         btn = new SceneObjectButton(obj, "GameOver TitleBackButton");
-        btn.GetDecideHandler().AddEvent("Go Title", new IEvent() {
+        btn.GetDecideHandler().GetEvents().Add("Go Title", new IEvent() {
             public void Event() {
                 SceneTitle t = (SceneTitle)sceneManager.GetScene(SceneID.SID_TITLE);
                 t.GoTitle();
@@ -2279,27 +2217,9 @@ public final class SceneGameOver extends Scene {
         obj = new SceneObject(sceneBack, this);
         new SceneObjectImage(obj, "gameover/back.png");
         SceneObjectDuration duration = new SceneObjectDuration(obj);
-        duration.GetDurations().put("Back Gradation", new ADuration() {
+        duration.GetDurations().Set("Back Gradation", new IDuration() {
             private SceneObject _obj;
             private SceneObjectTransform _objT;
-
-            public void Start() {
-                _isActive = true;
-                if (!_isBeginning) {
-                    _isBeginning = true;
-                    OnInit();
-                }
-            }
-
-            public void Update() {
-                if (!_isActive || !_isBeginning) return;
-                _timer -= 1/frameRate;
-                if (!IsContinue()) {
-                    End();
-                    return;
-                }
-                OnUpdate();
-            }
 
             public void OnInit() {
                 _obj = GetObject(sceneBack);
@@ -2323,6 +2243,7 @@ public final class SceneGameOver extends Scene {
             }
         }
         );
+        duration.SetUseTimer("Back Gradation", false);
     }
 
     public void OnEnabled() {
@@ -2332,8 +2253,7 @@ public final class SceneGameOver extends Scene {
         SceneObjectDuration dur;
         obj = GetObject(sceneBack);
         dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
-
-        dur.GetDurations().get("Back Gradation").Start();
+        dur.Start("Back Gradation");
     }
 
     public void OnDisabled() {
@@ -2705,7 +2625,7 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseDraggedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseDraggedHandler().GetEvents().Add(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isDragging) return;
                 GetDraggedActionHandler().InvokeAllEvents();
@@ -2730,47 +2650,6 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
     protected void _OnDestroy() {
         if (isProcessing) {
             println("SceneObjectDragHandler is destroyed");
-        }
-    }
-}
-public class SceneObjectDuration extends SceneObjectBehavior {
-    public int GetID() {
-        return ClassID.CID_DURATION;
-    }
-
-    private HashMap<String, ADuration> _durations;
-    public HashMap<String, ADuration> GetDurations() {
-        return _durations;
-    }
-
-    public SceneObjectDuration() {
-        super();
-        _InitParameterOnConstructor(null);
-    }
-
-    public SceneObjectDuration(SceneObject obj) {
-        super();
-        _InitParameterOnConstructor(obj);
-    }
-
-    private void _InitParameterOnConstructor(SceneObject obj) {
-        _durations = new HashMap<String, ADuration>();
-        if (obj == null) return;
-        obj.AddBehavior(this);
-    }
-
-    public void Update() {
-        super.Update();
-
-        if (_durations == null) return;
-        for (String label : _durations.keySet()) {
-            _durations.get(label).Update();
-        }
-    }
-
-    protected void _OnDestroy() {
-        if (isProcessing) {
-            println("SceneObjectDuration is destroyed");
         }
     }
 }
@@ -3701,7 +3580,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseReleasedHandler().AddEvent(_eventLabel, new IEvent() {
+        inputManager.GetMouseReleasedHandler().GetEvents().Add(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isActive) return;
                 GetDecideHandler().InvokeAllEvents();
@@ -3716,15 +3595,23 @@ public class SceneObjectButton extends SceneObjectBehavior {
         }
     }
 }
+public final class TimerInfo {
+    public float second;
+    public boolean useTimer;
+    public boolean haveBegun;
+    public boolean isActive;
+}
+
 public class SceneObjectTimer extends SceneObjectBehavior {
     public int GetID() {
         return ClassID.CID_TIMER;
     }
 
-    private HashMap<String, ATimer> _timers;
-    public HashMap<String, ATimer> GetTimers() {
+    private PHash<ITimer> _timers;
+    public PHash<ITimer> GetTimers() {
         return _timers;
     }
+    private PHash<TimerInfo> _infos;
 
     public SceneObjectTimer() {
         super();
@@ -3737,7 +3624,8 @@ public class SceneObjectTimer extends SceneObjectBehavior {
     }
 
     private void _InitParameterOnConstructor(SceneObject obj) {
-        _timers = new HashMap<String, ATimer>();
+        _timers = new PHash<ITimer>();
+        _infos = new PHash<TimerInfo>();
         if (obj == null) return;
         obj.AddBehavior(this);
     }
@@ -3746,8 +3634,23 @@ public class SceneObjectTimer extends SceneObjectBehavior {
         super.Update();
 
         if (_timers == null) return;
-        for (String label : _timers.keySet()) {
-            _timers.get(label).Update();
+        TimerInfo i;
+        for (String label : _timers.GetElements().keySet()) {
+            if (!_IsContainsKey(label)) continue;
+            i = _infos.Get(label);
+            if (!i.isActive || !i.haveBegun) continue;
+            i.second -= 1/frameRate;
+            if (i.second <= 0) {
+                _timers.Get(label).OnTimeOut();
+                End(label);
+            }
+        }
+    }
+
+    public void Stop() {
+        super.Stop();
+        for (String label : _infos.GetElements().keySet()) {
+            End(label);
         }
     }
 
@@ -3755,6 +3658,173 @@ public class SceneObjectTimer extends SceneObjectBehavior {
         if (isProcessing) {
             println("SceneObjectTimer is destroyed");
         }
+    }
+
+    //////////////////////////////////////////
+    // 以下、操作系メソッド
+    //////////////////////////////////////////
+
+    private boolean _IsContainsKey(String label) {
+        return _timers.ContainsKey(label) && _infos.ContainsKey(label);
+    }
+
+    private TimerInfo _GetTimerInfo(String label) {
+        TimerInfo i = _infos.Get(label);
+        if (i == null) {
+            i = new TimerInfo();
+            _infos.Add(label, i);
+        }
+        return i;
+    }
+
+    public void ResetTimer(String label, float timer) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.second = timer;
+    }
+
+    public void Start(String label) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = true;
+        if (!i.haveBegun) {
+            i.haveBegun = true;
+            _timers.Get(label).OnInit();
+        }
+    }
+
+    public void Stop(String label) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = false;
+    }
+
+    public void End(String label) {
+        if (!_infos.ContainsKey(label)) return;
+        TimerInfo i = _infos.Get(label);
+        i.isActive = false;
+        i.haveBegun = false;
+    }
+}
+
+public class SceneObjectDuration extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DURATION;
+    }
+
+    private PHash<IDuration> _durations;
+    public PHash<IDuration> GetDurations() {
+        return _durations;
+    }
+    private PHash<TimerInfo> _infos;
+
+    public SceneObjectDuration() {
+        super();
+        _InitParameterOnConstructor(null);
+    }
+
+    public SceneObjectDuration(SceneObject obj) {
+        super();
+        _InitParameterOnConstructor(obj);
+    }
+
+    private void _InitParameterOnConstructor(SceneObject obj) {
+        _durations = new PHash<IDuration>();
+        _infos = new PHash<TimerInfo>();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_durations == null) return;
+        TimerInfo i;
+        IDuration d;
+        boolean f;
+        for (String label : _durations.GetElements().keySet()) {
+            if (!_IsContainsKey(label)) continue;
+            i = _infos.Get(label);
+            d = _durations.Get(label);
+            if (!i.isActive || !i.haveBegun) continue;
+
+            if (i.useTimer) {
+                i.second -= 1/frameRate;
+                f = i.second <= 0;
+            } else {
+                f = !d.IsContinue();
+            }
+            if (f) {
+                d.OnEnd();
+                End(label);
+            }
+            d.OnUpdate();
+        }
+    }
+
+    public void Stop() {
+        super.Stop();
+        for (String label : _infos.GetElements().keySet()) {
+            End(label);
+        }
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDuration is destroyed");
+        }
+    }
+
+    //////////////////////////////////////////
+    // 以下、操作系メソッド
+    //////////////////////////////////////////
+
+    private boolean _IsContainsKey(String label) {
+        return _durations.ContainsKey(label) && _infos.ContainsKey(label);
+    }
+
+    private TimerInfo _GetTimerInfo(String label) {
+        TimerInfo i = _infos.Get(label);
+        if (i == null) {
+            i = new TimerInfo();
+            _infos.Add(label, i);
+        }
+        return i;
+    }
+
+    public void ResetTimer(String label, float timer) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.second = timer;
+    }
+
+    public void SetUseTimer(String label, boolean useTimer) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.useTimer = useTimer;
+    }
+
+    public void Start(String label) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = true;
+        if (!i.haveBegun) {
+            i.haveBegun = true;
+            _durations.Get(label).OnInit();
+        }
+    }
+
+    public void Stop(String label) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = false;
+    }
+
+    public void End(String label) {
+        if (!_infos.ContainsKey(label)) return;
+        TimerInfo i = _infos.Get(label);
+        i.isActive = false;
+        i.haveBegun = false;
     }
 }
 public class SceneObjectToggleButton extends SceneObjectButton {
@@ -3793,7 +3863,7 @@ public class SceneObjectToggleButton extends SceneObjectButton {
             _img = (SceneObjectImage) beh;
         }
 
-        GetDecideHandler().AddEvent("Toggle", new IEvent() {
+        GetDecideHandler().GetEvents().Add("Toggle", new IEvent() {
             public void Event() {
                 _isOn = !_isOn;
 
@@ -3831,10 +3901,28 @@ public final class SceneOneIllust extends Scene {
 
         SceneObject obj = new SceneObject("Background", this);
         _backImage = new SceneObjectImage(obj, null);
+        
+        SceneObjectTimer timer = new SceneObjectTimer(obj);
+        timer.GetTimers().Add("hoge", new ITimer(){
+            public void OnInit() {
+                println(111);
+                _backImage.SetUsingImageName(null);
+            }
+            
+            public void OnTimeOut() {
+                println("done");
+                _backImage.SetUsingImageName("gameover/back.png");
+            }
+        });
     }
 
     public void OnEnabled() {
         super.OnEnabled();
+        
+        SceneObject o = GetObject("Background");
+        SceneObjectTimer t = (SceneObjectTimer)o.GetBehaviorOnID(ClassID.CID_TIMER);
+        t.ResetTimer("hoge", 1);
+        t.Start("hoge");
     }
 
     public void OnDisabled() {
@@ -3966,13 +4054,13 @@ public final class TitleButton extends SceneObjectButton {
     }
 
     private void _SetEventOnConstructor() {
-        GetEnabledActiveHandler().AddEvent("title button on enabled active", new IEvent() {
+        GetEnabledActiveHandler().GetEvents().Add("title button on enabled active", new IEvent() {
             public void Event() {
                 _OnEnabledActive();
             }
         }
         );
-        GetDisabledActiveHandler().AddEvent("title button on disabled active", new IEvent() {
+        GetDisabledActiveHandler().GetEvents().Add("title button on disabled active", new IEvent() {
             public void Event() {
                 _OnDisabledActive();
             }

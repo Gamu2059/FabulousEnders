@@ -1,12 +1,20 @@
+public final class TimerInfo {
+    public float second;
+    public boolean useTimer;
+    public boolean haveBegun;
+    public boolean isActive;
+}
+
 public class SceneObjectTimer extends SceneObjectBehavior {
     public int GetID() {
         return ClassID.CID_TIMER;
     }
 
-    private HashMap<String, ATimer> _timers;
-    public HashMap<String, ATimer> GetTimers() {
+    private PHash<ITimer> _timers;
+    public PHash<ITimer> GetTimers() {
         return _timers;
     }
+    private PHash<TimerInfo> _infos;
 
     public SceneObjectTimer() {
         super();
@@ -19,7 +27,8 @@ public class SceneObjectTimer extends SceneObjectBehavior {
     }
 
     private void _InitParameterOnConstructor(SceneObject obj) {
-        _timers = new HashMap<String, ATimer>();
+        _timers = new PHash<ITimer>();
+        _infos = new PHash<TimerInfo>();
         if (obj == null) return;
         obj.AddBehavior(this);
     }
@@ -28,8 +37,23 @@ public class SceneObjectTimer extends SceneObjectBehavior {
         super.Update();
 
         if (_timers == null) return;
-        for (String label : _timers.keySet()) {
-            _timers.get(label).Update();
+        TimerInfo i;
+        for (String label : _timers.GetElements().keySet()) {
+            if (!_IsContainsKey(label)) continue;
+            i = _infos.Get(label);
+            if (!i.isActive || !i.haveBegun) continue;
+            i.second -= 1/frameRate;
+            if (i.second <= 0) {
+                _timers.Get(label).OnTimeOut();
+                End(label);
+            }
+        }
+    }
+
+    public void Stop() {
+        super.Stop();
+        for (String label : _infos.GetElements().keySet()) {
+            End(label);
         }
     }
 
@@ -37,5 +61,172 @@ public class SceneObjectTimer extends SceneObjectBehavior {
         if (isProcessing) {
             println("SceneObjectTimer is destroyed");
         }
+    }
+
+    //////////////////////////////////////////
+    // 以下、操作系メソッド
+    //////////////////////////////////////////
+
+    private boolean _IsContainsKey(String label) {
+        return _timers.ContainsKey(label) && _infos.ContainsKey(label);
+    }
+
+    private TimerInfo _GetTimerInfo(String label) {
+        TimerInfo i = _infos.Get(label);
+        if (i == null) {
+            i = new TimerInfo();
+            _infos.Add(label, i);
+        }
+        return i;
+    }
+
+    public void ResetTimer(String label, float timer) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.second = timer;
+    }
+
+    public void Start(String label) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = true;
+        if (!i.haveBegun) {
+            i.haveBegun = true;
+            _timers.Get(label).OnInit();
+        }
+    }
+
+    public void Stop(String label) {
+        if (!_timers.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = false;
+    }
+
+    public void End(String label) {
+        if (!_infos.ContainsKey(label)) return;
+        TimerInfo i = _infos.Get(label);
+        i.isActive = false;
+        i.haveBegun = false;
+    }
+}
+
+public class SceneObjectDuration extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_DURATION;
+    }
+
+    private PHash<IDuration> _durations;
+    public PHash<IDuration> GetDurations() {
+        return _durations;
+    }
+    private PHash<TimerInfo> _infos;
+
+    public SceneObjectDuration() {
+        super();
+        _InitParameterOnConstructor(null);
+    }
+
+    public SceneObjectDuration(SceneObject obj) {
+        super();
+        _InitParameterOnConstructor(obj);
+    }
+
+    private void _InitParameterOnConstructor(SceneObject obj) {
+        _durations = new PHash<IDuration>();
+        _infos = new PHash<TimerInfo>();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Update() {
+        super.Update();
+
+        if (_durations == null) return;
+        TimerInfo i;
+        IDuration d;
+        boolean f;
+        for (String label : _durations.GetElements().keySet()) {
+            if (!_IsContainsKey(label)) continue;
+            i = _infos.Get(label);
+            d = _durations.Get(label);
+            if (!i.isActive || !i.haveBegun) continue;
+
+            if (i.useTimer) {
+                i.second -= 1/frameRate;
+                f = i.second <= 0;
+            } else {
+                f = !d.IsContinue();
+            }
+            if (f) {
+                d.OnEnd();
+                End(label);
+            }
+            d.OnUpdate();
+        }
+    }
+
+    public void Stop() {
+        super.Stop();
+        for (String label : _infos.GetElements().keySet()) {
+            End(label);
+        }
+    }
+
+    protected void _OnDestroy() {
+        if (isProcessing) {
+            println("SceneObjectDuration is destroyed");
+        }
+    }
+
+    //////////////////////////////////////////
+    // 以下、操作系メソッド
+    //////////////////////////////////////////
+
+    private boolean _IsContainsKey(String label) {
+        return _durations.ContainsKey(label) && _infos.ContainsKey(label);
+    }
+
+    private TimerInfo _GetTimerInfo(String label) {
+        TimerInfo i = _infos.Get(label);
+        if (i == null) {
+            i = new TimerInfo();
+            _infos.Add(label, i);
+        }
+        return i;
+    }
+
+    public void ResetTimer(String label, float timer) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.second = timer;
+    }
+
+    public void SetUseTimer(String label, boolean useTimer) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.useTimer = useTimer;
+    }
+
+    public void Start(String label) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = true;
+        if (!i.haveBegun) {
+            i.haveBegun = true;
+            _durations.Get(label).OnInit();
+        }
+    }
+
+    public void Stop(String label) {
+        if (!_durations.ContainsKey(label)) return;
+        TimerInfo i = _GetTimerInfo(label);
+        i.isActive = false;
+    }
+
+    public void End(String label) {
+        if (!_infos.ContainsKey(label)) return;
+        TimerInfo i = _infos.Get(label);
+        i.isActive = false;
+        i.haveBegun = false;
     }
 }

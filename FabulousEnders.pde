@@ -23,11 +23,11 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_TITLE);
+        sceneManager.LoadScene(SceneID.SID_ILLUST);
 
         sceneManager.Start();
         
-        inputManager.GetMouseClickedHandler().AddEvent("aaa", new IEvent(){
+        inputManager.GetMouseClickedHandler().GetEvents().Add("aaa", new IEvent(){
             public void Event() {
                 SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
                 g.GoGameOver();

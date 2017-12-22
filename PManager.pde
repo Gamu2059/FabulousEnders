@@ -99,7 +99,7 @@ public final class InputManager {
     }
 
     private void _InitInputEvent() {
-        GetMouseEnteredHandler().AddEvent("Mouse Entered Window", new IEvent() { 
+        GetMouseEnteredHandler().GetEvents().Add("Mouse Entered Window", new IEvent() { 
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Enterd on Window!");
@@ -108,7 +108,7 @@ public final class InputManager {
         }
         );
 
-        GetMouseExitedHandler().AddEvent("Mouse Exited Window", new IEvent() {
+        GetMouseExitedHandler().GetEvents().Add("Mouse Exited Window", new IEvent() {
             public void Event() {
                 if (isProcessing) {
                     println("Mouse Exited from Window!");

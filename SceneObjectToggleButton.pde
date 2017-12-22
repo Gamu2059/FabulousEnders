@@ -34,7 +34,7 @@ public class SceneObjectToggleButton extends SceneObjectButton {
             _img = (SceneObjectImage) beh;
         }
 
-        GetDecideHandler().AddEvent("Toggle", new IEvent() {
+        GetDecideHandler().GetEvents().Add("Toggle", new IEvent() {
             public void Event() {
                 _isOn = !_isOn;
 

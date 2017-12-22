@@ -123,13 +123,13 @@ public final class TitleButton extends SceneObjectButton {
     }
 
     private void _SetEventOnConstructor() {
-        GetEnabledActiveHandler().AddEvent("title button on enabled active", new IEvent() {
+        GetEnabledActiveHandler().GetEvents().Add("title button on enabled active", new IEvent() {
             public void Event() {
                 _OnEnabledActive();
             }
         }
         );
-        GetDisabledActiveHandler().AddEvent("title button on disabled active", new IEvent() {
+        GetDisabledActiveHandler().GetEvents().Add("title button on disabled active", new IEvent() {
             public void Event() {
                 _OnDisabledActive();
             }

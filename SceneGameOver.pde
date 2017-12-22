@@ -16,7 +16,7 @@ public final class SceneGameOver extends Scene {
         obj = new SceneObject("TitleBackButton", this);
         obj.GetTransform().SetPriority(10);
         btn = new SceneObjectButton(obj, "GameOver TitleBackButton");
-        btn.GetDecideHandler().AddEvent("Go Title", new IEvent() {
+        btn.GetDecideHandler().GetEvents().Add("Go Title", new IEvent() {
             public void Event() {
                 SceneTitle t = (SceneTitle)sceneManager.GetScene(SceneID.SID_TITLE);
                 t.GoTitle();
@@ -28,27 +28,9 @@ public final class SceneGameOver extends Scene {
         obj = new SceneObject(sceneBack, this);
         new SceneObjectImage(obj, "gameover/back.png");
         SceneObjectDuration duration = new SceneObjectDuration(obj);
-        duration.GetDurations().put("Back Gradation", new ADuration() {
+        duration.GetDurations().Set("Back Gradation", new IDuration() {
             private SceneObject _obj;
             private SceneObjectTransform _objT;
-
-            public void Start() {
-                _isActive = true;
-                if (!_isBeginning) {
-                    _isBeginning = true;
-                    OnInit();
-                }
-            }
-
-            public void Update() {
-                if (!_isActive || !_isBeginning) return;
-                _timer -= 1/frameRate;
-                if (!IsContinue()) {
-                    End();
-                    return;
-                }
-                OnUpdate();
-            }
 
             public void OnInit() {
                 _obj = GetObject(sceneBack);
@@ -72,6 +54,7 @@ public final class SceneGameOver extends Scene {
             }
         }
         );
+        duration.SetUseTimer("Back Gradation", false);
     }
 
     public void OnEnabled() {
@@ -81,8 +64,7 @@ public final class SceneGameOver extends Scene {
         SceneObjectDuration dur;
         obj = GetObject(sceneBack);
         dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
-
-        dur.GetDurations().get("Back Gradation").Start();
+        dur.Start("Back Gradation");
     }
 
     public void OnDisabled() {
