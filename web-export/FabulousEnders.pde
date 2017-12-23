@@ -23,16 +23,9 @@ void setup() {
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_GAMEOVER);
+        sceneManager.LoadScene(SceneID.SID_TITLE);
 
         sceneManager.Start();
-        
-        inputManager.GetMouseClickedHandler().GetEvents().Add("aaa", new IEvent(){
-            public void Event() {
-                SceneGameOver g = (SceneGameOver) sceneManager.GetScene(SceneID.SID_GAMEOVER);
-                g.GoGameOver();
-            }
-        });
     } 
     catch(Exception e) {
         println(e);
@@ -1953,7 +1946,10 @@ public class Scene implements Comparable<Scene> {
      シーンマネージャのノンアクティブシーンになった時に呼び出される。
      */
     public void OnDisabledActive() {
-        CheckMouseActiveObject();
+        if (_activeObject != null) {
+            _activeObject.OnDisabledActive();
+            _activeObject = null;
+        }
     }
 
     public boolean IsAbleActiveScene() {
@@ -2054,7 +2050,7 @@ public class Scene implements Comparable<Scene> {
      */
     public void Draw() {
         _DrawScene();
-        
+
         SceneObject s;
         for (int i=0; i<_objects.size(); i++) {
             s = _objects.get(i);
@@ -2080,7 +2076,7 @@ public class Scene implements Comparable<Scene> {
      */
     public final void AddChild(SceneObject o) {
         if (o == null) return;
-        
+
         o.GetTransform().SetParent(GetTransform(), true);
     }
 
@@ -2188,7 +2184,7 @@ public class Scene implements Comparable<Scene> {
     }
 }
 public final class SceneGameOver extends Scene {
-    private String sceneBack;
+    private String gameOverBack, gameOverLabel, clickLabel, adjustLayer;
     private String[] sword;
 
     public SceneGameOver() {
@@ -2197,7 +2193,10 @@ public final class SceneGameOver extends Scene {
         GetDrawBack().SetEnable(true);
         SetScenePriority(1);
 
-        sceneBack = "GameOverBack";
+        gameOverBack = "GameOverBack";
+        gameOverLabel = "GameOverLabel";
+        clickLabel = "ClickLabel";
+        adjustLayer = "GameOverAdjustLayer";
         sword = new String[7];
         for (int i=0; i<sword.length; i++) {
             sword[i] = "sword" + i;
@@ -2206,6 +2205,8 @@ public final class SceneGameOver extends Scene {
         SceneObject obj;
         SceneObjectTransform objT;
         SceneObjectButton btn;
+        SceneObjectDuration dur;
+        SceneObjectTimer timer;
 
         // クリックしたらタイトルに戻るボタン
         obj = new SceneObject("TitleBackButton", this);
@@ -2219,84 +2220,345 @@ public final class SceneGameOver extends Scene {
         }
         );
 
+        // フレームアウト調整レイヤー
+        obj = new SceneObject(adjustLayer, this);
+        obj.GetTransform().SetPriority(9);
+        obj.GetDrawBack().SetEnable(true);
+        obj.GetDrawBack().SetEnableBorder(false);
+        obj.GetDrawBack().GetBackColorInfo().SetColor(1, 1, 1);
+        dur = new SceneObjectDuration(obj);
+        dur.GetDurations().Add("Clean Out", new IDuration() {
+            private SceneObjectDrawBack drawBack;
+            private SceneObjectDuration duration;
+            private float settedTime;
+            public void OnInit() {
+                drawBack = GetObject(adjustLayer).GetDrawBack();
+                drawBack.GetBackColorInfo().SetAlpha(255);
+                drawBack.SetEnable(true);
+                duration = (SceneObjectDuration)GetObject(adjustLayer).GetBehaviorOnID(ClassID.CID_DURATION);
+                settedTime = duration.GetSettedTimer("Clean Out");
+            }
+            public boolean IsContinue() {
+                return drawBack.GetBackColorInfo().GetAlpha() > 0;
+            }
+            public void OnUpdate() {
+                float a = drawBack.GetBackColorInfo().GetAlpha();
+                if (settedTime <= 0) {
+                    OnEnd();
+                } else {
+                    drawBack.GetBackColorInfo().SetAlpha(a - 255/(frameRate*settedTime));
+                }
+            }
+            public void OnEnd() {
+                drawBack.SetEnable(false);
+                drawBack.GetBackColorInfo().SetAlpha(0);
+            }
+        }
+        );
+
         // 背景
-        obj = new SceneObject(sceneBack, this);
+        obj = new SceneObject(gameOverBack, this);
+        objT = obj.GetTransform();
+        objT.SetAnchor(0, 0, 1, 0);
+        objT.SetPivot(0.5, 0);
         new SceneObjectImage(obj, "gameover/back.png");
-        SceneObjectDuration duration = new SceneObjectDuration(obj);
-        duration.GetDurations().Set("Back Gradation", new IDuration() {
+        dur = new SceneObjectDuration(obj);
+        dur.SetUseTimer("Back Gradation", false);
+        dur.GetDurations().Set("Back Gradation", new IDuration() {
             private SceneObject _obj;
             private SceneObjectTransform _objT;
-
+            private float settedTime;
             public void OnInit() {
-                _obj = GetObject(sceneBack);
-                if (_obj == null) return;
+                _obj = GetObject(gameOverBack);
                 _objT = _obj.GetTransform();
-                _objT.SetAnchor(0, 0, 1, 0);
-                _objT.SetPivot(0.5, 0);
                 _objT.SetSize(0, 0);
+                SceneObjectImage img = (SceneObjectImage)_obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+                img.GetColorInfo().SetAlpha(255);
+                SceneObjectDuration _dur = (SceneObjectDuration)_obj.GetBehaviorOnID(ClassID.CID_DURATION);
+                settedTime = _dur.GetSettedTimer("Back Gradation");
             }
-
             public boolean IsContinue() {
                 return _objT.GetSize().y < height;
             }
-
             public void OnUpdate() {
                 float y = _objT.GetSize().y;
-                _objT.SetSize(0, y + height/(frameRate*3));
+                if (settedTime <= 0) {
+                    _objT.SetSize(0, height);
+                } else {
+                    _objT.SetSize(0, y + height/(frameRate*settedTime));
+                }
             }
-
             public void OnEnd() {
             }
         }
         );
-        duration.SetUseTimer("Back Gradation", false);
+
 
         // 剣
         for (int i=0; i<sword.length; i++) {
-            obj = new SceneObject(sword[0], this);
+            obj = new SceneObject(sword[i]);
+            AddObject(obj);
             objT = obj.GetTransform();
             objT.SetAnchor(0.5, 0.5, 0.5, 0.5);
-            objT.SetPriority(3);
             new SceneObjectImage(obj, "gameover/" + sword[i] + ".png");
-            SceneObjectDuration dur = new SceneObjectDuration(obj);
+            if (i == 0) {
+                AddChild(obj);
+                objT.SetPriority(3);
+            } else {
+                objT.SetParent(GetObject(sword[0]).GetTransform(), true);
+            }
         }
+
         obj = GetObject(sword[0]);
-        SceneObjectDuration dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+        dur = new SceneObjectDuration(obj);
+        timer = new SceneObjectTimer(obj);
+        timer.GetTimers().Add("Fire Start Event", new ITimer() {
+            public void OnInit() {
+            }
+            public void OnTimeOut() {
+                SceneObjectDuration dur = (SceneObjectDuration)GetObject(sword[0]).GetBehaviorOnID(ClassID.CID_DURATION);
+                dur.ResetTimer("Rotate Sword", 1);
+                dur.SetUseTimer("Rotate Sword", true);
+                dur.Start("Rotate Sword");
+            }
+        }
+        );
         dur.GetDurations().Add("Rotate Sword", new IDuration() {
             private SceneObjectTransform _objT;
-            
+            private SceneObjectImage _img;
+            private SceneObjectDuration _dur;
+            private float settedTime;
+
             public void OnInit() {
                 _objT = GetObject(sword[0]).GetTransform();
+                _objT.SetSize(131, 388);
+                _objT.SetTranslation(0, -100);
+                _objT.SetScale(4, 4);
+                _objT.SetRotate(-1);
+                _img = (SceneObjectImage)GetObject(sword[0]).GetBehaviorOnID(ClassID.CID_IMAGE);
+                _img.GetColorInfo().SetColor(0, 0, 0, 255);
+                _dur = (SceneObjectDuration)GetObject(sword[0]).GetBehaviorOnID(ClassID.CID_DURATION);
+                settedTime = _dur.GetSettedTimer("Rotate Sword");
             }
-
             public boolean IsContinue() {
                 return true;
             }
-
             public void OnUpdate() {
                 float r = _objT.GetRotate();
-                _objT.SetRotate(r + 1/frameRate);
+                _objT.SetRotate(r + 2/(frameRate * settedTime));
+                float x, y;
+                x = _objT.GetScale().x - 3/(frameRate * settedTime);
+                y = _objT.GetScale().y - 3/(frameRate * settedTime);
+                _objT.SetScale(x, y);
             }
+            public void OnEnd() {
+                GetDrawBack().GetBackColorInfo().SetColor(0, 0, 0);
+                _img.GetColorInfo().SetAlpha(1);
+                _dur = (SceneObjectDuration)GetObject(gameOverBack).GetBehaviorOnID(ClassID.CID_DURATION);
+                _dur.ResetTimer("Back Gradation", 1);
+                _dur.Start("Back Gradation");
 
+                _dur = (SceneObjectDuration)GetObject(gameOverLabel).GetBehaviorOnID(ClassID.CID_DURATION);
+                _dur.ResetTimer("Down", 1.5);
+                _dur.Start("Down");
+
+                _dur = (SceneObjectDuration)GetObject(clickLabel).GetBehaviorOnID(ClassID.CID_DURATION);
+                _dur.ResetTimer("Up", 1.5);
+                _dur.Start("Up");
+
+                SceneObject obj;
+                for (int i=1; i<sword.length; i++) {
+                    obj = GetObject(sword[i]);
+                    _objT = obj.GetTransform();
+                    _objT.SetSize(131, 388);
+                    _img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+                    _img.GetColorInfo().SetAlpha(100);
+                    switch(i) {
+                    case 1:
+                        _objT.SetTranslation(10, -10);
+                        _objT.SetRotate(radians(10));
+                        break;
+                    case 2:
+                        _objT.SetTranslation(-5, -10);
+                        _objT.SetRotate(radians(-10));
+                        break;
+                    case 3:
+                        _objT.SetTranslation(5, 10);
+                        _objT.SetRotate(radians(18));
+                        break;
+                    case 4:
+                        _objT.SetTranslation(-10, 0);
+                        _objT.SetRotate(radians(-10));
+                        break;
+                    case 5:
+                        _objT.SetTranslation(25, 15);
+                        _objT.SetRotate(radians(8));
+                        break;
+                    case 6:
+                        _objT.SetTranslation(-5, 40);
+                        _objT.SetRotate(radians(-5));
+                        break;
+                    }
+                }
+            }
+        }
+        );
+
+        // ゲームオーバーテキスト
+        obj = new SceneObject(gameOverLabel, this);
+        new SceneObjectImage(obj, "gameover/gameover.png");
+        objT = obj.GetTransform();
+        objT.SetPriority(8);
+        objT.SetSize(547, 100);
+        objT.SetAnchor(0.5, 0, 0.5, 0);
+        objT.SetPivot(0.5, 0);
+        dur = new SceneObjectDuration(obj);
+        dur.GetDurations().Add("Down", new IDuration() {
+            private SceneObjectTransform _objT;
+            private DrawColor _draw;
+            private SceneObjectDuration _dur;
+            private float settedTime;
+            public void OnInit() {
+                SceneObject obj = GetObject(gameOverLabel);
+                _objT = obj.GetTransform();
+                _objT.SetTranslation(0, 50);
+                _draw = ((SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE)).GetColorInfo();
+                _dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+                settedTime = _dur.GetSettedTimer("Down");
+            }
+            public boolean IsContinue() {
+                return false;
+            }
+            public void OnUpdate() {
+                if (settedTime <= 0) {
+                    _objT.SetTranslation(0, 80);
+                    _draw.SetColor(0, 155, 205, 255);
+                } else {
+                    PVector t = _objT.GetTranslation();
+                    color c = _draw.GetColor();
+                    float d = frameRate * settedTime;
+                    _objT.SetTranslation(t.x, t.y + 30/d);
+                    _draw.SetColor(red(c) - 255/d, green(c) - 100/d, blue(c) - 50/d, alpha(c) + 255/d);
+                }
+            }
+            public void OnEnd() {
+                _objT.SetTranslation(0, 80);
+                _draw.SetAlpha(255);
+                _dur.Start("Flash");
+            }
+        }
+        );
+        dur.SetUseTimer("Down", true);
+        dur.GetDurations().Add("Flash", new IDuration() {
+            private DrawColor _draw;
+            private float _rad;
+            public void OnInit() {
+                _draw = ((SceneObjectImage)GetObject(clickLabel).GetBehaviorOnID(ClassID.CID_IMAGE)).GetColorInfo();
+                _rad = 0;
+            }
+            public boolean IsContinue() {
+                return true;
+            }
+            public void OnUpdate() {
+                _draw.SetAlpha(100 * cos(_rad) + 155);
+                _rad += PI/frameRate;
+                _rad %= TWO_PI;
+            }
             public void OnEnd() {
             }
         }
         );
+
+        // クリックテキスト
+        obj = new SceneObject(clickLabel, this);
+        new SceneObjectImage(obj, "gameover/click.png");
+        objT = obj.GetTransform();
+        objT.SetPriority(8);
+        objT.SetSize(327, 37);
+        objT.SetAnchor(0.5, 1, 0.5, 1);
+        objT.SetPivot(0.5, 1);
+        dur = new SceneObjectDuration(obj);
+        dur.GetDurations().Add("Up", new IDuration() {
+            private SceneObjectTransform _objT;
+            private DrawColor _draw;
+            private SceneObjectDuration _dur;
+            private float settedTime;
+            public void OnInit() {
+                SceneObject obj = GetObject(clickLabel);
+                _objT = obj.GetTransform();
+                _objT.SetTranslation(0, -70);
+                _draw = ((SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE)).GetColorInfo();
+                _dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
+                settedTime = _dur.GetSettedTimer("Up");
+            }
+            public boolean IsContinue() {
+                return false;
+            }
+            public void OnUpdate() {
+                if (settedTime <= 0) {
+                    _objT.SetTranslation(0, -100);
+                    _draw.SetColor(0, 155, 205, 255);
+                } else {
+                    PVector t = _objT.GetTranslation();
+                    _objT.SetTranslation(t.x, t.y - 30/(frameRate * settedTime));
+                    _draw.SetAlpha(_draw.GetAlpha() + 255/(frameRate * settedTime));
+                }
+            }
+            public void OnEnd() {
+                _objT.SetTranslation(0, -100);
+                _draw.SetAlpha(255);
+            }
+        }
+        );
+        dur.SetUseTimer("Up", true);
     }
 
     public void OnEnabled() {
         super.OnEnabled();
 
+        GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
+
         SceneObject obj;
+        SceneObjectTransform objT;
+        SceneObjectImage img;
         SceneObjectDuration dur;
-        obj = GetObject(sceneBack);
+        SceneObjectTimer timer;
+
+        obj = GetObject(gameOverBack);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        img.GetColorInfo().SetAlpha(1);
+
+        obj = GetObject(adjustLayer);
+        obj.GetDrawBack().GetBackColorInfo().SetAlpha(255);
         dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
-        dur.Start("Back Gradation");
-        
+        dur.ResetTimer("Clean Out", 1);
+        dur.Start("Clean Out");
+
+        for (int i=1; i<sword.length; i++) {
+            obj = GetObject(sword[i]);
+            objT = obj.GetTransform();
+            objT.SetTranslation(0, 0);
+            objT.SetSize(0, 0);
+            img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+            img.GetColorInfo().SetAlpha(1);
+        }
+
         obj = GetObject(sword[0]);
-        obj.GetTransform().SetSize(131, 388);
-        dur = (SceneObjectDuration)obj.GetBehaviorOnID(ClassID.CID_DURATION);
-        dur.Start("Rotate Sword");
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        img.GetColorInfo().SetAlpha(1);
+        timer = (SceneObjectTimer)obj.GetBehaviorOnID(ClassID.CID_TIMER);
+        timer.ResetTimer("Fire Start Event", 1);
+        timer.Start("Fire Start Event");
+
+        obj = GetObject(gameOverLabel);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        img.GetColorInfo().SetAlpha(1);
+        img.GetColorInfo().SetColor(255, 255, 255);
+
+        obj = GetObject(clickLabel);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        img.GetColorInfo().SetAlpha(1);
+        img.GetColorInfo().SetColor(255, 255, 255);
     }
 
     public void OnDisabled() {
@@ -3623,7 +3885,7 @@ public class SceneObjectButton extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        inputManager.GetMouseReleasedHandler().GetEvents().Add(_eventLabel, new IEvent() {
+        inputManager.GetMouseReleasedHandler().GetEvents().Set(_eventLabel, new IEvent() {
             public void Event() {
                 if (!_isActive) return;
                 GetDecideHandler().InvokeAllEvents();
@@ -3639,7 +3901,8 @@ public class SceneObjectButton extends SceneObjectBehavior {
     }
 }
 public final class TimerInfo {
-    public float second;
+    public float settedTime;
+    public float currentTime;
     public boolean useTimer;
     public boolean haveBegun;
     public boolean isActive;
@@ -3682,8 +3945,8 @@ public class SceneObjectTimer extends SceneObjectBehavior {
             if (!_IsContainsKey(label)) continue;
             i = _infos.Get(label);
             if (!i.isActive || !i.haveBegun) continue;
-            i.second -= 1/frameRate;
-            if (i.second <= 0) {
+            i.settedTime -= 1/frameRate;
+            if (i.settedTime <= 0) {
                 _timers.Get(label).OnTimeOut();
                 End(label);
             }
@@ -3723,7 +3986,7 @@ public class SceneObjectTimer extends SceneObjectBehavior {
     public void ResetTimer(String label, float timer) {
         if (!_timers.ContainsKey(label)) return;
         TimerInfo i = _GetTimerInfo(label);
-        i.second = timer;
+        i.settedTime = timer;
     }
 
     public void Start(String label) {
@@ -3792,14 +4055,15 @@ public class SceneObjectDuration extends SceneObjectBehavior {
             if (!i.isActive || !i.haveBegun) continue;
 
             if (i.useTimer) {
-                i.second -= 1/frameRate;
-                f = i.second <= 0;
+                i.currentTime -= 1/frameRate;
+                f = i.currentTime <= 0;
             } else {
                 f = !d.IsContinue();
             }
             if (f) {
                 d.OnEnd();
                 End(label);
+                return;
             }
             d.OnUpdate();
         }
@@ -3838,7 +4102,15 @@ public class SceneObjectDuration extends SceneObjectBehavior {
     public void ResetTimer(String label, float timer) {
         if (!_durations.ContainsKey(label)) return;
         TimerInfo i = _GetTimerInfo(label);
-        i.second = timer;
+        i.settedTime = timer;
+        i.currentTime = timer;
+        Stop(label);
+    }
+    
+    public float GetSettedTimer(String label) {
+        if (!_durations.ContainsKey(label)) return 0;
+        TimerInfo i = _GetTimerInfo(label);
+        return i.settedTime;
     }
 
     public void SetUseTimer(String label, boolean useTimer) {
@@ -3975,7 +4247,7 @@ public final class SceneOneIllust extends Scene {
 public final class SceneTitle extends Scene {
     private String titleBack, titleText, dustF, dustE, fire, buttonBack;
     private String[] titleButtons;
-    
+
     public SceneTitle() {
         super(SceneID.SID_TITLE);
         GetDrawBack().GetBackColorInfo().SetColor(255, 255, 255);
@@ -4017,7 +4289,14 @@ public final class SceneTitle extends Scene {
             objT.SetAnchor(0.5, 1, 0.5, 1);
             objT.SetPivot(0.5, 1);
             new SceneObjectImage(obj, "title/"+ paths[i] +".png");
-            new TitleButton(obj, titleButtons[i]);
+            TitleButton b = new TitleButton(obj, titleButtons[i]);
+            b.GetDecideHandler().GetEvents().Add("Go GameOver", new IEvent() {
+                public void Event() {
+                    SceneGameOver g = (SceneGameOver)sceneManager.GetScene(SceneID.SID_GAMEOVER);
+                    g.GoGameOver();
+                }
+            }
+            );
         }
 
         // 塵エフェクト
@@ -4066,10 +4345,10 @@ public final class SceneTitle extends Scene {
 
     public void OnEnabled() {
         super.OnEnabled();
-        
+
         SceneObject obj;
         SceneObjectImage img;
-        
+
         obj = GetObject(titleBack);
         img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
     }
@@ -4077,7 +4356,7 @@ public final class SceneTitle extends Scene {
     public void OnDisabled() {
         super.OnDisabled();
     }
-    
+
     public void GoTitle() {
         sceneManager.ReleaseAllScenes();
         sceneManager.LoadScene(SceneID.SID_TITLE);
@@ -4289,19 +4568,19 @@ public final class TitleButtonBack extends SceneObjectBehavior {
 
     public void Start() {
         super.Start();
-        
+
         GetObject().SetActivatable(false);
         _objT = GetObject().GetTransform();
         _objT.SetAnchor(0.5, 1, 0.5, 1);
         _objT.SetSize(240, 20);
         _objT.SetPriority(15);
-        
+
         _objImg = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
     }
-    
+
     public void Update() {
         super.Update();
-        
+
         _actObj = GetObject().GetScene().GetActiveObject();
         if (_actObj != null) {
             _objT.SetScale(1, 1);
@@ -4310,11 +4589,11 @@ public final class TitleButtonBack extends SceneObjectBehavior {
         } else {
             _objT.SetScale(0, 0);
         }
-        
+
         if (_objImg != null) {
             _objImg.GetColorInfo().SetAlpha(abs(cos(_rad)) * 255);
-        _rad += 2/frameRate;
-        _rad %= TWO_PI;
+            _rad += 2/frameRate;
+            _rad %= TWO_PI;
         }
     }
 
@@ -4324,7 +4603,7 @@ public final class TitleButtonBack extends SceneObjectBehavior {
         }
     }
 }
-/** //<>// //<>//
+/** //<>// //<>// //<>//
  アフィン変換一回分の情報に責任を持つ。
  サイズは持たない。
  */
