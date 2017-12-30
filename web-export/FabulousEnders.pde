@@ -26,6 +26,9 @@ void setup() {
         sceneManager.LoadScene(SceneID.SID_TITLE);
 
         sceneManager.Start();
+        
+        ConfigStatic configStatic = new ConfigStatic();
+        println(configStatic.GetMaxAttack());
     } 
     catch(Exception e) {
         println(e);
@@ -125,99 +128,6 @@ public final class ActionEvent {
         for (String label : _events.GetElements().keySet()) {
             InvokeEvent(label);
         }
-    }
-}
-public class ActionEventDuration {
-    
-}
-/**
- 平面上のある領域の基準点を二つ保持する責任を持つ。
- */
-public class Anchor {
-    private Pivot _min, _max;
-
-    public PVector GetMin() {
-        return _min.GetPivot();
-    }
-    public void SetMin(PVector value) {
-        if (value == null) return;
-        SetMin(value.x, value.y);
-    }
-
-    public void SetMin(float x, float y) {
-        float temp;
-        if (x > GetMax().x) {
-            temp = GetMax().x;
-            _max.SetX(x);
-            x = temp;
-        }
-        if (y > GetMax().y) {
-            temp = GetMax().y;
-            _max.SetY(y);
-            y = temp;
-        }
-        _min.SetPivot(x, y);
-    }
-
-    public PVector GetMax() {
-        return _max.GetPivot();
-    }
-    public void SetMax(PVector value) {
-        if (value == null) return;
-        SetMax(value.x, value.y);
-    }
-
-    public void SetMax(float x, float y) {
-        float temp;
-        if (x < GetMin().x) {
-            temp = GetMin().x;
-            _min.SetX(x);
-            x = temp;
-        }
-        if (y < GetMin().y) {
-            temp = GetMin().y;
-            _min.SetY(y);
-            y = temp;
-        }
-        _max.SetPivot(x, y);
-    }
-
-    public Anchor() {
-        _InitParametersOnConstructor(Pivot.P_LEFT, Pivot.P_TOP, Pivot.P_RIGHT, Pivot.P_BOTTOM);
-    }
-
-    public Anchor(float minX, float minY, float maxX, float maxY) {
-        _InitParametersOnConstructor(minX, minY, maxX, maxY);
-    }
-
-    private void _InitParametersOnConstructor(float minX, float minY, float maxX, float maxY) {
-        _min = new Pivot(minX, minY);
-        _max = new Pivot(maxX, maxY);
-    }
-
-    public float GetMinX() {
-        return GetMin().x;
-    }
-    public float GetMinY() {
-        return GetMin().y;
-    }
-    public float GetMaxX() {
-        return GetMax().x;
-    }
-    public float GetMaxY() {
-        return GetMax().y;
-    }
-    public void SetMinX(float value) {
-        SetMin(value, GetMinY());
-    }
-    public void SetMinY(float value) {
-        SetMin(GetMinX(), value);
-    }
-    public void SetMaxX(float value) {
-        SetMax(value, GetMaxY());
-    }
-    public void SetMaxY(float value) {
-        SetMax(GetMaxX(), value);
     }
 }
 public class Collection<R extends Comparable> {
@@ -450,6 +360,538 @@ public final class DrawColor {
             GetAlpha() == d.GetAlpha();
     }
 }
+public class ClassType {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private boolean _isArmor;
+    public boolean IsArmor() {
+        return _isArmor;
+    }
+
+    private boolean _isRider;
+    public boolean IsRider() {
+        return _isRider;
+    }
+
+    private boolean _isFlyer;
+    public boolean IsFlyer() {
+        return _isFlyer;
+    }
+
+    public ClassType(String name, boolean isArmor, boolean isRider, boolean isFlyer) {
+        _name = name;
+        _isArmor = isArmor;
+        _isRider = isRider;
+        _isFlyer = isFlyer;
+    }
+}
+
+/**
+ 剣、斧、槍、弓、魔法、杖などの種類。
+ */
+public class WeaponType {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+
+    // 命中した場合のみ耐久値が減少するかどうか
+    private boolean _isWearOnHit;
+    public boolean IsWearOnHit() {
+        return _isWearOnHit;
+    }
+
+    public WeaponType(String name, String imagePath, boolean isWearOnHit) {
+        _name = name;
+        _imagePath = imagePath;
+        _isWearOnHit = isWearOnHit;
+    }
+}
+
+/**
+ ゲーム内で設定を変更することができるコンフィグパラメータを保持するクラス。
+ */
+public class Config {
+    // グリッドカーソルを移動させる速さ
+    private int _gridSpeed;
+    public int GetGridSpeed() {
+        return _gridSpeed;
+    }
+    public void SetGridSpeed(int value) {
+        _gridSpeed = value;
+    }
+    public void AddGridSpeed(int value) {
+        _gridSpeed += value;
+    }
+
+    // メッセージウィンドウに表示させる文章の表示の速さ
+    private int _messageSpeed;
+    public int GetMessageSpeed() {
+        return _messageSpeed;
+    }
+    public void SetMessageSpeed(int value) {
+        _messageSpeed = value;
+    }
+    public void AddMessageSpeed(int value) {
+        _messageSpeed += value;
+    }
+
+    // リアル戦闘画面を表示するかどうか
+    private boolean _isShowBattle;
+    public boolean IsShowBattle() {
+        return _isShowBattle;
+    }
+    public void SetShowBattle(boolean value) {
+        _isShowBattle = value;
+    }
+}
+
+/**
+ ゲーム内で設定を変更することができないコンフィグパラメータを保持するクラス。
+ */
+public class ConfigStatic {
+    private int _maxMoney;
+    public int GetMaxMoney() {
+        return _maxMoney;
+    }
+
+    private int _maxExp;
+    public int GetMaxExp() {
+        return _maxExp;
+    }
+
+    private int _maxHaveSkills;
+    public int GetMaxHaveSkills() {
+        return _maxHaveSkills;
+    }
+
+    private int _maxHaveItems;
+    public int GetMaxHaveItems() {
+        return _maxHaveItems;
+    }
+
+    private int _maxStockItems;
+    public int GetMaxStockItems() {
+        return _maxStockItems;
+    }
+
+    private int _maxAppearEnemies;
+    public int GetMaxAppearEnemies() {
+        return _maxAppearEnemies;
+    }
+
+    private int _minGainExp;
+    public int GetMinGainExp() {
+        return _minGainExp;
+    }
+
+    private int _leaderGainExp;
+    public int GetLeaderGainExp() {
+        return _leaderGainExp;
+    }
+
+    private int _subLeaderGainExp;
+    public int GetSubLeaderGainExp() {
+        return _subLeaderGainExp;
+    }
+
+    private float _criticalHitRate;
+    public float GetCriticalHitRate() {
+        return _criticalHitRate;
+    }
+
+    private float _specialHitRate;
+    public float GetSpecialHitRate() {
+        return _specialHitRate;
+    }
+
+    private int _maxLevel;
+    public int GetMaxLevel() {
+        return _maxLevel;
+    }
+
+    private UnitParameter _maxParameter;
+    public int GetMaxHp() {
+        return _maxParameter.GetHp();
+    }
+    public int GetMaxAttack() {
+        return _maxParameter.GetAttack();
+    }
+    public int GetMaxMAttack() {
+        return _maxParameter.GetMAttack();
+    }
+    public int GetMaxTech() {
+        return _maxParameter.GetTech();
+    }
+    public int GetMaxSpeed() {
+        return _maxParameter.GetSpeed();
+    }
+    public int GetMaxHappiness() {
+        return _maxParameter.GetHappiness();
+    }
+    public int GetMaxDefense() {
+        return _maxParameter.GetDefense();
+    }
+    public int GetMaxMDefense() {
+        return _maxParameter.GetMDefense();
+    }
+    public int GetMaxMobility() {
+        return _maxParameter.GetMobility();
+    }
+    public int GetMaxProficiency() {
+        return _maxParameter.GetProficiency();
+    }
+
+    public ConfigStatic() {
+        JsonObject json = new JsonObject();
+        json.Load("data/config/config.json");
+
+        _maxParameter = new UnitParameter();
+
+        _maxMoney = json.GetInt("Max Money", -1);
+        _maxExp = json.GetInt("Max Exp", -1);
+        _maxHaveSkills = json.GetInt("Max Have Skills", -1);
+        _maxHaveItems = json.GetInt("Max Have Items", -1);
+        _maxStockItems = json.GetInt("Max Stock Items", -1);
+        _maxAppearEnemies = json.GetInt("Max Appear Enemies", -1);
+        _minGainExp = json.GetInt("Min Gain Exp", -1);
+        _leaderGainExp = json.GetInt("Leader Gain Exp", -1);
+        _subLeaderGainExp = json.GetInt("Sub Leader Gain Exp", -1);
+        _criticalHitRate = json.GetInt("Critical Hit Rate", -1);
+        _specialHitRate = json.GetInt("Special Hit Rate", -1);
+        _maxLevel = json.GetInt("Max Level", -1);
+        _maxParameter.SetHp(json.GetInt("Max Hp", -1));
+        _maxParameter.SetAttack(json.GetInt("Max Atk", -1));
+        _maxParameter.SetMAttack(json.GetInt("Max Mat", -1));
+        _maxParameter.SetTech(json.GetInt("Max Tec", -1));
+        _maxParameter.SetSpeed(json.GetInt("Max Spd", -1));
+        _maxParameter.SetHappiness(json.GetInt("Max Hap", -1));
+        _maxParameter.SetDefense(json.GetInt("Max Def", -1));
+        _maxParameter.SetMDefense(json.GetInt("Max Mdf", -1));
+        _maxParameter.SetMobility(json.GetInt("Max Mov", -1));
+        _maxParameter.SetProficiency(json.GetInt("Max Pro", -1));
+    }
+}
+public class UnitParameter {
+    private int _hp;
+    public int GetHp() {
+        return _hp;
+    }
+    public void SetHp(int value) {
+        _hp = value;
+    }
+    public void AddHp(int value) {
+        _hp += value;
+    }
+
+    private int _atk;
+    public int GetAttack() {
+        return _atk;
+    }
+    public void SetAttack(int value) {
+        _atk = value;
+    }
+    public void AddAttack(int value) {
+        _atk += value;
+    }
+
+    private int _mat;
+    public int GetMAttack() {
+        return _mat;
+    }
+    public void SetMAttack(int value) {
+        _mat = value;
+    }
+    public void AddMAttack(int value) {
+        _mat += value;
+    }
+
+    private int _tec;
+    public int GetTech() {
+        return _tec;
+    }
+    public void SetTech(int value) {
+        _tec = value;
+    }
+    public void AddTech(int value) {
+        _tec += value;
+    }
+
+    private int _spd;
+    public int GetSpeed() {
+        return _spd;
+    }
+    public void SetSpeed(int value) {
+        _spd = value;
+    }
+    public void AddSpeed(int value) {
+        _spd += value;
+    }
+
+    private int _hap;
+    public int GetHappiness() {
+        return _hap;
+    }
+    public void SetHappiness(int value) {
+        _hap = value;
+    }
+    public void AddHappiness(int value) {
+        _hap += value;
+    }
+
+    private int _def;
+    public int GetDefense() {
+        return _def;
+    }
+    public void SetDefense(int value) {
+        _def = value;
+    }
+    public void AddDefense(int value) {
+        _def += value;
+    }
+
+    private int _mdf;
+    public int GetMDefense() {
+        return _mdf;
+    }
+    public void SetMDefense(int value) {
+        _mdf = value;
+    }
+    public void AddMDefense(int value) {
+        _mdf += value;
+    }
+
+    private int _mov;
+    public int GetMobility() {
+        return _mov;
+    }
+    public void SetMobility(int value) {
+        _mov = value;
+    }
+    public void AddMobility(int value) {
+        _mov += value;
+    }
+
+    private int _pro;
+    public int GetProficiency() {
+        return _pro;
+    }
+    public void SetProficiency(int value) {
+        _pro = value;
+    }
+    public void AddProficiency(int value) {
+        _pro += value;
+    }
+}
+
+/**
+ ゲーム内の操作可能なユニット、敵ユニット、援軍ユニットすべての基本となるクラス。
+ */
+public class Unit {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+    public void SetName(String value) {
+        _name = value;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+    public void SetExplain(String value) {
+        _explain = value;
+    }
+
+    private int _importance;
+    public int GetImportance() {
+        return _importance;
+    }
+    public void SetImportance(int value) {
+        _importance = value;
+    }
+
+    private int _class;
+
+    private int _level;
+    public int GetLevel() {
+        return _level;
+    }
+    public void SetLevel(int value) {
+        _level = value;
+    }
+
+    private UnitParameter _parameter;
+    public UnitParameter GetParameter() {
+        return _parameter;
+    }
+
+    private UnitParameter _growthRate;
+    public UnitParameter GetGrowthRate() {
+        return _growthRate;
+    }
+
+    private ArrayList<ItemBase> _itemList;
+    public ArrayList<ItemBase> GetItemList() {
+        return _itemList;
+    }
+}
+
+/**
+ ユニットが属するクラス。
+ */
+public class UnitClass {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+    public void SetName(String value) {
+        _name = value;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+    public void SetExplain(String value) {
+        _explain = value;
+    }
+
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+    public void SetImagePath(String value) {
+        _imagePath = value;
+    }
+
+    private String _motionPath;
+    public String GetMotionPath() {
+        return _motionPath;
+    }
+    public void SetMotionPath(String value) {
+        _motionPath = value;
+    }
+
+    private int _wearableWeapon;
+
+    private int _classType;
+
+    private int _learnabeSkills;
+
+    private UnitParameter _paramBonus;
+    public UnitParameter GetParameterBonus() {
+        return _paramBonus;
+    }
+    public void SetParameterBonus(UnitParameter value) {
+        _paramBonus = value;
+    }
+
+    private UnitParameter _growthBonus;
+    public UnitParameter GetGrowthBonus() {
+        return _growthBonus;
+    }
+    public void SetGrowthBonus(UnitParameter value) {
+        _growthBonus = value;
+    }
+}
+
+/**
+ ユニットが保持することができるアイテムの基本クラス。
+ */
+public class ItemBase {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+    public void SetName(String value) {
+        _name = value;
+    }
+
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+    public void SetImagePath(String value) {
+        _imagePath = value;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+    public void SetExplain(String value) {
+        _explain = value;
+    }
+
+    private int _price;
+    public int GetPrice() {
+        return _price;
+    }
+    public void SetPrice(int value) {
+        _price = value;
+    }
+
+    private int _weigth;
+    public int GetWeigth() {
+        return _weigth;
+    }
+    public void SetWeigth(int value) {
+        _weigth = value;
+    }
+
+    private int _endurance;
+    public int GetEndurance() {
+        return _endurance;
+    }
+    public void SetEndurance(int value) {
+        _endurance = value;
+    }
+    public void AddEndurance(int value) {
+        _endurance += value;
+    }
+
+    private boolean _isImportant;
+    public boolean IsImportant() {
+        return _isImportant;
+    }
+    public void SetImportant(boolean value) {
+        _isImportant = value;
+    }
+
+    private boolean _isExchangeable;
+    public boolean IsExchangeable() {
+        return _isExchangeable;
+    }
+    public void SetExchangeable(boolean value) {
+        _isExchangeable = value;
+    }
+
+    private UnitParameter _paramBonus;
+    public UnitParameter GetParameterBonus() {
+        return _paramBonus;
+    }
+    public void SetParameterBonus(UnitParameter value) {
+        _paramBonus = value;
+    }
+
+    private UnitParameter _growthBonus;
+    public UnitParameter GetGrowthBonus() {
+        return _growthBonus;
+    }
+    public void SetGrowthBonus(UnitParameter value) {
+        _growthBonus = value;
+    }
+}
 public final static class GeneralCalc {
     /**
      指定した座標同士のラジアン角を返す。
@@ -472,6 +914,11 @@ public final class JsonArray extends JsonUtility {
         _elem = new ArrayList<String>();
     }
 
+    public JsonArray(String path) {
+        this();
+        Load(path);
+    }
+
     public boolean IsNull() {
         return _elem == null;
     }
@@ -485,11 +932,18 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
         }
-        return _RemoveEscape(obj);
+
+        if (!_IsProper(obj, stringToken, stringToken)) {
+            return defaultValue;
+        }
+        return _RemoveEscape(_RemoveSideString(obj));
     }
 
     public int GetInt(int index, int defaultValue) {
@@ -497,6 +951,9 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
@@ -509,6 +966,9 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
@@ -521,6 +981,9 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
@@ -532,7 +995,9 @@ public final class JsonArray extends JsonUtility {
         if (IsNull()) {
             return null;
         }
-
+        if (_elem.size()<=index) {
+            return null;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return null;
@@ -547,6 +1012,9 @@ public final class JsonArray extends JsonUtility {
             return null;
         }
 
+        if (_elem.size()<=index) {
+            return null;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return null;
@@ -556,16 +1024,84 @@ public final class JsonArray extends JsonUtility {
         return jsonArray;
     }
 
-    public void AddElement(Object elem) {
+    /**
+     各パラメーターの追加
+     */
+    public void AddString(String elem) {
+        AddElement(stringToken + elem + stringToken);
+    }
+
+    public void AddInt(int elem) {
+        AddElement(elem);
+    }
+
+    public void AddFloat(float elem) {
+        AddElement(elem);
+    }
+
+    public void AddBoolean(boolean elem) {
+        AddElement(elem);
+    }
+
+    public void AddJsonObject(JsonObject elem) {
+        AddElement(elem);
+    }
+
+    public void AddJsonArray(JsonArray elem) {
+        AddElement(elem);
+    }
+
+    private void AddElement(Object elem) {
         _elem.add(elem.toString());
     }
 
-    public void SetElement(int index, Object elem) {
-        _elem.set(index, elem.toString());
+    /**
+     各パラメーターの設定
+     */
+    public void SetString(int index, String elem) {
+        SetElement(index, stringToken + elem + stringToken);
+    }
+
+    public void SetInt(int index, int elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetFloat(int index, float elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetBoolean(int index, boolean elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetJsonObject(int index, JsonObject elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetJsonArray(int index, JsonArray elem) {
+        SetElement(index, elem);
+    }
+
+    private void SetElement(int index, Object elem) {
+        int elemSize=Size();
+        if (index < 0) {
+            println("IndexOutOfBoundsException : " + index);
+        } else {
+            if (elemSize <= index) {
+                for (int i=index-elemSize; 0<=i; i--) {
+                    _elem.add(null);
+                }
+            }
+            _elem.set(index, elem.toString());
+        }
     }
 
     public void RemoveElement(int index) {
         _elem.remove(index);
+    }
+
+    public void ClearElements() {
+        _elem.clear();
     }
 
     public int Size() {
@@ -581,14 +1117,7 @@ public final class JsonArray extends JsonUtility {
         // 最初が '[' 最後が ']' でなければ生成しない
         if (!_IsProper(jsonContents, beginArrayToken, endArrayToken)) return;
 
-        _elem = _Split(jsonContents.substring(1, jsonContents.length() - 1));
-        String temp;
-        for (int i=0; i<_elem.size(); i++) {
-            temp = _elem.get(i);
-            if (_IsProper(temp, stringToken, stringToken)) {
-                _elem.set(i, _RemoveSideString(temp));
-            }
-        }
+        _elem = _Split(trim(_RemoveSideString(jsonContents)));
     }
 
     /**
@@ -596,58 +1125,56 @@ public final class JsonArray extends JsonUtility {
      */
     protected ArrayList<String> _Split(String jsonContents) {
         ArrayList<String> jsonPair = new ArrayList<String>();
-        boolean isLiteral = false, isArray = false;
-        int objDepth = 0;
+        boolean isLiteral = false;
+        int arrayDepth = 0, objectDepth = 0;
         char temp;
         int lastSplitIdx = 0;
-        String pair;
-        for (int i=0; i<jsonContents.length(); i++) {
-            temp = jsonContents.charAt(i);
 
-            if (temp == stringToken) {
-                if (i == 0 || jsonContents.charAt(i - 1) != escapeToken) {
-                    isLiteral = !isLiteral;
+        if (jsonContents.length()!=0) {
+            for (int i=0; i<jsonContents.length(); i++) {
+                temp = jsonContents.charAt(i);
+
+                if (temp == stringToken) {
+                    if (i == 0 || jsonContents.charAt(i - 1) != escapeToken) {
+                        isLiteral = !isLiteral;
+                    }
+                }
+                if (!isLiteral) {
+                    if (temp == beginArrayToken) {
+                        arrayDepth++;
+                    } else if (temp == endArrayToken) {
+                        arrayDepth--;
+                    } else if (temp == beginObjectToken) {
+                        objectDepth++;
+                    } else if (temp == endObjectToken) {
+                        objectDepth--;
+                    }
+                }
+
+                if (temp == commaToken && !isLiteral && arrayDepth==0 && objectDepth == 0) {
+                    String elem=trim(jsonContents.substring(lastSplitIdx, i));
+                    if (elem.equals("null")) {
+                        elem=null;
+                    }
+                    jsonPair.add(elem);
+                    lastSplitIdx = i + 1;
                 }
             }
-            if (!isLiteral) {
-                if (temp == beginArrayToken) {
-                    isArray = true;
-                } else if (temp == endArrayToken) {
-                    isArray = false;
-                } else if (temp == beginObjectToken) {
-                    objDepth++;
-                } else if (temp == endObjectToken) {
-                    objDepth--;
-                }
-            }
-
-            if (temp == commaToken && !isLiteral && !isArray && objDepth == 0) {
-                jsonPair.add(trim(jsonContents.substring(lastSplitIdx, i)));
-                lastSplitIdx = i + 1;
-            }
+            jsonPair.add(trim(jsonContents.substring(lastSplitIdx)));
         }
-        jsonPair.add(trim(jsonContents.substring(lastSplitIdx)));
-
         return jsonPair;
     }
 
     public String toString() {
         try {
-            String elem, pair;
+            String elem;
             String[] product = new String[_elem.size()];
             for (int i=0; i<_elem.size(); i++) {
                 elem = _elem.get(i);
                 if (elem == null) {
                     continue;
                 }
-                if (_IsProper(elem, beginObjectToken, endObjectToken)) {
-                    pair = elem;
-                } else if (_IsProper(elem, beginArrayToken, endArrayToken)) {
-                    pair = elem;
-                } else {
-                    pair = stringToken + elem + stringToken;
-                }
-                product[i] = pair;
+                product[i] = elem;
             }
             return beginArrayToken + newLineToken + join(product, ",\n") + newLineToken + endArrayToken;
         } 
@@ -667,12 +1194,21 @@ public final class JsonObject extends JsonUtility {
         _names = new ArrayList<String>();
     }
 
+    public JsonObject(String path) {
+        this();
+        Load(path);
+    }
+
     public boolean IsNull() {
         return _elem == null;
     }
 
     public boolean IsEmpty() {
         return _elem.isEmpty();
+    }
+
+    public boolean HasKey(String name) {
+        return _elem.containsKey(name);
     }
 
     public String GetString(String name, String defaultValue) {
@@ -684,7 +1220,11 @@ public final class JsonObject extends JsonUtility {
         if (obj == null) {
             return defaultValue;
         }
-        return _RemoveEscape(obj);
+
+        if (!_IsProper(obj, stringToken, stringToken)) {
+            return defaultValue;
+        }
+        return _RemoveEscape(_RemoveSideString(obj));
     }
 
     public int GetInt(String name, int defaultValue) {
@@ -751,11 +1291,32 @@ public final class JsonObject extends JsonUtility {
         return jsonArray;
     }
 
-    /**
-     全てのパラメータは文字列で管理されるべきなので、Setterはこれのみ。
-     */
-    public void SetElement(String name, Object elem) {
-        if (!_elem.containsKey(name)) {
+    public void SetString(String name, String elem) {
+        SetElement(name, stringToken + elem + stringToken);
+    }
+
+    public void SetInt(String name, int elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetFloat(String name, float elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetBoolean(String name, boolean elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetJsonObject(String name, JsonObject elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetJsonArray(String name, JsonArray elem) {
+        SetElement(name, elem);
+    }
+
+    private void SetElement(String name, Object elem) {
+        if (!HasKey(name)) {
             _names.add(name);
         }
         _elem.put(name, elem.toString());
@@ -768,7 +1329,9 @@ public final class JsonObject extends JsonUtility {
         if (jsonContents == null) return;
 
         // 最初が '{' 最後が '}' でなければ生成しない
-        if (!_IsProper(jsonContents, beginObjectToken, endObjectToken)) return;
+        if (!_IsProper(jsonContents, beginObjectToken, endObjectToken)) {
+            return;
+        }
 
         _elem.clear();
         _names.clear();
@@ -777,22 +1340,26 @@ public final class JsonObject extends JsonUtility {
         String[] pair = new String[2];
         char temp;
 
-        for (int i=0; i<jsonPair.size(); i++) {
+        for (int i=0, end=jsonPair.size(); i<end; i++) {
             String jsonElem = jsonPair.get(i);
 
-            for (int j=0; j<jsonElem.length(); j++) {
+            for (int j=0, end2=jsonElem.length(); j<end2; j++) {
                 temp = jsonElem.charAt(j);
 
                 if (temp == colonToken) {
                     pair[0] = trim(jsonElem.substring(0, j));
                     pair[1] = trim(jsonElem.substring(j+1));
 
-                    for (int k=0; k<pair.length; k++) {
-                        if (_IsProper(pair[k], stringToken, stringToken)) {
-                            pair[k] = _RemoveSideString(pair[k]);
-                        }
-                    }
 
+                    if (_IsProper(pair[0], stringToken, stringToken)) {
+                        pair[0] = _RemoveSideString(pair[0]);
+                    } else {
+                        println("Inappropriate name. There in no \"");
+                        continue;
+                    }
+                    if (pair[1].equals("null")) {
+                        pair[1]=null;
+                    }
                     SetElement(pair[0], pair[1]);
                     break;
                 }
@@ -805,7 +1372,8 @@ public final class JsonObject extends JsonUtility {
      */
     protected ArrayList<String> _Split(String jsonContents) {
         ArrayList<String> jsonPair = new ArrayList<String>();
-        boolean isLiteral = false, isArray = false;
+        boolean isLiteral = false;
+        int arrayDepth=0, objectDepth=0;
         char temp;
         int lastSplitIdx = 0;
         for (int i=0; i<jsonContents.length(); i++) {
@@ -818,13 +1386,17 @@ public final class JsonObject extends JsonUtility {
             }
             if (!isLiteral) {
                 if (temp == beginArrayToken) {
-                    isArray = true;
+                    arrayDepth++;
                 } else if (temp == endArrayToken) {
-                    isArray = false;
+                    arrayDepth--;
+                } else if (temp == beginObjectToken) {
+                    objectDepth++;
+                } else if (temp == endObjectToken) {
+                    objectDepth--;
                 }
             }
 
-            if (temp == commaToken && !isLiteral && !isArray) {
+            if (temp == commaToken && !isLiteral && arrayDepth==0&&objectDepth==0) {
                 jsonPair.add(trim(jsonContents.substring(lastSplitIdx, i)));
                 lastSplitIdx = i + 1;
             }
@@ -833,25 +1405,18 @@ public final class JsonObject extends JsonUtility {
 
         return jsonPair;
     }
-    
+
     public String toString() {
         try {
-            String name, elem, pair;
+            String name, elem;
             String[] product = new String[_names.size()];
-            for (int i=0; i<_names.size(); i++) {
+            for (int i=0, end=_names.size(); i<end; i++) {
                 name = _names.get(i);
                 elem = _elem.get(name);
                 if (elem == null) {
                     continue;
                 }
-                if (_IsProper(elem, beginObjectToken, endObjectToken)) {
-                    pair = elem;
-                } else if (_IsProper(elem, beginArrayToken, endArrayToken)) {
-                    pair = elem;
-                } else {
-                    pair = stringToken + elem + stringToken;
-                }
-                product[i] = stringToken + _InsertEscape(name) + stringToken + " : " + pair;
+                product[i] = stringToken + _InsertEscape(name) + stringToken + " : " + elem;
             }
             return beginObjectToken + newLineToken + join(product, ",\n") + newLineToken + endObjectToken;
         } 
@@ -887,7 +1452,7 @@ public abstract class JsonUtility {
 
     public void Save(String path) {
         try {
-            saveStrings(path, new String[]{toString()});
+            saveStrings(path, new String[]{this.toString()});
         } 
         catch(Exception e) {
             println(e);
@@ -898,6 +1463,9 @@ public abstract class JsonUtility {
     protected abstract ArrayList<String> _Split(String content);
 
     protected boolean _IsProper(String content, char beginToken, char endToken) {
+        if (content.length()==0) {
+            return false;
+        }
         return content.charAt(0) == beginToken && content.charAt(content.length() - 1) == endToken;
     }
 
@@ -946,7 +1514,6 @@ public abstract class JsonUtility {
         for (int i=0; i< proArray.length; i++) {
             proArray[i] = product.get(i);
         }
-
         return join(proArray, "");
     }
 
@@ -1172,6 +1739,97 @@ public class Pivot {
 
     public void SetY(float value) {
         SetPivot(GetX(), value);
+    }
+}
+
+/**
+ 平面上のある領域の基準点を二つ保持する責任を持つ。
+ */
+public class Anchor {
+    private Pivot _min, _max;
+
+    public PVector GetMin() {
+        return _min.GetPivot();
+    }
+    public void SetMin(PVector value) {
+        if (value == null) return;
+        SetMin(value.x, value.y);
+    }
+
+    public void SetMin(float x, float y) {
+        float temp;
+        if (x > GetMax().x) {
+            temp = GetMax().x;
+            _max.SetX(x);
+            x = temp;
+        }
+        if (y > GetMax().y) {
+            temp = GetMax().y;
+            _max.SetY(y);
+            y = temp;
+        }
+        _min.SetPivot(x, y);
+    }
+
+    public PVector GetMax() {
+        return _max.GetPivot();
+    }
+    public void SetMax(PVector value) {
+        if (value == null) return;
+        SetMax(value.x, value.y);
+    }
+
+    public void SetMax(float x, float y) {
+        float temp;
+        if (x < GetMin().x) {
+            temp = GetMin().x;
+            _min.SetX(x);
+            x = temp;
+        }
+        if (y < GetMin().y) {
+            temp = GetMin().y;
+            _min.SetY(y);
+            y = temp;
+        }
+        _max.SetPivot(x, y);
+    }
+
+    public Anchor() {
+        _InitParametersOnConstructor(Pivot.P_LEFT, Pivot.P_TOP, Pivot.P_RIGHT, Pivot.P_BOTTOM);
+    }
+
+    public Anchor(float minX, float minY, float maxX, float maxY) {
+        _InitParametersOnConstructor(minX, minY, maxX, maxY);
+    }
+
+    private void _InitParametersOnConstructor(float minX, float minY, float maxX, float maxY) {
+        _min = new Pivot(minX, minY);
+        _max = new Pivot(maxX, maxY);
+    }
+
+    public float GetMinX() {
+        return GetMin().x;
+    }
+    public float GetMinY() {
+        return GetMin().y;
+    }
+    public float GetMaxX() {
+        return GetMax().x;
+    }
+    public float GetMaxY() {
+        return GetMax().y;
+    }
+    public void SetMinX(float value) {
+        SetMin(value, GetMinY());
+    }
+    public void SetMinY(float value) {
+        SetMin(GetMinX(), value);
+    }
+    public void SetMaxX(float value) {
+        SetMax(value, GetMaxY());
+    }
+    public void SetMaxY(float value) {
+        SetMax(GetMaxX(), value);
     }
 }
 public final class InputManager {
@@ -2581,20 +3239,14 @@ public class SceneObject implements Comparable<SceneObject> {
         return _behaviors;
     }
 
-    /**
-     オブジェクトは一回だけシーンを設定することができる。
-     */
     private Scene _scene;
     public Scene GetScene() {
         return _scene;
     }
     public void SetScene(Scene value) {
-        if (_isSettedScene) return;
         if (value == null) return;
-        _isSettedScene = true;
         _scene = value;
     }
-    private boolean _isSettedScene;
 
     private SceneObjectTransform _transform;
     public SceneObjectTransform GetTransform() {
@@ -2620,6 +3272,29 @@ public class SceneObject implements Comparable<SceneObject> {
         } else {
             _OnDisable();
         }
+        _SetEnableRecursive(value);
+    }
+
+    /**
+    親オブジェクトの有効フラグが変更された時に同時に自身の有効フラグも変更するかどうか。
+    trueの場合、自身の有効フラグも変更する。
+    */
+    private boolean _isAutoChangeEnable;
+    public boolean IsAutoChangeEnable() {
+        return _isAutoChangeEnable;
+    }
+    public void SetAutoChangeEnable(boolean value) {
+        _isAutoChangeEnable = value;
+    }
+    
+    private void _SetEnableRecursive(boolean value) {
+        SceneObjectTransform trans = GetTransform();
+        SceneObject obj;
+        for (int i=0;i<trans.GetChildren().size();i++) {
+            obj = trans.GetChildren().get(i).GetObject();
+            if (!obj.IsAutoChangeEnable()) continue;
+            obj.SetEnable(value);
+        }
     }
 
     /**
@@ -2644,7 +3319,7 @@ public class SceneObject implements Comparable<SceneObject> {
     public SceneObject(String name) {
         _InitParameterOnConstructor(name);
     }
-    
+
     public SceneObject(String name, Scene scene) {
         _InitParameterOnConstructor(name);
         if (scene != null) {
@@ -2652,7 +3327,7 @@ public class SceneObject implements Comparable<SceneObject> {
             scene.AddChild(this);
         }
     }
-    
+
     private void _InitParameterOnConstructor(String name) {
         _name = name;
 
@@ -2662,10 +3337,11 @@ public class SceneObject implements Comparable<SceneObject> {
 
         _drawBack = new SceneObjectDrawBack();
         AddBehavior(_drawBack);
-
+        
         // トランスフォームが設定されてからでないと例外を発生させてしまう
         SetEnable(true);
         SetActivatable(true);
+        SetAutoChangeEnable(true);
     }
 
     public void Start() {
@@ -2698,7 +3374,7 @@ public class SceneObject implements Comparable<SceneObject> {
 
     public void Draw() {
         GetTransform().GetTransformProcessor().TransformProcessing();
-        
+
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -2707,7 +3383,7 @@ public class SceneObject implements Comparable<SceneObject> {
             }
         }
     }
-    
+
     public void Destroy() {
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
@@ -3128,6 +3804,19 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     }
 
     /**
+     優先度を自動的に変更するかどうかを許可するフラグ。
+     trueの場合、自身の親の優先度が変更された時に自動的に親の優先度より1高い優先度になる。
+     falseの場合、親の優先度によらず自身の優先度を保持し、自身の子にも伝播しない。
+     */
+    private boolean _isAutoChangePriority;
+    public boolean IsAutoChangePriority() {
+        return _isAutoChangePriority;
+    }
+    public void SetAutoChangePriority(boolean value) {
+        _isAutoChangePriority = value;
+    }
+
+    /**
      優先度。
      階層構造とは概念が異なる。
      主に描画や当たり判定の優先度として用いられる。
@@ -3139,8 +3828,19 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
+            _SetPriorityRecursive(value + 1);
+            
             if (GetScene() == null) return;
             GetScene().SetNeedSorting(true);
+        }
+    }
+    private void _SetPriorityRecursive(int priority) {
+        SceneObjectTransform trans;
+        for (int i=0;i<_children.size();i++) {
+            trans = _children.get(i);
+            if (!trans.IsAutoChangePriority()) continue;
+            trans._priority = priority;
+            trans._SetPriorityRecursive(priority + 1);
         }
     }
 
@@ -3202,6 +3902,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _offsetMin = new PVector();
         _offsetMax = new PVector();
 
+        _isAutoChangePriority = true;
         _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
@@ -3833,8 +4534,17 @@ public class SceneObjectButton extends SceneObjectBehavior {
         return ClassID.CID_BUTTON;
     }
 
-    private boolean _isActive;
+    private boolean _isOverlappedMouse;
+    public boolean IsOverlappedMouse() {
+        return _isOverlappedMouse;    
+    }
+    
     private String _eventLabel;
+    protected String GetEventLabel() {
+        return _eventLabel;
+    }
+    
+    private SceneObjectImage _img;
 
     private ActionEvent _decideHandler;
     public ActionEvent GetDecideHandler() {
@@ -3871,27 +4581,32 @@ public class SceneObjectButton extends SceneObjectBehavior {
         _disabledActiveHandler = new ActionEvent();
     }
 
-    public void OnEnabledActive() {
-        super.OnEnabledActive();
-        _isActive = true;
-        GetEnabledActiveHandler().InvokeAllEvents();
-    }
-
     public void OnDisabledActive() {
         super.OnDisabledActive();
-        _isActive = false;
+        _isOverlappedMouse = false;
+        if (_img != null) {
+            DrawColor d = _img.GetColorInfo();
+            _img.GetColorInfo().SetColor(d.GetRedOrHue()*1.25, d.GetGreenOrSaturation()*1.25, d.GetBlueOrBrightness()*1.25);
+        }
         GetDisabledActiveHandler().InvokeAllEvents();
     }
 
     public void Start() {
         super.Start();
+        _img = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
         inputManager.GetMouseReleasedHandler().GetEvents().Set(_eventLabel, new IEvent() {
             public void Event() {
-                if (!_isActive) return;
+                if (!_isOverlappedMouse) return;
                 GetDecideHandler().InvokeAllEvents();
             }
         }
         );
+    }
+    
+    public void Update() {
+        super.Update();
+        if (_img != null) return;
+        _img = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
     }
 
     protected void _OnDestroy() {
@@ -4603,7 +5318,7 @@ public final class TitleButtonBack extends SceneObjectBehavior {
         }
     }
 }
-/** //<>// //<>// //<>//
+/** //<>//
  アフィン変換一回分の情報に責任を持つ。
  サイズは持たない。
  */

@@ -168,6 +168,19 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     }
 
     /**
+     優先度を自動的に変更するかどうかを許可するフラグ。
+     trueの場合、自身の親の優先度が変更された時に自動的に親の優先度より1高い優先度になる。
+     falseの場合、親の優先度によらず自身の優先度を保持し、自身の子にも伝播しない。
+     */
+    private boolean _isAutoChangePriority;
+    public boolean IsAutoChangePriority() {
+        return _isAutoChangePriority;
+    }
+    public void SetAutoChangePriority(boolean value) {
+        _isAutoChangePriority = value;
+    }
+
+    /**
      優先度。
      階層構造とは概念が異なる。
      主に描画や当たり判定の優先度として用いられる。
@@ -179,8 +192,19 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public void SetPriority(int value) {
         if (value >= 0 && _priority != value) {
             _priority = value;
+            _SetPriorityRecursive(value + 1);
+            
             if (GetScene() == null) return;
             GetScene().SetNeedSorting(true);
+        }
+    }
+    private void _SetPriorityRecursive(int priority) {
+        SceneObjectTransform trans;
+        for (int i=0;i<_children.size();i++) {
+            trans = _children.get(i);
+            if (!trans.IsAutoChangePriority()) continue;
+            trans._priority = priority;
+            trans._SetPriorityRecursive(priority + 1);
         }
     }
 
@@ -242,6 +266,7 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
         _offsetMin = new PVector();
         _offsetMax = new PVector();
 
+        _isAutoChangePriority = true;
         _priority = 1;
         _children = new ArrayList<SceneObjectTransform>();
         _matrix = new PMatrix2D();
@@ -873,8 +898,17 @@ public class SceneObjectButton extends SceneObjectBehavior {
         return ClassID.CID_BUTTON;
     }
 
-    private boolean _isActive;
+    private boolean _isOverlappedMouse;
+    public boolean IsOverlappedMouse() {
+        return _isOverlappedMouse;    
+    }
+    
     private String _eventLabel;
+    protected String GetEventLabel() {
+        return _eventLabel;
+    }
+    
+    private SceneObjectImage _img;
 
     private ActionEvent _decideHandler;
     public ActionEvent GetDecideHandler() {
@@ -911,27 +945,32 @@ public class SceneObjectButton extends SceneObjectBehavior {
         _disabledActiveHandler = new ActionEvent();
     }
 
-    public void OnEnabledActive() {
-        super.OnEnabledActive();
-        _isActive = true;
-        GetEnabledActiveHandler().InvokeAllEvents();
-    }
-
     public void OnDisabledActive() {
         super.OnDisabledActive();
-        _isActive = false;
+        _isOverlappedMouse = false;
+        if (_img != null) {
+            DrawColor d = _img.GetColorInfo();
+            _img.GetColorInfo().SetColor(d.GetRedOrHue()*1.25, d.GetGreenOrSaturation()*1.25, d.GetBlueOrBrightness()*1.25);
+        }
         GetDisabledActiveHandler().InvokeAllEvents();
     }
 
     public void Start() {
         super.Start();
+        _img = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
         inputManager.GetMouseReleasedHandler().GetEvents().Set(_eventLabel, new IEvent() {
             public void Event() {
-                if (!_isActive) return;
+                if (!_isOverlappedMouse) return;
                 GetDecideHandler().InvokeAllEvents();
             }
         }
         );
+    }
+    
+    public void Update() {
+        super.Update();
+        if (_img != null) return;
+        _img = (SceneObjectImage)GetObject().GetBehaviorOnID(ClassID.CID_IMAGE);
     }
 
     protected void _OnDestroy() {
