@@ -172,29 +172,26 @@ public class UnitClass {
     public String GetName() {
         return _name;
     }
-    public void SetName(String value) {
-        _name = value;
+
+    private String _imageFolderPath;
+    public String GetImageFolderPath() {
+        return _imageFolderPath;
     }
 
-    private String _imagePath;
-    public String GetImagePath() {
-        return _imagePath;
-    }
-    public void SetImagePath(String value) {
-        _imagePath = value;
+    private String _motionFolderPath;
+    public String GetMotionFolderPath() {
+        return _motionFolderPath;
     }
 
-    private String _motionPath;
-    public String GetMotionPath() {
-        return _motionPath;
-    }
-    public void SetMotionPath(String value) {
-        _motionPath = value;
+    private ClassType _classType;
+    public ClassType GetClassType() {
+        return _classType;
     }
 
-    private int _wearableWeapon;
-
-    private int _classType;
+    private ArrayList<WeaponType> _wearableWeaponTypes;
+    public ArrayList<WeaponType> GetWearableWeaponTypes() {
+        return _wearableWeaponTypes;
+    }
 
     private int _learnabeSkills;
 
@@ -202,16 +199,10 @@ public class UnitClass {
     public UnitParameter GetParameterBonus() {
         return _paramBonus;
     }
-    public void SetParameterBonus(UnitParameter value) {
-        _paramBonus = value;
-    }
 
     private UnitParameter _growthBonus;
     public UnitParameter GetGrowthBonus() {
         return _growthBonus;
-    }
-    public void SetGrowthBonus(UnitParameter value) {
-        _growthBonus = value;
     }
 }
 
@@ -223,40 +214,25 @@ public class ItemBase {
     public String GetName() {
         return _name;
     }
-    public void SetName(String value) {
-        _name = value;
-    }
 
     private String _imagePath;
     public String GetImagePath() {
         return _imagePath;
-    }
-    public void SetImagePath(String value) {
-        _imagePath = value;
     }
 
     private String _explain;
     public String GetExplain() {
         return _explain;
     }
-    public void SetExplain(String value) {
-        _explain = value;
-    }
 
     private int _price;
     public int GetPrice() {
         return _price;
     }
-    public void SetPrice(int value) {
-        _price = value;
-    }
 
     private int _weigth;
     public int GetWeigth() {
         return _weigth;
-    }
-    public void SetWeigth(int value) {
-        _weigth = value;
     }
 
     private int _endurance;
@@ -274,9 +250,6 @@ public class ItemBase {
     public boolean IsImportant() {
         return _isImportant;
     }
-    public void SetImportant(boolean value) {
-        _isImportant = value;
-    }
 
     private boolean _isExchangeable;
     public boolean IsExchangeable() {
@@ -290,15 +263,35 @@ public class ItemBase {
     public UnitParameter GetParameterBonus() {
         return _paramBonus;
     }
-    public void SetParameterBonus(UnitParameter value) {
-        _paramBonus = value;
-    }
 
     private UnitParameter _growthBonus;
     public UnitParameter GetGrowthBonus() {
         return _growthBonus;
     }
-    public void SetGrowthBonus(UnitParameter value) {
-        _growthBonus = value;
+}
+
+public class Skill {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+
+    // 戦闘用スキルかどうか
+    private boolean _isBattleSkill;
+    public boolean IsBattleSkill() {
+        return _isBattleSkill;
+    }
+
+    
+
+    // 発動率
+    private float _activateRate;
+    public float GetActivateRate() {
+        return _activateRate;
     }
 }

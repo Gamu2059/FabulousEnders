@@ -1,24 +1,5 @@
 {
-    "Max Money" :999999,
-    "Max Exp" :999999,
-    "Max Have Skills" :6,
-    "Max Have Items" :6,
-    "Max Stock Items" :500,
-    "Max Appear Enemies" :50,
-    "Min Gain Exp" :1,
-    "Leader Gain Exp" :50,
-    "Sub Leader Gain Exp" :30,
-    "Critical Hit Rate" :3.0,
-    "Special Hit Rate" :2.0,
-    "Max Level" :20,
-    "Max Hp" :80,
-    "Max Atk" :35,
-    "Max Mat" :35,
-    "Max Tec" :35,
-    "Max Spd" :35,
-    "Max Hap" :35,
-    "Max Def" :35,
-    "Max Mdf" :35,
-    "Max Mov" :20,
-    "Max Pro" :30
+    "Grid Speed" : 1,
+    "Message Speed" : 1,
+    "Is Show Battle" : true
 }
