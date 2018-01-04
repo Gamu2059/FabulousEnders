@@ -1,7 +1,7 @@
 /**
  接頭辞について。
- PE ... ProcessingEngineの略称。Pjsで動作する保証がないクラス。要検証。
- PEO... ProcessingEngineOnlyの略称。Pjsで動作しないことが分かりきっているクラス。
+ FE ... FabulousEnders上で使用するクラスファイル群。
+ P  ... システム上で使用するクラスファイル群。
  */
 
 import java.util.*;
@@ -19,16 +19,15 @@ FontManager fontManager;
 TransformManager transformManager;
 
 void setup() {
-    size(890, 500);
+    size(880, 480);
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_TITLE);
+        sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
 
         sceneManager.Start();
-        
-        ConfigStatic configStatic = new ConfigStatic();
-        println(configStatic.GetMaxAttack());
+        FESceneBattleMap map = (FESceneBattleMap)sceneManager.GetScene(SceneID.SID_FE_BATTLE_MAP);
+        map.LoadMap("data/map/test.json");
     } 
     catch(Exception e) {
         println(e);
@@ -47,6 +46,8 @@ void SetScenes() {
     sceneManager.AddScene(new SceneTitle());
     sceneManager.AddScene(new SceneOneIllust());
     sceneManager.AddScene(new SceneGameOver());
+
+    sceneManager.AddScene(new FESceneBattleMap());
 }
 
 void draw() {
@@ -360,7 +361,168 @@ public final class DrawColor {
             GetAlpha() == d.GetAlpha();
     }
 }
-public class ClassType {
+public class FEConst {
+    public static final int SYSTEM_MAP_GRID_PX = 40;
+    
+    //////////////////////////////////////////////////////
+    // Static Config
+    //////////////////////////////////////////////////////
+    public static final int CONFIG_MAX_GOLD = 999999;
+    public static final int CONFIG_MAX_EXP = 999999;
+    public static final int CONFIG_MAX_HAVE_SKILLS = 6;
+    public static final int CONFIG_MAX_HAVE_ITEMS = 5;
+    public static final int CONFIG_MAX_STOCK_ITEMS = 200;
+    public static final int CONFIG_MAX_APPEAR_ENEMIES = 50;
+    public static final int CONFIG_MIN_GAIN_EXP = 1;
+    public static final int CONFIG_LEADER_GAIN_EXP = 50;
+    public static final int CONFIG_SUB_LEADER_GAIN_EXP = 30;
+    public static final float CONFIG_CRITICAL_HIT_RATE = 3f;
+    public static final float CONFIG_SPECIAL_HIT_RATE = 2f;
+    public static final int CONFIG_MAX_LEVEL = 30;
+    public static final int CONFIG_MAX_HP = 99;
+    public static final int CONFIG_MAX_ATK = 40;
+    public static final int CONFIG_MAX_MAT = 40;
+    public static final int CONFIG_MAX_TEC = 40;
+    public static final int CONFIG_MAX_SPD = 40;
+    public static final int CONFIG_MAX_LUC = 40;
+    public static final int CONFIG_MAX_DEF = 40;
+    public static final int CONFIG_MAX_MDF = 40;
+    public static final int CONFIG_MAX_MOV = 20;
+    public static final int CONFIG_MAX_PRO = 30;
+    
+    //////////////////////////////////////////////////////
+    // Moving Type
+    //////////////////////////////////////////////////////
+    public static final int MOVE_TYPE_NORMAL = -100;
+    public static final int MOVE_TYPE_ARMOR = -101;
+    public static final int MOVE_TYPE_KNIGHT = -102;
+    public static final int MOVE_TYPE_FLYER = -103;
+    
+    //////////////////////////////////////////////////////
+    // Difficulty
+    //////////////////////////////////////////////////////
+    public static final int DIFFICULTY_EASY = -1000;
+    public static final int DIFFICULTY_NORMAL = -1001;
+    public static final int DIFFICULTY_HARD = -1002;
+    
+    
+    //////////////////////////////////////////////////////
+    // Skill
+    //////////////////////////////////////////////////////
+    // スキル発動率の参照
+    public static final int SKILL_REF_HP = -2000;
+    public static final int SKILL_REF_ATK = -2001;
+    public static final int SKILL_REF_MAT = -2002;
+    public static final int SKILL_REF_TEC = -2003;
+    public static final int SKILL_REF_SPD = -2004;
+    public static final int SKILL_REF_LUC = -2005;
+    public static final int SKILL_REF_DEF = -2006;
+    public static final int SKILL_REF_MDF = -2007;
+    public static final int SKILL_REF_MOV = -2008;
+    public static final int SKILL_REF_PRO = -2009;
+    public static final int SKILL_REF_PROBABILITY = -2010;
+    
+    // スキルの特徴
+    // 先制攻撃
+    public static final int SKILL_FET_PREEMPTIVE = -2100;
+    // 連続攻撃
+    public static final int SKILL_FET_CONTINUOUS = -2101;
+    // 再攻撃
+    public static final int SKILL_FET_REATTACK = -2102;
+    // ダメージ吸収(攻撃側スキル)
+    public static final int SKILL_FET_ABSORPTION = -2103;
+    // 物理ダメージ半減
+    public static final int SKILL_FET_HALVING_PHYSICS = -2104;
+    // 魔法ダメージ半減
+    public static final int SKILL_FET_HALVING_MAGIC = -2105;
+    // 物理ダメージ無効化
+    public static final int SKILL_FET_INVALIDATE_PHYSICS = -2106;
+    // 魔法ダメージ無効化
+    public static final int SKILL_FET_INVALIDATE_MAGIC = -2107;
+    // 反撃
+    public static final int SKILL_FET_COUNTER_ATTACK = -2108;
+    // 必中
+    public static final int SKILL_FET_HITTING = -2109;
+    // 反撃会心必中
+    public static final int SKILL_FET_COUNTER_CRITICAL = -2110;
+    // 経験値倍増
+    public static final int SKILL_FET_DOUBLE_EXP = -2111;
+    // 行動回復(相手に対して)
+    public static final int SKILL_FET_RECOVER_MOBILITY = -2112;
+    // 再行動
+    public static final int SKILL_FET_REACT = -2113;
+    // 再移動
+    public static final int SKILL_FET_REMOVE = -2114;
+    // 指揮C
+    public static final int SKILL_FET_COMMAND_C = -2115;
+    // 指揮B
+    public static final int SKILL_FET_COMMAND_B = -2116;
+    // 指揮A
+    public static final int SKILL_FET_COMMAND_A = -2117;
+    // 指揮S
+    public static final int SKILL_FET_COMMAND_S = -2118;
+    // 防御半減攻撃
+    public static final int SKILL_FET_DEFENSE_HALF = -2119;
+    // 防御無視攻撃
+    public static final int SKILL_FET_DEFENSE_INVALIDATE = -2120;
+    
+    //////////////////////////////////////////////////////
+    // State
+    //////////////////////////////////////////////////////
+    // 封印オプション
+    public static final int STATE_SEALED_PHYSICS = -3000;
+    public static final int STATE_SEALED_MAGIC = -3001;
+    public static final int STATE_SEALED_CANE = -3002;
+    public static final int STATE_SEALED_ITEM = -3003;
+    
+    // 行動制限オプション
+    public static final int STATE_ACT_NONE = -3100;
+    public static final int STATE_ACT_INACTIVITY = -3101;
+    public static final int STATE_ACT_RUNWILDLY = -3102;
+    public static final int STATE_ACT_AI = -3103;
+    
+    // 自動解除オプション
+    public static final int STATE_RELEASE_NONE = -3200;
+    public static final int STATE_RELEASE_BATTLE = -3201;
+    public static final int STATE_RELEASE_ATTACK = -3202;
+    public static final int STATE_RELEASE_BE_ATTACKED = -3203;
+    
+    //////////////////////////////////////////////////////
+    // Item
+    //////////////////////////////////////////////////////
+    // 種類
+    public static final int ITEM_KIND_CANT_USE = -4000;
+    public static final int ITEM_KIND_RECOVER_HP = -4001;
+    public static final int ITEM_KIND_DOPING = -4002;
+    public static final int ITEM_KIND_CLASS_CHANGE = -4002;
+    public static final int ITEM_KIND_LEARN_SKILL = -4003;
+    public static final int ITEM_KIND_UNLOCK = -4004;
+    public static final int ITEM_KIND_GAIN_STATE = -4005;
+    
+    // 使用範囲
+    public static final int ITEM_RANGE_OWN = -4100;
+    public static final int ITEM_RANGE_REGION = -4101;
+    public static final int ITEM_RANGE_ALL = -4102;
+    
+    // 使用フィルタ
+    public static final int ITEM_FILTER_OWN = -4200;
+    public static final int ITEM_FILTER_ENEMY = -4201;
+    public static final int ITEM_FILTER_ALLIED = -4202;
+    
+    // カテゴリ
+    public static final int ITEM_CATEGORY_ITEM = -4300;
+    public static final int ITEM_CATEGORY_CANE = -4301;
+    
+    //////////////////////////////////////////////////////
+    // Map Object
+    //////////////////////////////////////////////////////
+    // 向き
+    public static final int MAP_OBJ_DIR_UP = -5000;
+    public static final int MAP_OBJ_DIR_DOWN = -5001;
+    public static final int MAP_OBJ_DIR_RIGHT = -5002;
+    public static final int MAP_OBJ_DIR_LEFT = -5003;
+}
+public class FEClassType {
     private String _name;
     public String GetName() {
         return _name;
@@ -381,7 +543,7 @@ public class ClassType {
         return _isFlyer;
     }
 
-    public ClassType(String name, boolean isArmor, boolean isRider, boolean isFlyer) {
+    public FEClassType(String name, boolean isArmor, boolean isRider, boolean isFlyer) {
         _name = name;
         _isArmor = isArmor;
         _isRider = isRider;
@@ -392,7 +554,7 @@ public class ClassType {
 /**
  剣、斧、槍、弓、魔法、杖などの種類。
  */
-public class WeaponType {
+public class FEWeaponType {
     private String _name;
     public String GetName() {
         return _name;
@@ -409,7 +571,7 @@ public class WeaponType {
         return _isWearOnHit;
     }
 
-    public WeaponType(String name, String imagePath, boolean isWearOnHit) {
+    public FEWeaponType(String name, String imagePath, boolean isWearOnHit) {
         _name = name;
         _imagePath = imagePath;
         _isWearOnHit = isWearOnHit;
@@ -419,7 +581,7 @@ public class WeaponType {
 /**
  ゲーム内で設定を変更することができるコンフィグパラメータを保持するクラス。
  */
-public class Config {
+public class FEConfig {
     // グリッドカーソルを移動させる速さ
     private int _gridSpeed;
     public int GetGridSpeed() {
@@ -452,135 +614,18 @@ public class Config {
     public void SetShowBattle(boolean value) {
         _isShowBattle = value;
     }
-}
 
-/**
- ゲーム内で設定を変更することができないコンフィグパラメータを保持するクラス。
- */
-public class ConfigStatic {
-    private int _maxMoney;
-    public int GetMaxMoney() {
-        return _maxMoney;
-    }
-
-    private int _maxExp;
-    public int GetMaxExp() {
-        return _maxExp;
-    }
-
-    private int _maxHaveSkills;
-    public int GetMaxHaveSkills() {
-        return _maxHaveSkills;
-    }
-
-    private int _maxHaveItems;
-    public int GetMaxHaveItems() {
-        return _maxHaveItems;
-    }
-
-    private int _maxStockItems;
-    public int GetMaxStockItems() {
-        return _maxStockItems;
-    }
-
-    private int _maxAppearEnemies;
-    public int GetMaxAppearEnemies() {
-        return _maxAppearEnemies;
-    }
-
-    private int _minGainExp;
-    public int GetMinGainExp() {
-        return _minGainExp;
-    }
-
-    private int _leaderGainExp;
-    public int GetLeaderGainExp() {
-        return _leaderGainExp;
-    }
-
-    private int _subLeaderGainExp;
-    public int GetSubLeaderGainExp() {
-        return _subLeaderGainExp;
-    }
-
-    private float _criticalHitRate;
-    public float GetCriticalHitRate() {
-        return _criticalHitRate;
-    }
-
-    private float _specialHitRate;
-    public float GetSpecialHitRate() {
-        return _specialHitRate;
-    }
-
-    private int _maxLevel;
-    public int GetMaxLevel() {
-        return _maxLevel;
-    }
-
-    private UnitParameter _maxParameter;
-    public int GetMaxHp() {
-        return _maxParameter.GetHp();
-    }
-    public int GetMaxAttack() {
-        return _maxParameter.GetAttack();
-    }
-    public int GetMaxMAttack() {
-        return _maxParameter.GetMAttack();
-    }
-    public int GetMaxTech() {
-        return _maxParameter.GetTech();
-    }
-    public int GetMaxSpeed() {
-        return _maxParameter.GetSpeed();
-    }
-    public int GetMaxHappiness() {
-        return _maxParameter.GetHappiness();
-    }
-    public int GetMaxDefense() {
-        return _maxParameter.GetDefense();
-    }
-    public int GetMaxMDefense() {
-        return _maxParameter.GetMDefense();
-    }
-    public int GetMaxMobility() {
-        return _maxParameter.GetMobility();
-    }
-    public int GetMaxProficiency() {
-        return _maxParameter.GetProficiency();
-    }
-
-    public ConfigStatic() {
+    public FEConfig() {
         JsonObject json = new JsonObject();
         json.Load("data/config/config.json");
 
-        _maxParameter = new UnitParameter();
-
-        _maxMoney = json.GetInt("Max Money", -1);
-        _maxExp = json.GetInt("Max Exp", -1);
-        _maxHaveSkills = json.GetInt("Max Have Skills", -1);
-        _maxHaveItems = json.GetInt("Max Have Items", -1);
-        _maxStockItems = json.GetInt("Max Stock Items", -1);
-        _maxAppearEnemies = json.GetInt("Max Appear Enemies", -1);
-        _minGainExp = json.GetInt("Min Gain Exp", -1);
-        _leaderGainExp = json.GetInt("Leader Gain Exp", -1);
-        _subLeaderGainExp = json.GetInt("Sub Leader Gain Exp", -1);
-        _criticalHitRate = json.GetInt("Critical Hit Rate", -1);
-        _specialHitRate = json.GetInt("Special Hit Rate", -1);
-        _maxLevel = json.GetInt("Max Level", -1);
-        _maxParameter.SetHp(json.GetInt("Max Hp", -1));
-        _maxParameter.SetAttack(json.GetInt("Max Atk", -1));
-        _maxParameter.SetMAttack(json.GetInt("Max Mat", -1));
-        _maxParameter.SetTech(json.GetInt("Max Tec", -1));
-        _maxParameter.SetSpeed(json.GetInt("Max Spd", -1));
-        _maxParameter.SetHappiness(json.GetInt("Max Hap", -1));
-        _maxParameter.SetDefense(json.GetInt("Max Def", -1));
-        _maxParameter.SetMDefense(json.GetInt("Max Mdf", -1));
-        _maxParameter.SetMobility(json.GetInt("Max Mov", -1));
-        _maxParameter.SetProficiency(json.GetInt("Max Pro", -1));
+        _gridSpeed = json.GetInt("Grid Speed", -1);
+        _messageSpeed = json.GetInt("Message Speed", -1);
+        _isShowBattle = json.GetBoolean("Is Show Battle", true);
     }
 }
-public class UnitParameter {
+
+public class FEUnitParameter {
     private int _hp;
     public int GetHp() {
         return _hp;
@@ -636,15 +681,15 @@ public class UnitParameter {
         _spd += value;
     }
 
-    private int _hap;
-    public int GetHappiness() {
-        return _hap;
+    private int _luc;
+    public int GetLucky() {
+        return _luc;
     }
-    public void SetHappiness(int value) {
-        _hap = value;
+    public void SetLucky(int value) {
+        _luc = value;
     }
-    public void AddHappiness(int value) {
-        _hap += value;
+    public void AddLucky(int value) {
+        _luc += value;
     }
 
     private int _def;
@@ -693,9 +738,9 @@ public class UnitParameter {
 }
 
 /**
- ゲーム内の操作可能なユニット、敵ユニット、援軍ユニットすべての基本となるクラス。
+ ゲーム内の操作可能なユニットすべての基本となるクラス。
  */
-public class Unit {
+public class FEUnit {
     private String _name;
     public String GetName() {
         return _name;
@@ -720,7 +765,10 @@ public class Unit {
         _importance = value;
     }
 
-    private int _class;
+    private FEUnitClass _unitClass;
+    public FEUnitClass GetUnitClass() {
+        return _unitClass;
+    }
 
     private int _level;
     public int GetLevel() {
@@ -730,123 +778,110 @@ public class Unit {
         _level = value;
     }
 
-    private UnitParameter _parameter;
-    public UnitParameter GetParameter() {
+    // 戦闘中に使用するパラメータの現在値
+    private FEUnitParameter _parameter;
+    public FEUnitParameter GetParameter() {
         return _parameter;
     }
 
-    private UnitParameter _growthRate;
-    public UnitParameter GetGrowthRate() {
+    // 戦闘中には使用しない各パラメータの基準値
+    private FEUnitParameter _baseParameter;
+    public FEUnitParameter GetBaseParameter() {
+        return _baseParameter;
+    }
+
+    private FEUnitParameter _growthRate;
+    public FEUnitParameter GetGrowthRate() {
         return _growthRate;
     }
 
-    private ArrayList<ItemBase> _itemList;
-    public ArrayList<ItemBase> GetItemList() {
+    private ArrayList<FEItemBase> _itemList;
+    public ArrayList<FEItemBase> GetItemList() {
         return _itemList;
     }
+}
+
+public class FEPlayerUnit extends FEUnit {
+}
+
+public class FEEnemyUnit extends FEUnit {
 }
 
 /**
  ユニットが属するクラス。
  */
-public class UnitClass {
+public class FEUnitClass {
     private String _name;
     public String GetName() {
         return _name;
     }
-    public void SetName(String value) {
-        _name = value;
+
+    private String _imageFolderPath;
+    public String GetImageFolderPath() {
+        return _imageFolderPath;
+    }
+    public void SetImageFolderPath(String value) {
+        _imageFolderPath = value;
     }
 
-    private String _explain;
-    public String GetExplain() {
-        return _explain;
+    private String _motionFolderPath;
+    public String GetMotionFolderPath() {
+        return _motionFolderPath;
     }
-    public void SetExplain(String value) {
-        _explain = value;
-    }
-
-    private String _imagePath;
-    public String GetImagePath() {
-        return _imagePath;
-    }
-    public void SetImagePath(String value) {
-        _imagePath = value;
+    public void SetMotionFolderPath(String value) {
+        _motionFolderPath = value;
     }
 
-    private String _motionPath;
-    public String GetMotionPath() {
-        return _motionPath;
-    }
-    public void SetMotionPath(String value) {
-        _motionPath = value;
+    private FEClassType _classType;
+    public FEClassType GetClassType() {
+        return _classType;
     }
 
-    private int _wearableWeapon;
+    private ArrayList<FEWeaponType> _wearableWeaponTypes;
+    public ArrayList<FEWeaponType> GetWearableWeaponTypes() {
+        return _wearableWeaponTypes;
+    }
 
-    private int _classType;
+    private ArrayList<FEUnitSkill> _learnabeSkills;
 
-    private int _learnabeSkills;
-
-    private UnitParameter _paramBonus;
-    public UnitParameter GetParameterBonus() {
+    private FEUnitParameter _paramBonus;
+    public FEUnitParameter GetParameterBonus() {
         return _paramBonus;
     }
-    public void SetParameterBonus(UnitParameter value) {
-        _paramBonus = value;
-    }
 
-    private UnitParameter _growthBonus;
-    public UnitParameter GetGrowthBonus() {
+    private FEUnitParameter _growthBonus;
+    public FEUnitParameter GetGrowthBonus() {
         return _growthBonus;
-    }
-    public void SetGrowthBonus(UnitParameter value) {
-        _growthBonus = value;
     }
 }
 
 /**
  ユニットが保持することができるアイテムの基本クラス。
  */
-public class ItemBase {
+public class FEItemBase {
     private String _name;
     public String GetName() {
         return _name;
-    }
-    public void SetName(String value) {
-        _name = value;
     }
 
     private String _imagePath;
     public String GetImagePath() {
         return _imagePath;
     }
-    public void SetImagePath(String value) {
-        _imagePath = value;
-    }
 
     private String _explain;
     public String GetExplain() {
         return _explain;
-    }
-    public void SetExplain(String value) {
-        _explain = value;
     }
 
     private int _price;
     public int GetPrice() {
         return _price;
     }
-    public void SetPrice(int value) {
-        _price = value;
-    }
 
     private int _weigth;
     public int GetWeigth() {
         return _weigth;
-    }
-    public void SetWeigth(int value) {
-        _weigth = value;
     }
 
     private int _endurance;
@@ -864,9 +899,6 @@ public class ItemBase {
     public boolean IsImportant() {
         return _isImportant;
     }
-    public void SetImportant(boolean value) {
-        _isImportant = value;
-    }
 
     private boolean _isExchangeable;
     public boolean IsExchangeable() {
@@ -876,20 +908,259 @@ public class ItemBase {
         _isExchangeable = value;
     }
 
-    private UnitParameter _paramBonus;
-    public UnitParameter GetParameterBonus() {
+    private FEUnitParameter _paramBonus;
+    public FEUnitParameter GetParameterBonus() {
         return _paramBonus;
     }
-    public void SetParameterBonus(UnitParameter value) {
-        _paramBonus = value;
-    }
 
-    private UnitParameter _growthBonus;
-    public UnitParameter GetGrowthBonus() {
+    private FEUnitParameter _growthBonus;
+    public FEUnitParameter GetGrowthBonus() {
         return _growthBonus;
     }
-    public void SetGrowthBonus(UnitParameter value) {
-        _growthBonus = value;
+}
+
+public class FEWeapon extends FEItemBase {
+    private FEWeaponType _weaponType;
+    public FEWeaponType GetWeaponType() {
+        return _weaponType;
+    }
+
+    private int _power;
+    public int GetPower() {
+        return _power;
+    }
+
+    private int _minRange;
+    public int GetMinRange() {
+        return _minRange;
+    }
+
+    private int _maxRange;
+    public int GetMaxRange() {
+        return _maxRange;
+    }
+
+    private int _accuracy;
+    public int GetAccuracy() {
+        return _accuracy;
+    }
+
+    private int _critical;
+    public int GetCritical() {
+        return _critical;
+    }
+
+    private int _attackNum;
+    public int GetAttackNum() {
+        return _attackNum;
+    }
+
+    private int _wearableProficiency;
+    public int GetWearableProficiency() {
+        return _wearableProficiency;
+    }
+
+    private FEClassType[] _specialAttack; 
+    public FEClassType[] GetSpecialAttack() {
+        return _specialAttack;
+    }
+
+    private boolean _isOneway;
+    public boolean IsOneway() {
+        return _isOneway;
+    }
+
+    private boolean _isMagical;
+    public boolean IsMagical() {
+        return _isMagical;
+    }
+
+    private String _motionPattern;
+    public String GetMotionPattern() {
+        return _motionPattern;
+    }
+}
+
+public class FEItem extends FEItemBase {
+    private int _category;
+    public int GetCategory() {
+        return _category;
+    }
+
+    private int _kind;
+    public int GetKind() {
+        return _kind;
+    }
+
+    private int _gainExp;
+    public int GetGainExp() {
+        return _gainExp;
+    }
+
+    private int _range;
+    public int GetRange() {
+        return _range;
+    }
+
+    private int _filter;
+    public int GetFilter() {
+        return _filter;
+    }
+
+    private String _imageFolderPath;
+    public String GetImageFolderPath() {
+        return _imageFolderPath;
+    }
+
+    private int _useEffect;
+    public int GetUseEffect() {
+        return _useEffect;
+    }
+}
+
+public class FEUnitSkill {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+
+    private int _activateReference;
+    public int GetActivateReference() {
+        return _activateReference;
+    }
+
+    // 発動率
+    private float _activateRate;
+    public float GetActivateRate() {
+        return _activateRate;
+    }
+
+    private int _skillFeature;
+    public int GetSkillFeature() {
+        return _skillFeature;
+    }
+}
+
+public class FeState {
+
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+
+    private int _sustainTurn;
+    public int GetSustainTurn() {
+        return _sustainTurn;
+    }
+}
+
+public class FETerrain {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private int _avoid;
+    public int GetAvoid() {
+        return _avoid;
+    }
+
+    private int _defense;
+    public int GetDefense() {
+        return _defense;
+    }
+
+    private int _mDefense;
+    public int GetMDefense() {
+        return _mDefense;
+    }
+
+    private int _recover;
+    public int GetRecover() {
+        return _recover;
+    }
+
+    private String _mapImagePath;
+    public String GetMapImagePath() {
+        return _mapImagePath;
+    }
+
+    private String _backImagePath;
+    public String GetBackImagePath() {
+        return _backImagePath;
+    }
+
+    private int[] _moveCosts;
+    public int[] GetMoveConts() {
+        return _moveCosts;
+    }
+
+    private boolean _isMovable;
+    public boolean IsMovable() {
+        return _isMovable;
+    }
+}
+public class FEManager {
+    /**
+     環境コンフィグ
+     */
+    private FEConfig _config;
+    public FEConfig GetConfig() {
+        return _config;
+    }
+
+    /**
+     所持金
+     */
+    private int _money;
+
+    /**
+     全ての持ち物のリスト
+     */
+    private ArrayList<FEItemBase> _itemList;
+
+    /**
+     全ての操作可能ユニットのリスト
+     */
+    private ArrayList<FEPlayerUnit> _playerUnits;
+
+    /**
+     出撃可能なユニットのリスト
+     */
+    private ArrayList<FEPlayerUnit> _sortableUnits;
+
+    /**
+     敵ユニットリスト
+     */
+    private ArrayList<FEEnemyUnit> _enemyUnits;
+    
+    /**
+     地形効果
+     */
+    private ArrayList<ArrayList<String>> _tileEffects;
+
+    public FEManager() {
+        _config = new FEConfig();
     }
 }
 public final static class GeneralCalc {
@@ -1562,12 +1833,16 @@ public final class ClassID {
     public static final int CID_TITLE_DUST_EFFECT = 1001;
     public static final int CID_TITLE_DUST_IMAGE = 1002;
     public static final int CID_TITLE_BUTTON_BACK = 1003;
+    
+    public static final int CID_FE_MAP_OBJECT_IMAGE = 10000;
+    public static final int CID_FE_MAP_OBJECT_DATA = 10001;
 }
 
 public final class SceneID {
     public static final String SID_TITLE = "Title";
     public static final String SID_GAMEOVER = "Gameover";
     public static final String SID_ILLUST = "One Illust";
+    public static final String SID_FE_BATTLE_MAP = "FE Battle Map";
 }
 
 public final class Key {
@@ -2841,6 +3116,333 @@ public class Scene implements Comparable<Scene> {
         return GetScenePriority() - o.GetScenePriority();
     }
 }
+/**
+ 戦闘マップ及びマップイベントを描画するシーン。
+ */
+public class FESceneBattleMap extends Scene {
+    private JsonObject _mapData;
+
+    private SceneObject _backObj;
+    private SceneObjectImage _backImg;
+    private FEMapBackScroller _backScr;
+
+    /**
+     プレイヤーユニットオブジェクト
+     */
+    private ArrayList<SceneObject> _playerUnits;
+
+    /**
+     敵ユニットオブジェクト
+     */
+    private ArrayList<SceneObject> _enemyUnits;
+
+    /**
+     イベントオブジェクト
+     */
+    private ArrayList<FEMapObjectBase> _events;
+
+    public FESceneBattleMap() {
+        super(SceneID.SID_FE_BATTLE_MAP);
+
+        _mapData = new JsonObject();
+
+        _events = new ArrayList<FEMapObjectBase>();
+
+        _backObj = new SceneObject("Back Image", this);
+        _backImg = new SceneObjectImage(_backObj, null);
+        _backScr = new FEMapBackScroller(_backObj, "FE Map Back Scroller Dragged Event");
+        SceneObjectTransform _objT = _backObj.GetTransform();
+        _objT.SetAnchor(0, 0, 0, 0);
+        _objT.SetPivot(0, 0);
+    }
+
+    /**
+     マップデータを読み込み、現在のマップをリセットする。
+     戦闘開始ではない。
+     */
+    public void LoadMap(String dataPath) {
+        _mapData.Load(dataPath);
+
+        // 背景設定
+        _backImg.SetUsingImageName(_mapData.GetString("Back Image", null));
+
+        // サイズ設定
+        JsonObject pos = _mapData.GetJsonObject("Map Size");
+        int x, y;
+        x = pos.GetInt("x", -1);
+        y = pos.GetInt("y", -1);
+        SceneObjectTransform _objT = _backObj.GetTransform();
+        _objT.SetSize(x * FEConst.SYSTEM_MAP_GRID_PX, y * FEConst.SYSTEM_MAP_GRID_PX);
+        _backScr.ReSetScroller();
+
+        // イベントオブジェクト設定
+        _events.clear();
+        JsonArray eventArray = _mapData.GetJsonArray("Event Datas");
+        if (eventArray == null) return;
+        JsonObject event;
+        for (int i=0; i<eventArray.Size(); i++) {
+            event = eventArray.GetJsonObject(i);
+            FEMapObjectBase obj = new FEMapObjectBase(event.GetString("Name", "No Name"), this, event);
+            obj.GetTransform().SetParent(_backObj.GetTransform(), true);
+        }
+    }
+
+    //private void _ResetSettedFlag(boolean[][] flags) {
+    //    for (int i=0; i<flags.length; i++) {
+    //        for (int j=0; j<flags[0].length; j++) {
+    //            flags[i][j] = false;
+    //        }
+    //    }
+    //}
+}
+
+public class FEMapBackScroller extends SceneObjectDragHandler {
+    private SceneObjectTransform _objT;
+    private PVector _objTPos;
+    private boolean _isFixedX, _isFixedY;
+    private float _bgnPosX, _bgnPosY;
+    private int _bgnX, _bgnY, _curX, _curY;
+
+
+    public FEMapBackScroller(SceneObject obj, String eventLabel) {
+        super(eventLabel);
+
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    public void Start() {
+        super.Start();
+
+        _objT = GetObject().GetTransform();
+        _objTPos = _objT.GetTranslation();
+
+        GetDraggedBeginHandler().GetEvents().Add("FE Map Back Scroller", new IEvent() {
+            public void Event() {
+                _bgnX = mouseX;
+                _bgnY = mouseY;
+                _bgnPosX = _objTPos.x;
+                _bgnPosY = _objTPos.y;
+            }
+        }
+        );
+        GetDraggedActionHandler().GetEvents().Add("FE Map Back Scroller", new IEvent() {
+            public void Event() {
+                if (_isFixedX) {
+                    _curX = 0;
+                } else {
+                    int x = (mouseX - _bgnX) / FEConst.SYSTEM_MAP_GRID_PX;
+                    _curX = x * FEConst.SYSTEM_MAP_GRID_PX;
+                    println(x);
+                }
+                if (_isFixedY) {
+                    _curY = 0;
+                } else {
+                    int y = (mouseY - _bgnY) / FEConst.SYSTEM_MAP_GRID_PX;
+                    _curY = y * FEConst.SYSTEM_MAP_GRID_PX;
+                }
+                if (!_isFixedX) {
+                    if (_curX > 0) {
+                        _curX = 0;
+                    } else if ((_curX + _objT.GetSize().x) * _objT.GetScale().x <= width) {
+                        _curX = int(width / _objT.GetScale().x - _objT.GetSize().x);
+                    }
+                }
+                if (!_isFixedY) {
+                    if (_curY > 0) {
+                        _curY = 0;
+                    } else if ((_curY + _objT.GetSize().y) * _objT.GetScale().y <= height) {
+                        _curY = int(height / _objT.GetScale().y - _objT.GetSize().y);
+                    }
+                }
+                _objT.SetTranslation(_curX, _curY);
+            }
+        }
+        );
+    }
+
+    public void ReSetScroller() {
+        if (GetObject() == null) return;
+        _objT = GetObject().GetTransform();
+        _isFixedX = _objT.GetScale().x * _objT.GetSize().x <= width;
+        _isFixedY = _objT.GetScale().y * _objT.GetSize().y <= height;
+    }
+}
+
+/**
+ マップ上に存在するオブジェクトのベースクラス。
+ */
+public class FEMapObjectBase extends SceneObject {
+    private FEMapObjectData _data;
+    public FEMapObjectData GetData() {
+        return _data;
+    }
+
+    public FEMapObjectBase(String name, FESceneBattleMap scene, JsonObject json) {
+        super(name, scene);
+
+        SceneObjectTransform objT = GetTransform();
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetPivot(0, 0);
+        objT.SetSize(FEConst.SYSTEM_MAP_GRID_PX, FEConst.SYSTEM_MAP_GRID_PX);
+        objT.SetTranslation(json.GetInt("x", 0) * FEConst.SYSTEM_MAP_GRID_PX, json.GetInt("y", 0) * FEConst.SYSTEM_MAP_GRID_PX);
+
+        _data = new FEMapObjectData(this);
+        FEMapObjectImage img = new FEMapObjectImage(this);
+
+        img.SetBaseFolderPath(json.GetString("Image Folder Path", null));
+        img.SetAnimation(json.GetBoolean("Is Animation", false));
+        img.SetFixedDirection(json.GetBoolean("Is Fixed Direction", true));
+    }
+}
+
+/**
+ マップオブジェクトの基本情報を保持するコンポーネント。
+ */
+public class FEMapObjectData extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_OBJECT_DATA;
+    }
+
+    /**
+     マップ上の座標
+     */
+    private PVector _position;
+    public PVector GetPosition() {
+        return _position;
+    }
+
+    /**
+     他のオブジェクトがすり抜けられるかどうか
+     */
+    private boolean _isSlipable;
+    public boolean IsSlipable() {
+        return _isSlipable;
+    }
+    public void SetSlipable(boolean value) {
+        _isSlipable = value;
+    }
+
+    /**
+     向き
+     */
+    private int _direction;
+    public int GetDirection() {
+        return _direction;
+    }
+    public void SetDirection(int value) {
+        _direction = value;
+    }
+
+    public FEMapObjectData(FEMapObjectBase obj) {
+        super();
+
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    protected void _OnDestroy() {
+        ;
+    }
+}
+
+/**
+ マップオブジェクトのアニメーションを司るコンポーネント。
+ */
+public class FEMapObjectImage extends SceneObjectImage {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_OBJECT_IMAGE;
+    }
+
+    /**
+     イメージの保存されているフォルダのパス
+     */
+    private String _baseFolderPath;
+    public String GetBaseFolderPath() {
+        return _baseFolderPath;
+    }
+    public void SetBaseFolderPath(String value) {
+        _baseFolderPath = value;
+    }
+
+    /**
+     アニメーションさせるかどうか
+     */
+    private boolean _isAnimation;
+    public boolean IsAnimation() {
+        return _isAnimation;
+    }
+    public void SetAnimation(boolean value) {
+        _isAnimation = value;
+    }
+
+    /**
+     向きを固定するかどうか
+     */
+    private boolean _isFixedDirection;
+    public boolean IsFixedDirection() {
+        return _isFixedDirection;
+    }
+    public void SetFixedDirection(boolean value) {
+        _isFixedDirection = value;
+    }
+
+    // タイマーコンポーネント
+    SceneObjectTimer _timer;
+
+    FEMapObjectBase _obj;
+
+    private String _timerLabel;
+    private int _index;
+
+    public FEMapObjectImage(FEMapObjectBase obj) {
+        super(obj, null);
+
+        _obj = obj;
+
+        _timer = new SceneObjectTimer(obj);
+        _timerLabel = "FE Map Object Image Animation";
+        _timer.GetTimers().Add(_timerLabel, new ITimer() {
+            public void OnInit() {
+                _index = (_index + 1) % 4;
+                int id = _index % 2 == 0 ? _index : 1;
+                if (_baseFolderPath == null) return;
+                String dir;
+                switch(_obj.GetData().GetDirection()) {
+                case FEConst.MAP_OBJ_DIR_UP:
+                    dir = "U";
+                    break;
+                case FEConst.MAP_OBJ_DIR_RIGHT:
+                    dir = "R";
+                    break;
+                case FEConst.MAP_OBJ_DIR_DOWN:
+                    dir = "D";
+                    break;
+                case FEConst.MAP_OBJ_DIR_LEFT:
+                    dir = "L";
+                    break;
+                default:
+                    dir = "N";
+                    break;
+                }
+                SetUsingImageName(_baseFolderPath + "/" + dir + id + ".png");
+            }
+
+            public void OnTimeOut() {
+                if (!_isAnimation) return;
+                _timer.ResetTimer(_timerLabel, 0.5);
+                _timer.Start(_timerLabel);
+            }
+        }
+        );
+    }
+
+    public void Start() {
+        super.Start();
+        _timer.ResetTimer(_timerLabel, 0.5);
+        _timer.Start(_timerLabel);
+    }
+}
 public final class SceneGameOver extends Scene {
     private String gameOverBack, gameOverLabel, clickLabel, adjustLayer;
     private String[] sword;
@@ -3565,8 +4167,18 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         return ClassID.CID_DRAG_HANDLER;
     }
 
-    private boolean _isActive, _isDragging;
+    private boolean _isActive, _isDragging, _preDragging;
     private String _eventLabel;
+
+    private ActionEvent _draggedBeginHandler;
+    public ActionEvent GetDraggedBeginHandler() {
+        return _draggedBeginHandler;
+    }
+
+    private ActionEvent _draggedEndHandler;
+    public ActionEvent GetDraggedEndHandler() {
+        return _draggedEndHandler;
+    }
 
     private ActionEvent _draggedActionHandler;
     public ActionEvent GetDraggedActionHandler() {
@@ -3587,6 +4199,8 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         super();
 
         _eventLabel = eventLabel;
+        _draggedBeginHandler = new ActionEvent();
+        _draggedEndHandler = new ActionEvent();
         _draggedActionHandler = new ActionEvent();
         _enabledActiveHandler = new ActionEvent();
         _disabledActiveHandler = new ActionEvent();
@@ -3621,11 +4235,18 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         if (_isActive) {
             if (inputManager.IsMouseDown()) {
                 _isDragging = true;
+                if (_isDragging != _preDragging) {
+                    GetDraggedBeginHandler().InvokeAllEvents();
+                }
             }
         }
         if (inputManager.IsMouseUp()) {
             _isDragging = false;
+            if (_isDragging != _preDragging) {
+                GetDraggedEndHandler().InvokeAllEvents();
+            }
         }
+        _preDragging = _isDragging;
     }
 
     protected void _OnDestroy() {
@@ -4662,7 +5283,6 @@ public class SceneObjectTimer extends SceneObjectBehavior {
             if (!i.isActive || !i.haveBegun) continue;
             i.settedTime -= 1/frameRate;
             if (i.settedTime <= 0) {
-                _timers.Get(label).OnTimeOut();
                 End(label);
             }
         }
@@ -4725,6 +5345,7 @@ public class SceneObjectTimer extends SceneObjectBehavior {
         TimerInfo i = _infos.Get(label);
         i.isActive = false;
         i.haveBegun = false;
+        _timers.Get(label).OnTimeOut();
     }
 }
 
@@ -4776,7 +5397,6 @@ public class SceneObjectDuration extends SceneObjectBehavior {
                 f = !d.IsContinue();
             }
             if (f) {
-                d.OnEnd();
                 End(label);
                 return;
             }
@@ -4821,7 +5441,7 @@ public class SceneObjectDuration extends SceneObjectBehavior {
         i.currentTime = timer;
         Stop(label);
     }
-    
+
     public float GetSettedTimer(String label) {
         if (!_durations.ContainsKey(label)) return 0;
         TimerInfo i = _GetTimerInfo(label);
@@ -4855,6 +5475,7 @@ public class SceneObjectDuration extends SceneObjectBehavior {
         TimerInfo i = _infos.Get(label);
         i.isActive = false;
         i.haveBegun = false;
+        _durations.Get(label).OnEnd();
     }
 }
 public class SceneObjectToggleButton extends SceneObjectButton {
@@ -5318,7 +5939,7 @@ public final class TitleButtonBack extends SceneObjectBehavior {
         }
     }
 }
-/** //<>//
+/** //<>// //<>// //<>// //<>// //<>// //<>//
  アフィン変換一回分の情報に責任を持つ。
  サイズは持たない。
  */

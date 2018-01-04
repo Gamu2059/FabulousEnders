@@ -38,12 +38,16 @@ public final class ClassID {
     public static final int CID_TITLE_DUST_EFFECT = 1001;
     public static final int CID_TITLE_DUST_IMAGE = 1002;
     public static final int CID_TITLE_BUTTON_BACK = 1003;
+    
+    public static final int CID_FE_MAP_OBJECT_IMAGE = 10000;
+    public static final int CID_FE_MAP_OBJECT_DATA = 10001;
 }
 
 public final class SceneID {
     public static final String SID_TITLE = "Title";
     public static final String SID_GAMEOVER = "Gameover";
     public static final String SID_ILLUST = "One Illust";
+    public static final String SID_FE_BATTLE_MAP = "FE Battle Map";
 }
 
 public final class Key {

@@ -1,4 +1,86 @@
-public class UnitParameter {
+/**
+ 剣、斧、槍、弓、魔法、杖などの種類。
+ */
+public class FEWeaponClass {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    /**
+     マウスオーバー時に表示する説明
+     */
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+
+    /**
+     使用可能武器として表示する画像のパス
+     */
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+
+    /**
+     武器タイプ
+     */
+    private int _weaponType;
+    public int GetWeaponType() {
+        return _weaponType;
+    }
+
+    /** 
+     命中した場合のみ耐久値が減少するかどうか
+     */
+    private boolean _isWearOnHit;
+    public boolean IsWearOnHit() {
+        return _isWearOnHit;
+    }
+
+    private HashMap<FEWeaponClass, FEWeaponCompatibility> _compatibility;
+    public HashMap<FEWeaponClass, FEWeaponCompatibility> GetCompatibility() {
+        return _compatibility;
+    }
+}
+
+/**
+ 武器同士の相性特性。
+ */
+public class FEWeaponCompatibility {
+    private int _attackCorrect;
+    public int GetAttackCorrect() {
+        return _attackCorrect;
+    }
+
+    private int _defenseCorrect;
+    public int GetDefenseCorrect() {
+        return _defenseCorrect;
+    }
+
+    private int _accuracyCorrect;
+    public int GetAccuracyCorrect() {
+        return _accuracyCorrect;
+    }
+
+    private int _avoidCorrect;
+    public int GetAvoidCorrect() {
+        return _avoidCorrect;
+    }
+
+    private int _criticalCorrect;
+    public int GetCriticalCorrect() {
+        return _criticalCorrect;
+    }
+
+    private int _criticalAvoidCorrect;
+    public int GetCriticalAvoidCorrect() {
+        return _criticalAvoidCorrect;
+    }
+}
+
+public class FEUnitParameter {
     private int _hp;
     public int GetHp() {
         return _hp;
@@ -54,15 +136,15 @@ public class UnitParameter {
         _spd += value;
     }
 
-    private int _hap;
-    public int GetHappiness() {
-        return _hap;
+    private int _luc;
+    public int GetLucky() {
+        return _luc;
     }
-    public void SetHappiness(int value) {
-        _hap = value;
+    public void SetLucky(int value) {
+        _luc = value;
     }
-    public void AddHappiness(int value) {
-        _hap += value;
+    public void AddLucky(int value) {
+        _luc += value;
     }
 
     private int _def;
@@ -111,9 +193,9 @@ public class UnitParameter {
 }
 
 /**
- ゲーム内の操作可能なユニット、敵ユニット、援軍ユニットすべての基本となるクラス。
+ ゲーム内のユニットすべての基本となるクラス。
  */
-public class Unit {
+public class FEUnitBase {
     private String _name;
     public String GetName() {
         return _name;
@@ -130,6 +212,30 @@ public class Unit {
         _explain = value;
     }
 
+    private String _organization;
+    public String GetOrganization() {
+        return _organization;
+    }
+    public void SetOrganization(String value) {
+        _organization = value;
+    }
+
+    private String _faceImagePath;
+    public String GetFaceImagePath() {
+        return _faceImagePath;
+    }
+    public void SetFaceImagePath(String value) {
+        _faceImagePath = value;
+    }
+
+    private String _mapImageFolderPath;
+    public String GetMapImageFolderPath() {
+        return _mapImageFolderPath;
+    }
+    public void SetMapImageFolderPath(String value) {
+        _mapImageFolderPath = value;
+    }
+
     private int _importance;
     public int GetImportance() {
         return _importance;
@@ -138,7 +244,16 @@ public class Unit {
         _importance = value;
     }
 
-    private int _class;
+    /**
+     参照保持
+     */
+    private FEUnitClass _unitClass;
+    public FEUnitClass GetUnitClass() {
+        return _unitClass;
+    }
+    public void SetUnitClass(FEUnitClass value) {
+        _unitClass = value;
+    }
 
     private int _level;
     public int GetLevel() {
@@ -148,60 +263,162 @@ public class Unit {
         _level = value;
     }
 
-    private UnitParameter _parameter;
-    public UnitParameter GetParameter() {
+    // 戦闘中に使用するパラメータの現在値
+    private FEUnitParameter _parameter;
+    public FEUnitParameter GetParameter() {
         return _parameter;
     }
 
-    private UnitParameter _growthRate;
-    public UnitParameter GetGrowthRate() {
+    // 戦闘中には使用しない各パラメータの基準値
+    private FEUnitParameter _baseParameter;
+    public FEUnitParameter GetBaseParameter() {
+        return _baseParameter;
+    }
+
+    private FEUnitParameter _growthRate;
+    public FEUnitParameter GetGrowthRate() {
         return _growthRate;
     }
 
-    private ArrayList<ItemBase> _itemList;
-    public ArrayList<ItemBase> GetItemList() {
+    private ArrayList<FEItemBase> _itemList;
+    public ArrayList<FEItemBase> GetItemList() {
         return _itemList;
+    }
+
+    private FEWeapon _equipWeapon;
+    public FEWeapon GetEquipWeapon() {
+        return _equipWeapon;
+    }
+    public void SetEquipWeapon(FEItemBase item) {
+        if (!(item instanceof FEWeapon)) return;
+        if (!_itemList.contains(item)) return;
+        _equipWeapon = (FEWeapon)item;
+    }
+
+    public FEUnitBase() {
+        _itemList = new ArrayList<FEItemBase>();
+    }
+}
+
+/**
+ 行動パターンを持つユニットのクラス。
+ */
+public class FEOtherUnit extends FEUnitBase {
+    private int _actionPattern;
+    public int GetActionPattern() {
+        return _actionPattern;
+    }
+
+    /**
+     行動に影響するリージョンの配列
+     */
+    private int[] _regions;
+    public int[] GetRegions() {
+        return _regions;
+    }
+
+    /**
+     攻撃対象にする組織
+     */
+    private String[] _attackOnOrg;
+    public String[] GetAttackOnOrg() {
+        return _attackOnOrg;
+    }
+
+    /**
+     攻撃優先度オプション
+     */
+    private FEAttackPriority[] _attackPriority;
+    public FEAttackPriority[] GetAttackPriority() {
+        return _attackPriority;
+    }
+}
+
+public class FEAttackPriority {
+    private int _optionID;
+    public int GetOptionID() {
+        return _optionID;
+    }
+
+    private String _parameter;
+    public String GetParameter() {
+        return _parameter;
     }
 }
 
 /**
  ユニットが属するクラス。
  */
-public class UnitClass {
+public class FEUnitClass {
     private String _name;
     public String GetName() {
         return _name;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
     }
 
     private String _imageFolderPath;
     public String GetImageFolderPath() {
         return _imageFolderPath;
     }
-
-    private String _motionFolderPath;
-    public String GetMotionFolderPath() {
-        return _motionFolderPath;
+    public void SetImageFolderPath(String value) {
+        _imageFolderPath = value;
     }
 
-    private ClassType _classType;
-    public ClassType GetClassType() {
+    private int _classType;
+    public int GetClassType() {
         return _classType;
     }
 
-    private ArrayList<WeaponType> _wearableWeaponTypes;
-    public ArrayList<WeaponType> GetWearableWeaponTypes() {
+    private int _movingType;
+    public int GetMovingType() {
+        return _movingType;
+    }
+
+    /**
+     タイル効果を考慮するかどうか
+     */
+    private boolean _isConsiderTileEffect;
+    public boolean IsConsiderTileEffect() {
+        return _isConsiderTileEffect;
+    }
+
+    private ArrayList<FEWeaponClass> _wearableWeaponTypes;
+    public ArrayList<FEWeaponClass> GetWearableWeaponTypes() {
         return _wearableWeaponTypes;
     }
 
-    private int _learnabeSkills;
+    private HashMap<Integer, FEUnitSkill> _learnabeSkills;
+    public HashMap<Integer, FEUnitSkill> GetLearnabeSkills() {
+        return _learnabeSkills;
+    }
 
-    private UnitParameter _paramBonus;
-    public UnitParameter GetParameterBonus() {
+    /**
+     杖を使うことができるかどうか
+     */
+    private boolean _canUseCane;
+    public boolean CanUseCane() {
+        return _canUseCane;
+    }
+
+    /**
+     標準で再移動をサポートしているかどうか
+     */
+    private boolean _canReMove;
+    public boolean CanReMove() {
+        return _canReMove;
+    }
+
+    private FEUnitParameter _paramBonus;
+    public FEUnitParameter GetParameterBonus() {
         return _paramBonus;
     }
 
-    private UnitParameter _growthBonus;
-    public UnitParameter GetGrowthBonus() {
+    private FEUnitParameter _growthBonus;
+    public FEUnitParameter GetGrowthBonus() {
         return _growthBonus;
     }
 }
@@ -209,10 +426,15 @@ public class UnitClass {
 /**
  ユニットが保持することができるアイテムの基本クラス。
  */
-public class ItemBase {
+public class FEItemBase {
     private String _name;
     public String GetName() {
         return _name;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
     }
 
     private String _imagePath;
@@ -220,9 +442,12 @@ public class ItemBase {
         return _imagePath;
     }
 
-    private String _explain;
-    public String GetExplain() {
-        return _explain;
+    /**
+     使用エフェクト
+     */
+    private String _usingEffectPath;
+    public String GetUsingEffectPath() {
+        return _usingEffectPath;
     }
 
     private int _price;
@@ -235,6 +460,9 @@ public class ItemBase {
         return _weigth;
     }
 
+    /**
+     耐久値
+     */
     private int _endurance;
     public int GetEndurance() {
         return _endurance;
@@ -259,18 +487,118 @@ public class ItemBase {
         _isExchangeable = value;
     }
 
-    private UnitParameter _paramBonus;
-    public UnitParameter GetParameterBonus() {
+    private FEUnitParameter _paramBonus;
+    public FEUnitParameter GetParameterBonus() {
         return _paramBonus;
     }
 
-    private UnitParameter _growthBonus;
-    public UnitParameter GetGrowthBonus() {
+    private FEUnitParameter _growthBonus;
+    public FEUnitParameter GetGrowthBonus() {
         return _growthBonus;
     }
 }
 
-public class Skill {
+public class FEWeapon extends FEItemBase {
+    private FEWeaponClass _weaponClass;
+    public FEWeaponClass GetWeaponClass() {
+        return _weaponClass;
+    }
+
+    private int _power;
+    public int GetPower() {
+        return _power;
+    }
+
+    private int _minRange;
+    public int GetMinRange() {
+        return _minRange;
+    }
+
+    private int _maxRange;
+    public int GetMaxRange() {
+        return _maxRange;
+    }
+
+    private int _accuracy;
+    public int GetAccuracy() {
+        return _accuracy;
+    }
+
+    private int _critical;
+    public int GetCritical() {
+        return _critical;
+    }
+
+    private int _attackNum;
+    public int GetAttackNum() {
+        return _attackNum;
+    }
+
+    private int _wearableProficiency;
+    public int GetWearableProficiency() {
+        return _wearableProficiency;
+    }
+
+    /**
+     特効が付くクラスタイプの配列
+     */
+    private int[] _specialAttack; 
+    public int[] GetSpecialAttack() {
+        return _specialAttack;
+    }
+
+    private boolean _isOneway;
+    public boolean IsOneway() {
+        return _isOneway;
+    }
+
+    private boolean _isMagical;
+    public boolean IsMagical() {
+        return _isMagical;
+    }
+
+    /**
+     相手にステートを付与する確率
+     */
+    private HashMap<FEState, Integer> _stateGrant;
+    public HashMap<FEState, Integer> GetStateGrant() {
+        return _stateGrant;
+    }
+}
+
+public class FEItem extends FEItemBase {
+    private int _kind;
+    public int GetKind() {
+        return _kind;
+    }
+
+    private boolean _isCane;
+    public boolean IsCane() {
+        return _isCane;
+    }
+
+    private int _gainExp;
+    public int GetGainExp() {
+        return _gainExp;
+    }
+
+    private int _range;
+    public int GetRange() {
+        return _range;
+    }
+
+    private int _filter;
+    public int GetFilter() {
+        return _filter;
+    }
+
+    private int _useEffect;
+    public int GetUseEffect() {
+        return _useEffect;
+    }
+}
+
+public class FEUnitSkill {
     private String _name;
     public String GetName() {
         return _name;
@@ -281,17 +609,159 @@ public class Skill {
         return _explain;
     }
 
-    // 戦闘用スキルかどうか
-    private boolean _isBattleSkill;
-    public boolean IsBattleSkill() {
-        return _isBattleSkill;
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
     }
 
-    
+    private int _activateReference;
+    public int GetActivateReference() {
+        return _activateReference;
+    }
 
-    // 発動率
+    /**
+     発動確率がパラメータ依存でない場合の固有確率
+     */
     private float _activateRate;
     public float GetActivateRate() {
         return _activateRate;
+    }
+
+    private int _skillFeature;
+    public int GetSkillFeature() {
+        return _skillFeature;
+    }
+}
+
+public class FEState {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private String _explain;
+    public String GetExplain() {
+        return _explain;
+    }
+
+    private String _imagePath;
+    public String GetImagePath() {
+        return _imagePath;
+    }
+
+    private boolean _isBadState;
+    public boolean IsBadState() {
+        return _isBadState;
+    }
+
+    private int _sustainTurn;
+    public int GetSustainTurn() {
+        return _sustainTurn;
+    }
+
+    /**
+     自然回復(ターン開始時)
+     */
+    private int _recoverOnTimes;
+    public int GetRecoverOnTimes() {
+        return _recoverOnTimes;
+    }
+
+    private int[] _sealedOption;
+    public int[] GetSealedOption() {
+        return _sealedOption;
+    }
+
+    private int _actOption;
+    public int GetActOption() {
+        return _actOption;
+    }
+
+    /**
+     解除オプション
+     */
+    private int _releaseOption;
+    public int GetReleaseOption() {
+        return _releaseOption;
+    }
+
+    /**
+     解除にかかる回数
+     */
+    private int _releaseBy;
+    public int GetReleaseBy() {
+        return _releaseBy;
+    }
+
+    private FEUnitParameter _paramBonus;
+    public FEUnitParameter GetParameterBonus() {
+        return _paramBonus;
+    }
+}
+
+/**
+ 地形情報。
+ そのままマップのデータとして使われる。
+ */
+public class FETerrain {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private FETerrainEffect _effect;
+    public FETerrainEffect GetEffect() {
+        return _effect;
+    }
+    public void SetEffect(FETerrainEffect value) {
+        _effect = value;
+    }
+
+    /**
+     基本的な地形は一枚絵で表示してしまうが、建物などを表示したい場合はこちら
+     */
+    private String _mapImagePath;
+    public String GetMapImagePath() {
+        return _mapImagePath;
+    }
+}
+
+/**
+ 地形効果
+ */
+public class FETerrainEffect {
+    private String _name;
+    public String GetName() {
+        return _name;
+    }
+
+    private int _avoid;
+    public int GetAvoid() {
+        return _avoid;
+    }
+
+    private int _defense;
+    public int GetDefense() {
+        return _defense;
+    }
+
+    private int _mDefense;
+    public int GetMDefense() {
+        return _mDefense;
+    }
+
+    private int _recover;
+    public int GetRecover() {
+        return _recover;
+    }
+
+    private int[] _moveCosts;
+    public int[] GetMoveConts() {
+        return _moveCosts;
+    }
+
+    private boolean _isMovable;
+    public boolean IsMovable() {
+        return _isMovable;
     }
 }

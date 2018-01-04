@@ -1,0 +1,14 @@
+[
+    {
+        "Name" : "ミゼル",
+        "Explain" : "aaaaaaaaaa",
+        "Organization" : "ノーラス解放団",
+        "Face Image Path" : "character/face/ミゼル.png",
+        "Map Image Folder Path" : "character/map/ミゼル",
+        "Importance" : "LEADER",
+        "Class" : "剣士",
+        "Level" : 4,
+        "Growth Correct" : {},
+        "Parameter Correct" : {}
+    }
+]

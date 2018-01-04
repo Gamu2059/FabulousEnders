@@ -45,7 +45,6 @@ public class SceneObjectTimer extends SceneObjectBehavior {
             if (!i.isActive || !i.haveBegun) continue;
             i.settedTime -= 1/frameRate;
             if (i.settedTime <= 0) {
-                _timers.Get(label).OnTimeOut();
                 End(label);
             }
         }
@@ -108,6 +107,7 @@ public class SceneObjectTimer extends SceneObjectBehavior {
         TimerInfo i = _infos.Get(label);
         i.isActive = false;
         i.haveBegun = false;
+        _timers.Get(label).OnTimeOut();
     }
 }
 
@@ -159,7 +159,6 @@ public class SceneObjectDuration extends SceneObjectBehavior {
                 f = !d.IsContinue();
             }
             if (f) {
-                d.OnEnd();
                 End(label);
                 return;
             }
@@ -204,7 +203,7 @@ public class SceneObjectDuration extends SceneObjectBehavior {
         i.currentTime = timer;
         Stop(label);
     }
-    
+
     public float GetSettedTimer(String label) {
         if (!_durations.ContainsKey(label)) return 0;
         TimerInfo i = _GetTimerInfo(label);
@@ -238,5 +237,6 @@ public class SceneObjectDuration extends SceneObjectBehavior {
         TimerInfo i = _infos.Get(label);
         i.isActive = false;
         i.haveBegun = false;
+        _durations.Get(label).OnEnd();
     }
 }
