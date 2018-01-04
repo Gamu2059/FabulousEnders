@@ -541,6 +541,15 @@ public abstract class JsonUtility {
         }
     }
 
+    /**
+     例外が発生した場合にキャッチせずに投げる。
+     */
+    public void LoadWithThrowException(String path) throws Exception {
+        String[] jsonText = loadStrings(path);
+        String json = join(trim(jsonText), "");
+        Parse(json);
+    }
+
     public void Save(String path) {
         try {
             saveStrings(path, new String[]{this.toString()});
@@ -548,6 +557,10 @@ public abstract class JsonUtility {
         catch(Exception e) {
             println(e);
         }
+    }
+
+    public void SaveWithThrowException(String path) throws Exception {
+        saveStrings(path, new String[]{this.toString()});
     }
 
     public abstract void Parse(String content);

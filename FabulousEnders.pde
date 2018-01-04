@@ -31,6 +31,8 @@ void setup() {
         sceneManager.Start();
         //FESceneBattleMap map = (FESceneBattleMap)sceneManager.GetScene(SceneID.SID_FE_BATTLE_MAP);
         //map.LoadMap("data/map/test.json");
+        
+        saveStrings("data/test.json", new String[]{"hoge"});
     } 
     catch(Exception e) {
         println(e);

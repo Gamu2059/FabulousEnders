@@ -25,6 +25,35 @@ public class FEManager {
 
         _config.Load("data/config/config.json");
         _dataBase.Load("data/database");
+
+        // テスト環境のみ
+        StartGame();
+    }
+
+    /**
+     ゲームを最初からプレイする。
+     */
+    public void StartGame() {
+        try {
+            _progressDataBase.Load("data/database/star.json");
+        } 
+        catch(Exception e) {
+            println(111);
+        }
+    }
+
+    /**
+     ゲームを続きからプレイする。
+     */
+    public void ContinueGame() {
+        // ロードシーンを開く
+    }
+
+    /**
+     環境コンフィグを設定する。
+     */
+    public void SetConfig() {
+        // 環境設定シーンを開く
     }
 }
 
@@ -261,7 +290,9 @@ public class FEProgressDataBase {
         _terrains = new ArrayList<ArrayList<FETerrain>>();
     }
 
-    public void Load(String dataBaseFolderPath) {
+    public void Load(String dataPath) throws Exception {
+        JsonObject json = new JsonObject();
+        json.Load(dataPath);
     }
 }
 
