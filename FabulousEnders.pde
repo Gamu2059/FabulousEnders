@@ -21,6 +21,8 @@ TransformManager transformManager;
 FEJsonUtility feJsonUtility;
 FEManager feManager;
 
+SceneDialog dialog;
+
 void setup() {
     size(880, 480);
     try {
@@ -29,10 +31,8 @@ void setup() {
         sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
 
         sceneManager.Start();
-        //FESceneBattleMap map = (FESceneBattleMap)sceneManager.GetScene(SceneID.SID_FE_BATTLE_MAP);
-        //map.LoadMap("data/map/test.json");
-        
-        saveStrings("data/test.json", new String[]{"hoge"});
+        feManager.StartGame();
+        feManager.GetBattleMapManager().LoadMapData("test_map.json");
     } 
     catch(Exception e) {
         println(e);
@@ -45,12 +45,14 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
-    
+
     feJsonUtility = new FEJsonUtility();
     feManager = new FEManager();
 }
 
 void SetScenes() {
+    dialog = new SceneDialog();
+    sceneManager.AddScene(dialog);
     sceneManager.AddScene(new SceneTitle());
     sceneManager.AddScene(new SceneOneIllust());
     sceneManager.AddScene(new SceneGameOver());
@@ -63,6 +65,7 @@ void draw() {
         background(0);
         sceneManager.Update();
         inputManager.Update();
+        //println(frameRate);
     } 
     catch(Exception e) {
         println(e);

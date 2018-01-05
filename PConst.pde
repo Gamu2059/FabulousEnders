@@ -39,11 +39,13 @@ public final class ClassID {
     public static final int CID_TITLE_DUST_IMAGE = 1002;
     public static final int CID_TITLE_BUTTON_BACK = 1003;
     
-    public static final int CID_FE_MAP_OBJECT_IMAGE = 10000;
-    public static final int CID_FE_MAP_OBJECT_DATA = 10001;
+    public static final int CID_FE_MAP_OBJECT_DRAWER = 10000;
+    public static final int CID_FE_MAP_MOUSE_CURSOR = 10001;
+    public static final int CID_FE_MAP_UNIT_VIEWER = 10002;
 }
 
 public final class SceneID {
+    public static final String SID_DIALOG = "Dialog";
     public static final String SID_TITLE = "Title";
     public static final String SID_GAMEOVER = "Gameover";
     public static final String SID_ILLUST = "One Illust";

@@ -1,7 +1,18 @@
 {
+    "Money" : 0,
+    "Items" : [
+        
+    ],
     "Player Units" : [
         {
-            "Name" : "ミゼル"
+            "ID" : 1,
+            "Organization" : "トルニア解放軍"
+        },
+        {
+            "ID" : 2
+        },
+        {
+            "ID" : 3
         }
     ]
 }

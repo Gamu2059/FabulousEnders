@@ -1,5 +1,8 @@
 public class FEConst {
+    public static final String MAP_PATH = "data/map/";
+    
     public static final int SYSTEM_MAP_GRID_PX = 40;
+    public static final int SYSTEM_MAP_OBJECT_PX = 60;
     public static final int SYSTEM_MAP_MAX_HEIGHT = 50;
     public static final int SYSTEM_MAP_MAX_WIDTH = 50;
     

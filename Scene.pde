@@ -189,7 +189,6 @@ public class Scene implements Comparable<Scene> {
      */
     public void CheckMouseActiveObject() {
         if (!inputManager.IsMouseMode()) return;
-
         SceneObject s;
         boolean f = false;
         for (int i=_objects.size()-1; i>=0; i--) {

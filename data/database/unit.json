@@ -1,11 +1,38 @@
 [
     {
+        "ID" : 1,
         "Name" : "ミゼル",
         "Explain" : "aaaaaaaaaa",
         "Organization" : "ノーラス解放団",
         "Face Image Path" : "character/face/ミゼル.png",
         "Map Image Folder Path" : "character/map/ミゼル",
         "Importance" : "LEADER",
+        "Class" : "剣士",
+        "Level" : 4,
+        "Growth Correct" : {},
+        "Parameter Correct" : {}
+    },
+    {
+        "ID" : 2,
+        "Name" : "イソP",
+        "Explain" : "aaaaaaaaaa",
+        "Organization" : "ノーラス解放団",
+        "Face Image Path" : "character/face/isoP.png",
+        "Map Image Folder Path" : "character/map/ミゼル",
+        "Importance" : "NORMAL",
+        "Class" : "剣士",
+        "Level" : 4,
+        "Growth Correct" : {},
+        "Parameter Correct" : {}
+    },
+    {
+        "ID" : 3,
+        "Name" : "カナト",
+        "Explain" : "aaaaaaaaaa",
+        "Organization" : "ノーラス解放団",
+        "Face Image Path" : "character/face/カナト.png",
+        "Map Image Folder Path" : "character/map/ミゼル",
+        "Importance" : "NORMAL",
         "Class" : "剣士",
         "Level" : 4,
         "Growth Correct" : {},

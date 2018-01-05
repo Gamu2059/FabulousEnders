@@ -2,149 +2,68 @@
  戦闘マップ及びマップイベントを描画するシーン。
  */
 public class FESceneBattleMap extends Scene {
-    private JsonObject _mapData;
+    private SceneObject mapImageObj, terrainImageObj, hazardAreaObj, actionRangeObj, mapElementObj, cursorObj, unitViewObj;
 
-    private SceneObject _backObj;
-    private SceneObjectImage _backImg;
+    private SceneObjectImage mapImage;
 
-    /**
-     プレイヤーユニットオブジェクト
-     */
-    private ArrayList<SceneObject> _playerUnits;
-
-    /**
-     敵ユニットオブジェクト
-     */
-    private ArrayList<SceneObject> _enemyUnits;
-
-    /**
-     イベントオブジェクト
-     */
-    private ArrayList<FEMapObjectBase> _events;
+    private FEMapMouseCursor mapCursor;
+    public FEMapMouseCursor GetMapCursor() {
+        return mapCursor;
+    }
 
     public FESceneBattleMap() {
         super(SceneID.SID_FE_BATTLE_MAP);
 
-        _mapData = new JsonObject();
+        SceneObjectTransform objT;
 
-        _events = new ArrayList<FEMapObjectBase>();
-
-        _backObj = new SceneObject("Back Image", this);
-        _backImg = new SceneObjectImage(_backObj, null);
-        SceneObjectTransform _objT = _backObj.GetTransform();
-        _objT.SetAnchor(0, 0, 0, 0);
-        _objT.SetPivot(0, 0);
-    }
-
-    /**
-     マップデータを読み込み、現在のマップをリセットする。
-     戦闘開始ではない。
-     */
-    public void LoadMap(String dataPath) {
-        _mapData.Load(dataPath);
-
-        // 背景設定
-        _backImg.SetUsingImageName(_mapData.GetString("Back Image", null));
-
-        // サイズ設定
-        JsonObject pos = _mapData.GetJsonObject("Map Size");
-        int x, y;
-        x = pos.GetInt("x", -1);
-        y = pos.GetInt("y", -1);
-        SceneObjectTransform _objT = _backObj.GetTransform();
-        _objT.SetSize(x * FEConst.SYSTEM_MAP_GRID_PX, y * FEConst.SYSTEM_MAP_GRID_PX);
-        //_backScr.ReSetScroller();
-
-        // イベントオブジェクト設定
-        _events.clear();
-        JsonArray eventArray = _mapData.GetJsonArray("Event Datas");
-        if (eventArray == null) return;
-        JsonObject event;
-        for (int i=0; i<eventArray.Size(); i++) {
-            event = eventArray.GetJsonObject(i);
-            FEMapObjectBase obj = new FEMapObjectBase(event.GetString("Name", "No Name"), this, event);
-            obj.GetTransform().SetParent(_backObj.GetTransform(), true);
-        }
-    }
-
-    //private void _ResetSettedFlag(boolean[][] flags) {
-    //    for (int i=0; i<flags.length; i++) {
-    //        for (int j=0; j<flags[0].length; j++) {
-    //            flags[i][j] = false;
-    //        }
-    //    }
-    //}
-}
-
-/**
- マップ上に存在するオブジェクトのベースクラス。
- */
-public class FEMapObjectBase extends SceneObject {
-    private FEMapObjectData _data;
-    public FEMapObjectData GetData() {
-        return _data;
-    }
-
-    public FEMapObjectBase(String name, FESceneBattleMap scene, JsonObject json) {
-        super(name, scene);
-
-        SceneObjectTransform objT = GetTransform();
+        mapImageObj = new SceneObject("Map Image Object", this);
+        mapImage = new SceneObjectImage(mapImageObj, null);
+        objT = mapImageObj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetPivot(0, 0);
-        objT.SetSize(FEConst.SYSTEM_MAP_GRID_PX, FEConst.SYSTEM_MAP_GRID_PX);
-        objT.SetTranslation(json.GetInt("x", 0) * FEConst.SYSTEM_MAP_GRID_PX, json.GetInt("y", 0) * FEConst.SYSTEM_MAP_GRID_PX);
+        mapCursor = new FEMapMouseCursor(mapImageObj);
 
-        _data = new FEMapObjectData(this);
-        FEMapObjectImage img = new FEMapObjectImage(this);
+        mapElementObj = new SceneObject("Map Element Object", this);
+        objT = mapElementObj.GetTransform();
+        objT.SetParent(mapImageObj.GetTransform(), true);
+        objT.SetPriority(objT.GetPriority() + 4);
+        new FEMapObjectDrawer(mapElementObj);
 
-        img.SetBaseFolderPath(json.GetString("Image Folder Path", null));
-        img.SetAnimation(json.GetBoolean("Is Animation", false));
-        img.SetFixedDirection(json.GetBoolean("Is Fixed Direction", true));
+        unitViewObj = new SceneObject("Unit View Object", this);
+        new FEMapUnitViewer(unitViewObj);
+    }
+
+    public void OnEnabled() {
+        super.OnEnabled();
+
+        FEBattleMapManager bm = feManager.GetBattleMapManager();
+        SceneObjectTransform objT = mapImageObj.GetTransform();
+
+        objT.SetSize(bm.GetMapSize().x * FEConst.SYSTEM_MAP_GRID_PX, bm.GetMapSize().y * FEConst.SYSTEM_MAP_GRID_PX);
+        mapImage.SetUsingImageName(bm.GetMapImagePath());
     }
 }
 
-
-
 /**
- マップオブジェクトの基本情報を保持するコンポーネント。
+ ユニットオブジェクトの描画を行う振る舞い。
  */
-public class FEMapObjectData extends SceneObjectBehavior {
+public class FEMapObjectDrawer extends SceneObjectBehavior {
     public int GetID() {
-        return ClassID.CID_FE_MAP_OBJECT_DATA;
+        return ClassID.CID_FE_MAP_OBJECT_DRAWER;
     }
 
-    /**
-     マップ上の座標
-     */
-    private PVector _position;
-    public PVector GetPosition() {
-        return _position;
-    }
+    private FEBattleMapManager bm;
+    private int offset;
 
-    /**
-     他のオブジェクトがすり抜けられるかどうか
-     */
-    private boolean _isSlipable;
-    public boolean IsSlipable() {
-        return _isSlipable;
-    }
-    public void SetSlipable(boolean value) {
-        _isSlipable = value;
-    }
+    private SceneObjectTimer timer;
+    private String timerLabel;
+    private int cnt, normalIdx, runIdx;
 
-    /**
-     向き
-     */
-    private int _direction;
-    public int GetDirection() {
-        return _direction;
-    }
-    public void SetDirection(int value) {
-        _direction = value;
-    }
-
-    public FEMapObjectData(FEMapObjectBase obj) {
+    public FEMapObjectDrawer(SceneObject obj) {
         super();
+
+        timer = new SceneObjectTimer(obj);
+        timerLabel = "FEMapObjectDrawer CountTimer";
 
         if (obj == null) return;
         obj.AddBehavior(this);
@@ -153,102 +72,286 @@ public class FEMapObjectData extends SceneObjectBehavior {
     protected void _OnDestroy() {
         ;
     }
-}
 
-/**
- マップオブジェクトのアニメーションを司るコンポーネント。
- */
-public class FEMapObjectImage extends SceneObjectImage {
-    public int GetID() {
-        return ClassID.CID_FE_MAP_OBJECT_IMAGE;
-    }
+    public void Start() {
+        super.Start();
+        bm = feManager.GetBattleMapManager();
+        offset = (FEConst.SYSTEM_MAP_GRID_PX - FEConst.SYSTEM_MAP_OBJECT_PX) / 2;
+        cnt = 0;
 
-    /**
-     イメージの保存されているフォルダのパス
-     */
-    private String _baseFolderPath;
-    public String GetBaseFolderPath() {
-        return _baseFolderPath;
-    }
-    public void SetBaseFolderPath(String value) {
-        _baseFolderPath = value;
-    }
-
-    /**
-     アニメーションさせるかどうか
-     */
-    private boolean _isAnimation;
-    public boolean IsAnimation() {
-        return _isAnimation;
-    }
-    public void SetAnimation(boolean value) {
-        _isAnimation = value;
-    }
-
-    /**
-     向きを固定するかどうか
-     */
-    private boolean _isFixedDirection;
-    public boolean IsFixedDirection() {
-        return _isFixedDirection;
-    }
-    public void SetFixedDirection(boolean value) {
-        _isFixedDirection = value;
-    }
-
-    // タイマーコンポーネント
-    SceneObjectTimer _timer;
-
-    FEMapObjectBase _obj;
-
-    private String _timerLabel;
-    private int _index;
-
-    public FEMapObjectImage(FEMapObjectBase obj) {
-        super(obj, null);
-
-        _obj = obj;
-
-        _timer = new SceneObjectTimer(obj);
-        _timerLabel = "FE Map Object Image Animation";
-        _timer.GetTimers().Add(_timerLabel, new ITimer() {
+        timer.GetTimers().Add(timerLabel, new ITimer() {
             public void OnInit() {
-                _index = (_index + 1) % 4;
-                int id = _index % 2 == 0 ? _index : 1;
-                if (_baseFolderPath == null) return;
-                String dir;
-                switch(_obj.GetData().GetDirection()) {
-                case FEConst.MAP_OBJ_DIR_UP:
-                    dir = "U";
-                    break;
-                case FEConst.MAP_OBJ_DIR_RIGHT:
-                    dir = "R";
-                    break;
-                case FEConst.MAP_OBJ_DIR_DOWN:
-                    dir = "D";
-                    break;
-                case FEConst.MAP_OBJ_DIR_LEFT:
-                    dir = "L";
-                    break;
-                default:
-                    dir = "N";
-                    break;
+                cnt = ++cnt % 2;
+                runIdx = ++runIdx % 6;
+                if (cnt == 0) {
+                    normalIdx = ++normalIdx % 6;
                 }
-                SetUsingImageName(_baseFolderPath + "/" + dir + id + ".png");
             }
 
             public void OnTimeOut() {
-                if (!_isAnimation) return;
-                _timer.ResetTimer(_timerLabel, 0.5);
-                _timer.Start(_timerLabel);
+                timer.ResetTimer(timerLabel, 0.1);
+                timer.Start(timerLabel);
             }
         }
         );
+        timer.ResetTimer(timerLabel, 0.1);
+        timer.Start(timerLabel);
+    }
+
+    public void Draw() {
+        super.Draw();
+
+        FEMapElement e;
+        FEMapObject o;
+        PVector pos;
+        int x, y;
+        String imgPath;
+        for (int i=0; i<bm.GetMapElements().size(); i++) {
+            e = bm.GetMapElements().get(i);
+            o = e.GetMapObject();
+            if (o == null) continue;
+            if (o.GetMapImageFolderPath() == null) continue;
+
+            imgPath = o.GetMapImageFolderPath() + "/N" + _DrawIdx(runIdx) + ".png";
+            if (imageManager.GetImage(imgPath) == null) continue;
+            pos = e.GetPosition();
+            x = int(pos.x);
+            y = int(pos.y);
+            x = x * FEConst.SYSTEM_MAP_GRID_PX + offset;
+            y = y * FEConst.SYSTEM_MAP_GRID_PX + offset;
+            image(imageManager.GetImage(imgPath), x, y, FEConst.SYSTEM_MAP_OBJECT_PX, FEConst.SYSTEM_MAP_OBJECT_PX);
+        }
+    }
+
+    private int _DrawIdx(int idx) {
+        switch(idx) {
+        case 4:
+        case 5:
+            return 0;
+        case 1:
+        case 2:
+            return 2;
+        default:
+            return 1;
+        }
+    }
+}
+
+/**
+ マウス座標を戦闘マップ座標の相対座標に変換する。
+ */
+public class FEMapMouseCursor extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_MOUSE_CURSOR;
+    }
+
+    private float _x, _y;
+    public float GetX() {
+        return _x;
+    }
+    public float GetY() {
+        return _y;
+    }
+
+    private int _mapX, _mapY;
+    public int GetMapX() {
+        return _mapX;
+    }
+    public int GetMapY() {
+        return _mapY;
+    }
+
+    private SceneObjectTransform _objT;
+    private PMatrix2D _objM;
+    private float[] _in, _out;
+    private int _mapW, _mapH;
+
+    public FEMapMouseCursor(SceneObject obj) {
+        super();    
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    protected void _OnDestroy() {
+        ;
     }
 
     public void Start() {
         super.Start();
-        _timer.ResetTimer(_timerLabel, 0.5);
-        _timer.Start(_timerLabel);
+        _objT = GetObject().GetTransform();
+        _in = new float[2];
+        _out = new float[2];
+        _mapW = (int)feManager.GetBattleMapManager().GetMapSize().x;
+        _mapH = (int)feManager.GetBattleMapManager().GetMapSize().y;
+        println(_mapW);
+    }
+
+    /**
+     UpdateはTransformする前なので、その直後のDrawで正確な逆演算を行う。
+     */
+    public void Draw() {
+        super.Draw();
+        if (_objT == null) return;
+        _objM = _objT.GetMatrix().get();
+        if (!_objM.invert()) return;
+        _in[0] = mouseX;
+        _in[1] = mouseY;
+        _objM.mult(_in, _out);
+        _in[0] = _out[0];
+        _in[1] = _out[1];
+        _objM.mult(_in, _out);
+        _x = _out[0];
+        _y = _out[1];
+
+        _mapX = _mapY = -999;
+        for (int i=0; i<_mapW; i++) {
+            if (_IsInGrid(i, _x)) {
+                _mapX = i;
+                break;
+            }
+        }
+        for (int i=0; i<_mapH; i++) {
+            if (_IsInGrid(i, _y)) {
+                _mapY = i;
+                break;
+            }
+        }
+
+        stroke(200, 0, 0);
+        strokeWeight(2);
+        rect(_mapX * FEConst.SYSTEM_MAP_GRID_PX + 2, _mapY * FEConst.SYSTEM_MAP_GRID_PX + 2, FEConst.SYSTEM_MAP_GRID_PX - 4, FEConst.SYSTEM_MAP_GRID_PX - 4);
+    }
+
+    private boolean _IsInGrid(int idx, float p) {
+        return FEConst.SYSTEM_MAP_GRID_PX * idx <= p && p < FEConst.SYSTEM_MAP_GRID_PX * (idx + 1);
+    }
+}
+
+/**
+ マップを参照してカーソルが重なったところにいるキャラクタの概要を表示する。
+ */
+public class FEMapUnitViewer extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_UNIT_VIEWER;
+    }
+
+    private FEMapMouseCursor _mapCur;
+    private SceneObjectTransform _objT;
+
+    private SceneObject _prmBackObj, _faceBackObj;
+    private SceneObjectDrawBack _prmBack, _faceBack;
+    private SceneObjectImage _faceImg;
+
+    public FEMapUnitViewer(SceneObject obj) {
+        super();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    protected void _OnDestroy() {
+        ;
+    }
+
+    public void Start() {
+        super.Start();
+
+        GetObject().SetActivatable(false);
+        _objT = GetObject().GetTransform();
+        _objT.AddPriority(500);
+        _objT.SetAnchor(1, 0.5, 1, 0.5);
+        _objT.SetPivot(1, 0.5);
+        _objT.SetSize(320, 70);
+        FESceneBattleMap sbm = (FESceneBattleMap) GetObject().GetScene();
+        _mapCur = sbm.GetMapCursor();
+
+        SceneObjectTransform objT;
+        SceneObjectDrawBack objD;
+
+        _prmBackObj = new SceneObject("Unit Parameter Viewer Back", sbm);
+        _prmBackObj.SetActivatable(false);
+        objT = _prmBackObj.GetTransform();
+        objT.SetParent(_objT, true);
+        objT.SetSize(240, 0);
+        objT.SetAnchor(1, 0, 1, 1);
+        objT.SetPivot(1, 0.5);
+        objT.SetTranslation(-5, 0);
+        _prmBack = _prmBackObj.GetDrawBack();
+        _prmBack.SetCorner(7);
+        _prmBack.SetEnable(true, false);
+
+        SceneObject _prmFrontObj = new SceneObject("Unit Parameter Viewer Front", sbm);
+        _prmFrontObj.SetActivatable(false);
+        objT = _prmFrontObj.GetTransform();
+        objT.SetParent(_prmBackObj.GetTransform(), true);
+        objT.SetAnchor(0, 1, 1, 1);
+        objT.SetPivot(0.5, 1);
+        objT.SetOffsetMin(4, 0);
+        objT.SetOffsetMax(-4, 0);
+        objT.SetTranslation(0, -4);
+        objT.SetSize(0, 35);
+        objD = _prmFrontObj.GetDrawBack();
+        objD.SetCorner(7);
+        objD.SetEnable(true, false);
+        objD.GetBackColorInfo().SetColor(255, 250, 220);
+
+        _faceBackObj = new SceneObject("Unit Face Viewer Back", sbm);
+        _faceBackObj.SetActivatable(false);
+        objT  = _faceBackObj.GetTransform();
+        objT.SetParent(_objT, true);
+        objT.SetSize(70, 0);
+        objT.SetAnchor(1, 0, 1, 1);
+        objT.SetPivot(1, 0.5);
+        objT.SetTranslation(-250, 0);
+        _faceBack = _faceBackObj.GetDrawBack();
+        _faceBack.SetCorner(7);
+        _faceBack.SetEnable(true, false);
+
+        SceneObject _faceFrontObj = new SceneObject("Unit Face Viewer Front", sbm);
+        _faceFrontObj.SetActivatable(false);
+        objT = _faceFrontObj.GetTransform();
+        objT.SetParent(_faceBackObj.GetTransform(), true);
+        objT.SetOffsetMin(4, 4);
+        objT.SetOffsetMax(-4, -4);
+        objD = _faceFrontObj.GetDrawBack();
+        objD.SetEnable(true, false);
+        objD.GetBackColorInfo().SetColor(40, 10, 10);
+        _faceImg = new SceneObjectImage(_faceFrontObj, null);
+    }
+
+    public void Update() {
+        super.Update();
+        if (_mapCur == null) {
+            _objT.SetScale(0, 0);
+            return;
+        }
+        FEMapElement elem = feManager.GetBattleMapManager().GetMapElementOnPos(_mapCur.GetMapX(), _mapCur.GetMapY());
+        if (elem == null) {
+            _objT.SetScale(0, 0);
+        } else {
+            if (!(elem.GetMapObject() instanceof FEUnit)) {
+                _objT.SetScale(0, 0);
+                return;
+            }
+            _objT.SetScale(1, 1);
+
+            boolean f = _mapCur.GetMapY() < feManager.GetBattleMapManager().GetMapSize().y / 2;
+            _objT.SetTranslation(0, (f?1:-1) * ((height - _objT.GetSize().y) / 2 - 5));
+            FEUnit unit = (FEUnit)elem.GetMapObject();
+            if (unit.GetFaceImagePath() == null) {
+                _faceBackObj.GetTransform().SetScale(0, 0);
+            } else {
+                _faceBackObj.GetTransform().SetScale(1, 1);
+                _faceImg.SetUsingImageName(unit.GetFaceImagePath());
+            }
+            _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
+            _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
+            //if (feManager.GetBattleMapManager().GetSortieUnits().contains(unit)) {
+            //    _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
+            //    _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
+            //} else if (feManager.GetBattleMapManager().GetSortieEnemyUnits().contains(unit)) {
+            //    _prmBack.GetBackColorInfo().SetColor(150, 0, 20);
+            //    _faceBack.GetBackColorInfo().SetColor(150, 0, 20);
+            //}
+        }
     }
 }
