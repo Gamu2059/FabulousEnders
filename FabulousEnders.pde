@@ -28,6 +28,8 @@ void setup() {
     try {
         InitManager();
         SetScenes();
+        feManager.Init();
+
         sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
 
         sceneManager.Start();

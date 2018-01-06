@@ -183,7 +183,6 @@ public class FEMapMouseCursor extends SceneObjectBehavior {
         _out = new float[2];
         _mapW = (int)feManager.GetBattleMapManager().GetMapSize().x;
         _mapH = (int)feManager.GetBattleMapManager().GetMapSize().y;
-        println(_mapW);
     }
 
     /**

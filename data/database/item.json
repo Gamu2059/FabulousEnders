@@ -1,6 +1,52 @@
 [
     {
         "ID" : 0,
-        "Name" : "Dummy"
+        "Name" : "No Name",
+        "Explain" : "No Explain",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 0,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : false,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Item Feature" : "NONE",
+        "Item Feature Parameter" : {
+        },
+        "Is Cane" : false,
+        "Gain Exp" : 0,
+        "Range" : "OWN",
+        "Range Option" : {
+            "Range Ref" : "UNIQUE",
+            "Ref Rate" : 0,
+            "Unique Range" : 0
+        },
+        "Filter" : "OWN",
+        "Granted Skills" : [
+        ]
+    },
+    {
+        "ID" : 1,
+        "Name" : "傷薬",
+        "Explain" : "HPを10回復する。",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 200,
+        "Endurance" : 3,
+        "Is Salable" : true,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Item Feature" : "RECOVER HP",
+        "Item Feature Parameter" : {
+            "Recover" : 10
+        },
+        "Is Cane" : false,
+        "Gain Exp" : 0,
+        "Range" : "OWN",
+        "Filter" : "OWN"
     }
 ]

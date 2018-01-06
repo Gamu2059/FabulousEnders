@@ -410,7 +410,11 @@ public final class JsonObject extends JsonUtility {
         if (!HasKey(name)) {
             _names.add(name);
         }
-        _elem.put(name, elem.toString());
+        if (elem == null) {
+            _elem.put(name, null);
+        } else {
+            _elem.put(name, elem.toString());
+        }
     }
 
     /**
@@ -504,9 +508,6 @@ public final class JsonObject extends JsonUtility {
             for (int i=0, end=_names.size(); i<end; i++) {
                 name = _names.get(i);
                 elem = _elem.get(name);
-                if (elem == null) {
-                    continue;
-                }
                 product[i] = stringToken + _InsertEscape(name) + stringToken + " : " + elem;
             }
             return beginObjectToken + newLineToken + join(product, ",\n") + newLineToken + endObjectToken;

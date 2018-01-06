@@ -80,7 +80,7 @@ public class SceneDialog extends Scene {
     public void Show(String message) {
         Show("", message);
     }
-    
+
     public void Show(String title, String message) {
         _headerText.SetText(title);
         _contentsText.SetText(message);
@@ -89,5 +89,10 @@ public class SceneDialog extends Scene {
 
     public void Hide() {
         sceneManager.ReleaseScene(SceneID.SID_DIALOG);
+        if (!isProcessing) {
+            resetMatrix();
+            background(0);
+        }
+        exit();
     }
 }

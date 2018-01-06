@@ -1,41 +1,84 @@
 [
     {
-        "ID" : 1,
+        "ID" : 0,
         "Name" : "ミゼル",
-        "Explain" : "aaaaaaaaaa",
+        "Explain" : "レイヴ家の一人娘だが複雑な生い立ちを持つ。剣の扱いに長ける。",
         "Organization" : "ノーラス解放団",
         "Face Image Path" : "character/face/ミゼル.png",
         "Map Image Folder Path" : "character/map/ミゼル",
         "Importance" : "LEADER",
-        "Class" : "剣士",
+        "Class ID" : 0,
         "Level" : 4,
-        "Growth Correct" : {},
-        "Parameter Correct" : {}
+        "Growth Rate" : {
+            "HP" : 8,
+            "ATK" : 15,
+            "MAT" : 2,
+            "TEC" : 20,
+            "SPD" : 18,
+            "LUC" : 3,
+            "DEF" : 10,
+            "MDF" : 4,
+            "MOV" : 0,
+            "PRO" : 25
+        },
+        "Parameter" : {
+            "HP" : 24,
+            "ATK" : 6,
+            "MAT" : 0,
+            "TEC" : 7,
+            "SPD" : 6,
+            "LUC" : 2,
+            "DEF" : 4,
+            "MDF" : 2,
+            "MOV" : 4,
+            "PRO" : 12
+        },
+        "Skills" : [
+        ],
+        "Item List" : [
+            {
+                "Is Item" : false,
+                "ID" : 0,
+                "Endurance" : 24,
+                "Is Exchangeable" : true
+            },
+            {
+                "Is Item" : true,
+                "ID" : 1,
+                "Endurance" : 2,
+                "Is Exchangeable" : true
+            }
+        ],
+        "Equip Weapon Index" : 0
     },
     {
-        "ID" : 2,
+        "ID" : 1,
         "Name" : "イソP",
         "Explain" : "aaaaaaaaaa",
         "Organization" : "ノーラス解放団",
         "Face Image Path" : "character/face/isoP.png",
         "Map Image Folder Path" : "character/map/ミゼル",
         "Importance" : "NORMAL",
-        "Class" : "剣士",
+        "Class ID" : 0,
         "Level" : 4,
-        "Growth Correct" : {},
-        "Parameter Correct" : {}
+        "Growth Rate" : {},
+        "Parameter" : {},
+        "Skills" : [
+        ]
     },
     {
-        "ID" : 3,
+        "ID" : 2,
         "Name" : "カナト",
         "Explain" : "aaaaaaaaaa",
         "Organization" : "ノーラス解放団",
         "Face Image Path" : "character/face/カナト.png",
         "Map Image Folder Path" : "character/map/ミゼル",
         "Importance" : "NORMAL",
-        "Class" : "剣士",
+        "Class ID" : 0,
         "Level" : 4,
-        "Growth Correct" : {},
-        "Parameter Correct" : {}
+        "Growth Rate" : {},
+        "Parameter" : {},
+        "Skills" : [
+        ]
     }
 ]

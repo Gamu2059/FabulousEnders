@@ -39,9 +39,12 @@ public class FEWeaponClass extends FEData {
     /**
      使用可能武器として表示する画像のパス
      */
-    private String _imagePath;
-    public String GetImagePath() {
-        return _imagePath;
+    private String _iconImagePath;
+    public String GetIconImagePath() {
+        return _iconImagePath;
+    }
+    public void SetIconImagePath(String value) {
+        _iconImagePath = value;
     }
 
     /**
@@ -51,6 +54,9 @@ public class FEWeaponClass extends FEData {
     public int GetWeaponType() {
         return _weaponType;
     }
+    public void SetWeaponType(int value) {
+        _weaponType = value;
+    }
 
     /** 
      命中した場合のみ耐久値が減少するかどうか
@@ -59,17 +65,20 @@ public class FEWeaponClass extends FEData {
     public boolean IsWearOnHit() {
         return _isWearOnHit;
     }
+    public void SetWearOnHit(boolean value) {
+        _isWearOnHit = value;
+    }
 
     /**
      武器相性
      */
-    private HashMap<FEWeaponClass, FEWeaponCompatibility> _compatibility;
-    public HashMap<FEWeaponClass, FEWeaponCompatibility> GetCompatibility() {
+    private HashMap<Integer, FEWeaponCompatibility> _compatibility;
+    public HashMap<Integer, FEWeaponCompatibility> GetCompatibility() {
         return _compatibility;
     }
 
     public FEWeaponClass() {
-        _compatibility = new HashMap<FEWeaponClass, FEWeaponCompatibility>();
+        _compatibility = new HashMap<Integer, FEWeaponCompatibility>();
     }
 }
 
@@ -77,34 +86,68 @@ public class FEWeaponClass extends FEData {
  武器同士の相性特性。
  */
 public class FEWeaponCompatibility {
+    private int _weaponClassID;
+    public int GetWeaponClassID() {
+        return _weaponClassID;
+    }
+    public void SetWeaponClassID(int value) {
+        _weaponClassID = value;
+    }
+
+    private boolean _isBadCompatibility;
+    public boolean IsBadCompatibility() {
+        return _isBadCompatibility;
+    }
+    public void SetBadCompatibility(boolean value) {
+        _isBadCompatibility = value;
+    }
+
     private int _attackCorrect;
     public int GetAttackCorrect() {
         return _attackCorrect;
+    }
+    public void SetAttackCorrect(int value) {
+        _attackCorrect = value;
     }
 
     private int _defenseCorrect;
     public int GetDefenseCorrect() {
         return _defenseCorrect;
     }
+    public void SetDefenseCorrect(int value) {
+        _defenseCorrect = value;
+    }
 
     private int _accuracyCorrect;
     public int GetAccuracyCorrect() {
         return _accuracyCorrect;
+    }
+    public void SetAccuracyCorrect(int value) {
+        _accuracyCorrect = value;
     }
 
     private int _avoidCorrect;
     public int GetAvoidCorrect() {
         return _avoidCorrect;
     }
+    public void SetAvoidCorrect(int value) {
+        _avoidCorrect = value;
+    }
 
     private int _criticalCorrect;
     public int GetCriticalCorrect() {
         return _criticalCorrect;
     }
+    public void SetCriticalCorrect(int value) {
+        _criticalCorrect = value;
+    }
 
     private int _criticalAvoidCorrect;
     public int GetCriticalAvoidCorrect() {
         return _criticalAvoidCorrect;
+    }
+    public void SetCriticalAvoidCorrect(int value) {
+        _criticalAvoidCorrect = value;
     }
 }
 
@@ -289,14 +332,15 @@ public class FEUnit extends FEMapObject {
     }
 
     /**
-     参照保持
+     属するクラス
+     ID保持
      */
-    private FEClass _unitClass;
-    public FEClass GetUnitClass() {
-        return _unitClass;
+    private int _unitClassID;
+    public int GetUnitClassID() {
+        return _unitClassID;
     }
-    public void SetUnitClass(FEClass value) {
-        _unitClass = value;
+    public void SetUnitClassID(int value) {
+        _unitClassID = value;
     }
 
     /**
@@ -349,9 +393,6 @@ public class FEUnit extends FEMapObject {
     public FEUnitParameter GetBaseParameter() {
         return _baseParameter;
     }
-    public void SetBaseParameter(FEUnitParameter value) {
-        _baseParameter = value;
-    }
 
     /**
      クラス、装備中の武器、アイテム、ステート、スキル、地形効果によるパラメータ補正値
@@ -376,9 +417,6 @@ public class FEUnit extends FEMapObject {
     public FEUnitParameter GetBaseGrowthRate() {
         return _baseGrowthRate;
     }
-    public void SetBaseGrowthRate(FEUnitParameter value) {
-        _baseGrowthRate = value;
-    }
 
     /**
      クラス、装備中の武器、アイテムによる成長率補正
@@ -390,21 +428,23 @@ public class FEUnit extends FEMapObject {
 
     /**
      ユニット自身が習得しているスキルのリスト
+     ID保持
      */
-    private ArrayList<FESkill> _learnSkillList;
-    public ArrayList<FESkill> GetLearnSkillList() {
+    private ArrayList<Integer> _learnSkillList;
+    public ArrayList<Integer> GetLearnSkillList() {
         return _learnSkillList;
     }
-    public void SetLearnSkillList(ArrayList<FESkill> value) {
+    public void SetLearnSkillList(ArrayList<Integer> value) {
         _learnSkillList = value;
     }
 
     /**
      ユニット自身、クラス、装備中の武器、アイテム、ステート、スキルの中から実際に有効と判断されたスキルのリスト
      現在のスキルリスト
+     ID保持
      */
-    private ArrayList<FESkill> _skillList;
-    public ArrayList<FESkill> GetSkillList() {
+    private ArrayList<Integer> _skillList;
+    public ArrayList<Integer> GetSkillList() {
         return _skillList;
     }
 
@@ -423,10 +463,30 @@ public class FEUnit extends FEMapObject {
     public FEActualItem GetEquipWeapon() {
         return _equipWeapon;
     }
+    /**
+     武器を装備する。
+     もし手持ちのアイテムの中から選んだものなのであれば、先頭に持ってきて装備する。
+     全体の持ち物の中から選んだものなのであれば、持てるかどうかの判定をしてから先頭に持ってきて装備する。
+     */
     public void SetEquipWeapon(FEActualItem item) {
+        if (item == null) return;
         if (!(item.GetItem() instanceof FEWeapon)) return;
-        if (!_itemList.contains(item)) return;
+        if (_itemList.contains(item)) {
+            if (_itemList.indexOf(item) > 0) {
+                _itemList.remove(item);
+                _itemList.add(0, item);
+            }
+        } else {
+            if (_itemList.size() >= FEConst.CONFIG_MAX_HAVE_ITEMS) return;
+            _itemList.add(0, item);
+        }
         _equipWeapon = item;
+    }
+    /**
+     現在装備している武器を武装解除する。
+     */
+    public void DetachWeapon() {
+        _equipWeapon = null;
     }
 
     public FEUnit() {
@@ -435,13 +495,9 @@ public class FEUnit extends FEMapObject {
         _parameter = new FEUnitParameter();
         _baseGrowthRate = new FEUnitParameter();
         _correctGrowthRate = new FEUnitParameter();
-
-        _learnSkillList = new ArrayList<FESkill>();
-        _skillList = new ArrayList<FESkill>();
-
+        _learnSkillList = new ArrayList<Integer>();
+        _skillList = new ArrayList<Integer>();
         _itemList = new ArrayList<FEActualItem>();
-
-        _equipWeapon = new FEActualItem();
     }
 
     public void CopyTo(FEUnit own) {
@@ -450,21 +506,28 @@ public class FEUnit extends FEMapObject {
         own.SetOrganization(GetOrganization());
         own.SetFaceImagePath(GetFaceImagePath());
         own.SetImportance(GetImportance());
-        own.SetUnitClass(GetUnitClass());
+        own.SetUnitClassID(GetUnitClassID());
         own.SetLevel(GetLevel());
         own.SetExp(GetExp());
         own.SetHp(GetHp());
         GetBaseParameter().CopyTo(own.GetBaseParameter());
         GetBaseGrowthRate().CopyTo(own.GetBaseGrowthRate());
-        own.SetLearnSkillList((ArrayList<FESkill>)GetLearnSkillList().clone());
+        own.SetLearnSkillList((ArrayList<Integer>)GetLearnSkillList().clone());
         own.GetItemList().clear();
-        FEActualItem item;
+        FEActualItem item, toItem;
         for (int i=0; i<GetItemList().size(); i++) {
-            item = new FEActualItem();
-            GetItemList().get(i).CopyTo(item);
-            own.GetItemList().add(item);
+            item = GetItemList().get(i);
+            toItem = feManager.GetDataBase().CreateItem(item.GetItem().GetID(), item.IsItem());
+            if (toItem == null) continue;
+            item.CopyTo(toItem);
+            own.GetItemList().add(toItem);
         }
-        GetEquipWeapon().CopyTo(own.GetEquipWeapon());
+        int eIdx = GetItemList().indexOf(GetEquipWeapon());
+        if (eIdx >= 0 && eIdx < GetItemList().size()) {
+            own.SetEquipWeapon(own.GetItemList().get(eIdx));
+        } else {
+            own.DetachWeapon();
+        }
     }
 }
 
@@ -519,17 +582,28 @@ public class FEAttackPriority {
  参照保持専用。
  */
 public class FEClass extends FEData {
-    private String _imageFolderPath;
-    public String GetImageFolderPath() {
-        return _imageFolderPath;
+    private String _faceImagePath;
+    public String GetFaceImagePath() {
+        return _faceImagePath;
     }
-    public void SetImageFolderPath(String value) {
-        _imageFolderPath = value;
+    public void SetFaceImagePath(String value) {
+        _faceImagePath = value;
+    }
+
+    private String _mapImageFolderPath;
+    public String GetMapImageFolderPath() {
+        return _mapImageFolderPath;
+    }
+    public void SetMapImageFolderPath(String value) {
+        _mapImageFolderPath = value;
     }
 
     private int _classType;
     public int GetClassType() {
         return _classType;
+    }
+    public void SetClassType(int value) {
+        _classType = value;
     }
 
     /**
@@ -539,21 +613,32 @@ public class FEClass extends FEData {
     public boolean IsConsiderTileEffect() {
         return _isConsiderTileEffect;
     }
-
-    /**
-     参照保持
-     */
-    private ArrayList<FEWeaponClass> _wearableWeaponTypes;
-    public ArrayList<FEWeaponClass> GetWearableWeaponTypes() {
-        return _wearableWeaponTypes;
+    public void SetConsiderTileEffect(boolean value) {
+        _isConsiderTileEffect = value;
     }
 
     /**
-     スキルは参照保持
+     装備可能な武器の武器クラス
+     ID保持
      */
-    private HashMap<Integer, FESkill> _learnabeSkills;
-    public HashMap<Integer, FESkill> GetLearnabeSkills() {
+    private int[] _wearableWeaponTypes;
+    public int[] GetWearableWeaponTypes() {
+        return _wearableWeaponTypes;
+    }
+    public void SetWearableWeaponTypes(int[] value) {
+        _wearableWeaponTypes = value;
+    }
+
+    /**
+     習得できるスキル
+     スキルID, 習得レベル で対応
+     */
+    private HashMap<Integer, Integer> _learnabeSkills;
+    public HashMap<Integer, Integer> GetLearnabeSkills() {
         return _learnabeSkills;
+    }
+    public void SetLearnableSkills(HashMap<Integer, Integer> value) {
+        _learnabeSkills = value;
     }
 
     /**
@@ -563,23 +648,42 @@ public class FEClass extends FEData {
     public boolean CanUseCane() {
         return _canUseCane;
     }
-
-    /**
-     標準で再移動をサポートしているかどうか
-     */
-    private boolean _canReMove;
-    public boolean CanReMove() {
-        return _canReMove;
+    public void SetUseCane(boolean value) {
+        _canUseCane = value;
     }
 
-    private FEUnitParameter _paramBonus;
-    public FEUnitParameter GetParameterBonus() {
-        return _paramBonus;
+    /**
+     上位クラスかどうか
+     */
+    private boolean _isAdvancedClass;
+    public boolean IsAdvancedClass() {
+        return _isAdvancedClass;
+    }
+    public void SetAdvancedClass(boolean value) {
+        _isAdvancedClass = value;
+    }
+
+    private FEUnitParameter _changeBonus;
+    public FEUnitParameter GetChangeBonus() {
+        return _changeBonus;
     }
 
     private FEUnitParameter _growthBonus;
     public FEUnitParameter GetGrowthBonus() {
         return _growthBonus;
+    }
+
+    private FEUnitParameter _growthLimit;
+    public FEUnitParameter GetGrowthLimit() {
+        return _growthLimit;
+    }
+
+    public FEClass() {
+        super();
+        _changeBonus = new FEUnitParameter();
+        _growthBonus = new FEUnitParameter();
+        _growthLimit = new FEUnitParameter();
+        _learnabeSkills = new HashMap<Integer, Integer>();
     }
 }
 
@@ -588,27 +692,39 @@ public class FEClass extends FEData {
  参照保持専用。
  */
 public class FEItemBase extends FEData {
-    private String _imagePath;
-    public String GetImagePath() {
-        return _imagePath;
+    private String _iconImagePath;
+    public String GetIconImagePath() {
+        return _iconImagePath;
+    }
+    public void SetIconImagePath(String value) {
+        _iconImagePath = value;
     }
 
     /**
      使用エフェクト
      */
-    private String _usingEffectPath;
-    public String GetUsingEffectPath() {
-        return _usingEffectPath;
+    private String _effectImagePath;
+    public String GetEffectImagePath() {
+        return _effectImagePath;
+    }
+    public void SetEffectImagePath(String value) {
+        _effectImagePath = value;
     }
 
     private int _price;
     public int GetPrice() {
         return _price;
     }
+    public void SetPrice(int value) {
+        _price = value;
+    }
 
-    private int _weigth;
-    public int GetWeigth() {
-        return _weigth;
+    private int _weight;
+    public int GetWeight() {
+        return _weight;
+    }
+    public void SetWeight(int value) {
+        _weight = value;
     }
 
     /**
@@ -625,9 +741,20 @@ public class FEItemBase extends FEData {
         _endurance += value;
     }
 
+    private boolean _isSalable;
+    public boolean IsSalable() {
+        return _isSalable;
+    }
+    public void SetSalable(boolean value) {
+        _isSalable = value;
+    }
+
     private boolean _isImportant;
     public boolean IsImportant() {
         return _isImportant;
+    }
+    public void SetImportant(boolean value) {
+        _isImportant = value;
     }
 
     private boolean _isExchangeable;
@@ -647,6 +774,24 @@ public class FEItemBase extends FEData {
     public FEUnitParameter GetGrowthBonus() {
         return _growthBonus;
     }
+
+    /**
+     このアイテムを装備している間にだけ付与されるスキル。
+     ID保持
+     */
+    private int[] _grantedSkills;
+    public int[] GetGrantedSkills() {
+        return _grantedSkills;
+    }
+    public void SetGrantedSkills(int[] value) {
+        _grantedSkills = value;
+    }
+
+    public FEItemBase() {
+        super();
+        _paramBonus = new FEUnitParameter();
+        _growthBonus = new FEUnitParameter();
+    }
 }
 
 /**
@@ -654,44 +799,80 @@ public class FEItemBase extends FEData {
  参照保持専用。
  */
 public class FEWeapon extends FEItemBase {
-    private FEWeaponClass _weaponClass;
-    public FEWeaponClass GetWeaponClass() {
-        return _weaponClass;
+    /**
+     武器クラス
+     ID保持
+     */
+    private int _weaponClassID;
+    public int GetWeaponClassID() {
+        return _weaponClassID;
+    }
+    public void SetWeaponClassID(int value) {
+        _weaponClassID = value;
+    }
+
+    private int _powerType;
+    public int GetPowerType() {
+        return _powerType;
+    }
+    public void SetPowerType(int value) {
+        _powerType = value;
     }
 
     private int _power;
     public int GetPower() {
         return _power;
     }
+    public void SetPower(int value) {
+        _power = value;
+    }
 
     private int _minRange;
     public int GetMinRange() {
         return _minRange;
+    }
+    public void SetMinRange(int value) {
+        _minRange = value;
     }
 
     private int _maxRange;
     public int GetMaxRange() {
         return _maxRange;
     }
+    public void SetMaxRange(int value) {
+        _maxRange = value;
+    }
 
     private int _accuracy;
     public int GetAccuracy() {
         return _accuracy;
+    }
+    public void SetAccuracy(int value) {
+        _accuracy = value;
     }
 
     private int _critical;
     public int GetCritical() {
         return _critical;
     }
+    public void SetCritical(int value) {
+        _critical = value;
+    }
 
     private int _attackNum;
     public int GetAttackNum() {
         return _attackNum;
     }
+    public void SetAttackNum(int value) {
+        _attackNum = value;
+    }
 
     private int _wearableProficiency;
     public int GetWearableProficiency() {
         return _wearableProficiency;
+    }
+    public void SetWearableProficiency(int value) {
+        _wearableProficiency = value;
     }
 
     /**
@@ -701,24 +882,25 @@ public class FEWeapon extends FEItemBase {
     public int[] GetSpecialAttack() {
         return _specialAttack;
     }
-
-    private boolean _isOneway;
-    public boolean IsOneway() {
-        return _isOneway;
-    }
-
-    private boolean _isMagical;
-    public boolean IsMagical() {
-        return _isMagical;
+    public void SetSpecialAttack(int[] value) {
+        _specialAttack = value;
     }
 
     /**
      相手にステートを付与する確率
-     ステートは参照保持
+     ステートID, 付与パーセンテージで対応
      */
-    private HashMap<FEState, Integer> _stateGrant;
-    public HashMap<FEState, Integer> GetStateGrant() {
-        return _stateGrant;
+    private HashMap<Integer, Integer> _grantingStates;
+    public HashMap<Integer, Integer> GetGrantingStates() {
+        return _grantingStates;
+    }
+    public void SetGrantingStates(HashMap<Integer, Integer> value) {
+        _grantingStates = value;
+    }
+
+    public FEWeapon() {
+        super();
+        _grantingStates = new HashMap<Integer, Integer>();
     }
 }
 
@@ -727,34 +909,95 @@ public class FEWeapon extends FEItemBase {
  参照保持専用。
  */
 public class FEItem extends FEItemBase {
-    private int _kind;
-    public int GetKind() {
-        return _kind;
-    }
-
     private boolean _isCane;
     public boolean IsCane() {
         return _isCane;
+    }
+    public void SetCane(boolean value) {
+        _isCane = value;
     }
 
     private int _gainExp;
     public int GetGainExp() {
         return _gainExp;
     }
+    public void SetGainExp(int value) {
+        _gainExp = value;
+    }
 
+    /**
+     射程
+     */
     private int _range;
     public int GetRange() {
         return _range;
     }
+    public void SetRange(int value) {
+        _range = value;
+    }
 
+    /**
+     射程にパラメータ参照を選んだ場合の参照するパラメータの判定値
+     */
+    private int _rangeRef;
+    public int GetRangeRef() {
+        return _rangeRef;
+    }
+    public void SEtRangeRef(int value) {
+        _rangeRef = value;
+    }
+
+    /**
+     参照するパラメータに掛ける倍率
+     */
+    private float _refRate;
+    public float GetRefRate() {
+        return _refRate;
+    }
+    public void SetRefRate(float value) {
+        _refRate = value;
+    }
+
+    /**
+     固有射程
+     */
+    private int _uniqueRange;
+    public int GetUniqueRange() {
+        return _uniqueRange;
+    }
+    public void SetUniqueRange(int value) {
+        _uniqueRange = value;
+    }
+
+    /**
+     誰に対して使用することができるか
+     */
     private int _filter;
     public int GetFilter() {
         return _filter;
     }
+    public void SetFilter(int value) {
+        _filter = value;
+    }
 
-    private int _useEffect;
-    public int GetUseEffect() {
-        return _useEffect;
+    private int _itemFeature;
+    public int GetItemFeature() {
+        return _itemFeature;
+    }
+    public void SetItemFeature(int value) {
+        _itemFeature = value;
+    }
+
+    private JsonObject _itemFeatureParameter;
+    public JsonObject GetItemFeatureParameter() {
+        return _itemFeatureParameter;
+    }
+    public void SetItemFeatureParameter(JsonObject value) {
+        _itemFeatureParameter = value;
+    }
+
+    public FEItem() {
+        super();
     }
 }
 
@@ -763,8 +1006,19 @@ public class FEItem extends FEItemBase {
  */
 public class FEActualItem implements Copyable<FEActualItem> {
     /**
+     アイテムかどうか
+     falseの場合は、武器と看做す
+     生成される段階で判断するのでSetterを設けない
+     */
+    private boolean _isItem;
+    public boolean IsItem() {
+        return _isItem;
+    }
+
+    /**
      アイテム内容
-     参照保持
+     参照保持(意図的)
+     生成される段階で決定するのでSetterを設けない
      */
     private FEItemBase _item;
     public FEItemBase GetItem() {
@@ -796,19 +1050,19 @@ public class FEActualItem implements Copyable<FEActualItem> {
         _isExchangeable = value;
     }
 
-    public FEActualItem() {
-        _item = new FEItemBase();
-    }
-
-    public void Create(FEItemBase item) {
+    public FEActualItem(FEItemBase item, boolean isItem) {
         _item = item;
-        _endurance = item.GetEndurance();
-        _isExchangeable = item.IsExchangeable();
+        _isItem = isItem;
+        _endurance = _item.GetEndurance();
+        _isExchangeable = _item.IsExchangeable();
     }
 
     public void CopyTo(FEActualItem own) {
         if (own == null) return;
-        own.Create(_item);
+        own._item = _item;
+        own._isItem = _isItem;
+        own._endurance = _endurance;
+        own._isExchangeable = _isExchangeable;
     }
 }
 
@@ -817,27 +1071,55 @@ public class FEActualItem implements Copyable<FEActualItem> {
  参照保持専用。
  */
 public class FESkill extends FEData {
-    private String _imagePath;
-    public String GetImagePath() {
-        return _imagePath;
+    private String _iconImagePath;
+    public String GetIconImagePath() {
+        return _iconImagePath;
+    }
+    public void SetIconImagePath(String value) {
+        _iconImagePath = value;
     }
 
     private int _activateReference;
     public int GetActivateReference() {
         return _activateReference;
     }
+    public void SetActivateReference(int value) {
+        _activateReference = value;
+    }
 
     /**
      発動確率がパラメータ依存でない場合の固有確率
      */
-    private float _activateRate;
-    public float GetActivateRate() {
-        return _activateRate;
+    private int _uniqueActivateRate;
+    public int GetUniqueActivateRate() {
+        return _uniqueActivateRate;
+    }
+    public void SetUniqueActivateRate(int value) {
+        _uniqueActivateRate = value;
     }
 
     private int _skillFeature;
     public int GetSkillFeature() {
         return _skillFeature;
+    }
+    public void SetSkillFeature(int value) {
+        _skillFeature = value;
+    }
+
+    /**
+     スキル機能パラメータ
+     スキルによってパラメータの種類が異なるので柔軟に対応するためJSONで保持する
+     */
+    private JsonObject _skillFeatureParameter;
+    public JsonObject GetSkillFeatureParameter() {
+        return _skillFeatureParameter;
+    }
+    public void SetSkillFeatureParameter(JsonObject value) {
+        _skillFeatureParameter = value;
+    }
+
+    public FESkill() {
+        super();
     }
 }
 
@@ -846,19 +1128,36 @@ public class FESkill extends FEData {
  参照保持専用。
  */
 public class FEState extends FEData {
-    private String _imagePath;
-    public String GetImagePath() {
-        return _imagePath;
+    private String _iconImagePath;
+    public String GetIconImagePath() {
+        return _iconImagePath;
+    }
+    public void SetIconImagePath(String value) {
+        _iconImagePath = value;
+    }
+
+    private String _mapImagePath;
+    public String GetMapImagePath() {
+        return _mapImagePath;
+    }
+    public void SetMapImagePath(String value) {
+        _mapImagePath = value;
     }
 
     private boolean _isBadState;
     public boolean IsBadState() {
         return _isBadState;
     }
+    public void SetBadState(boolean value) {
+        _isBadState = value;
+    }
 
     private int _sustainTurn;
     public int GetSustainTurn() {
         return _sustainTurn;
+    }
+    public void SetSustainTurn(int value) {
+        _sustainTurn = value;
     }
 
     /**
@@ -868,15 +1167,24 @@ public class FEState extends FEData {
     public int GetRecoverOnTimes() {
         return _recoverOnTimes;
     }
+    public void SetRecoverOnTimes(int value) {
+        _recoverOnTimes = value;
+    }
 
     private int[] _sealedOption;
     public int[] GetSealedOption() {
         return _sealedOption;
     }
+    public void SetSealedOption(int[] value) {
+        _sealedOption = value;
+    }
 
     private int _actOption;
     public int GetActOption() {
         return _actOption;
+    }
+    public void SetActOption(int value) {
+        _actOption = value;
     }
 
     /**
@@ -886,28 +1194,52 @@ public class FEState extends FEData {
     public int GetReleaseOption() {
         return _releaseOption;
     }
+    public void SetReleaseOption(int value) {
+        _releaseOption = value;
+    }
 
     /**
      解除にかかる回数
      */
-    private int _releaseBy;
-    public int GetReleaseBy() {
-        return _releaseBy;
+    private int _releaseParameter;
+    public int GetReleaseParameter() {
+        return _releaseParameter;
+    }
+    public void SetReleaseParameter(int value) {
+        _releaseParameter = value;
     }
 
     private FEUnitParameter _paramBonus;
     public FEUnitParameter GetParameterBonus() {
         return _paramBonus;
     }
+
+    /**
+     このステートに掛かっている間にだけ付与されるスキル。
+     ID保持
+     */
+    private int[] _grantedSkills;
+    public int[] GetGrantedSkills() {
+        return _grantedSkills;
+    }
+    public void SetGrantedSkills(int[] value) {
+        _grantedSkills = value;
+    }
+
+    public FEState() {
+        super();
+        _paramBonus = new FEUnitParameter();
+    }
 }
 
 /**
  ユニットのステートとして実際に扱うデータ。
  */
-public class FEActualState implements Cloneable {
+public class FEActualState implements Copyable<FEActualState> {
     /**
      ステート内容
-     参照保持
+     参照保持(意図的)
+     生成される段階で決定するのでSetterを設けない
      */
     private FEState _state;
     public FEState GetState() {
@@ -928,11 +1260,15 @@ public class FEActualState implements Cloneable {
         _remainTurn += value;
     }
 
-    public FEActualState clone() {
-        FEActualState own = new FEActualState();
+    public FEActualState(FEState state) {
+        _state = state;
+        _remainTurn = _state.GetSustainTurn();
+    }
+
+    public void CopyTo(FEActualState own) {
+        if (own == null) return;
         own._state = _state;
         own._remainTurn = _remainTurn;
-        return own;
     }
 }
 
@@ -990,6 +1326,7 @@ public class FETerrainEffect extends FEData {
     }
 
     public FETerrainEffect() {
+        super();
         _moveCosts = new HashMap<Integer, Integer>();
     }
 }
@@ -1000,14 +1337,15 @@ public class FETerrainEffect extends FEData {
  */
 public class FETerrain extends FEData {
     /**
-     参照保持
+     地形効果
+     ID保持
      */
-    private FETerrainEffect _effect;
-    public FETerrainEffect GetEffect() {
-        return _effect;
+    private int _effectID;
+    public int GetEffectID() {
+        return _effectID;
     }
-    public void SetEffect(FETerrainEffect value) {
-        _effect = value;
+    public void SetEffectID(int value) {
+        _effectID = value;
     }
 
     /**
@@ -1016,6 +1354,13 @@ public class FETerrain extends FEData {
     private String _mapImagePath;
     public String GetMapImagePath() {
         return _mapImagePath;
+    }
+    public void SetMapImagePath(String value) {
+        _mapImagePath = value;
+    }
+
+    public FETerrain() {
+        super();
     }
 }
 
@@ -1094,7 +1439,7 @@ public class FEMapElement implements Comparable<FEMapElement> {
     public FEMapElement() {
         _position = new PVector();
     }
-    
+
     public boolean IsSamePosition(int x, int y) {
         return x == _position.x && y == _position.y;
     }

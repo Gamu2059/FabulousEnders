@@ -1,5 +1,24 @@
 [
     {
-        "Name" : "剣士"
+        "ID" : 0,
+        "Name" : "剣士",
+        "Explain" : "剣を扱うことができる。速さは高いが守備が低め。",
+        "Face Image Path" : "",
+        "Map Image Folder Path" : "",
+        "Class Type" : "NORMAL",
+        "Is Consider Tile Effect" : true,
+        "Wearable Weapon Class ID" : [
+            0
+        ],
+        "Can Use Cane" : false,
+        "Is Advanced Class" : false,
+        "Class Change Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Growth Limit" : {
+        },
+        "Learnable Skills" : [
+        ]
     }
 ]

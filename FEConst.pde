@@ -59,61 +59,22 @@ public class FEConst {
     // Skill
     //////////////////////////////////////////////////////
     // スキル発動率の参照
-    public static final int SKILL_REF_HP = -2000;
-    public static final int SKILL_REF_ATK = -2001;
-    public static final int SKILL_REF_MAT = -2002;
-    public static final int SKILL_REF_TEC = -2003;
-    public static final int SKILL_REF_SPD = -2004;
-    public static final int SKILL_REF_LUC = -2005;
-    public static final int SKILL_REF_DEF = -2006;
-    public static final int SKILL_REF_MDF = -2007;
-    public static final int SKILL_REF_MOV = -2008;
-    public static final int SKILL_REF_PRO = -2009;
-    public static final int SKILL_REF_PROBABILITY = -2010;
+    public static final int REF_HP = -2000;
+    public static final int REF_ATK = -2001;
+    public static final int REF_MAT = -2002;
+    public static final int REF_TEC = -2003;
+    public static final int REF_SPD = -2004;
+    public static final int REF_LUC = -2005;
+    public static final int REF_DEF = -2006;
+    public static final int REF_MDF = -2007;
+    public static final int REF_MOV = -2008;
+    public static final int REF_PRO = -2009;
+    public static final int REF_UNI = -2010;
     
     // スキルの特徴
+    public static final int SKILL_FET_NONE = -2100;
     // 先制攻撃
-    public static final int SKILL_FET_PREEMPTIVE = -2100;
-    // 連続攻撃
-    public static final int SKILL_FET_CONTINUOUS = -2101;
-    // 再攻撃
-    public static final int SKILL_FET_REATTACK = -2102;
-    // ダメージ吸収(攻撃側スキル)
-    public static final int SKILL_FET_ABSORPTION = -2103;
-    // 物理ダメージ半減
-    public static final int SKILL_FET_HALVING_PHYSICS = -2104;
-    // 魔法ダメージ半減
-    public static final int SKILL_FET_HALVING_MAGIC = -2105;
-    // 物理ダメージ無効化
-    public static final int SKILL_FET_INVALIDATE_PHYSICS = -2106;
-    // 魔法ダメージ無効化
-    public static final int SKILL_FET_INVALIDATE_MAGIC = -2107;
-    // 反撃
-    public static final int SKILL_FET_COUNTER_ATTACK = -2108;
-    // 必中
-    public static final int SKILL_FET_HITTING = -2109;
-    // 反撃会心必中
-    public static final int SKILL_FET_COUNTER_CRITICAL = -2110;
-    // 経験値倍増
-    public static final int SKILL_FET_DOUBLE_EXP = -2111;
-    // 行動回復(相手に対して)
-    public static final int SKILL_FET_RECOVER_MOBILITY = -2112;
-    // 再行動
-    public static final int SKILL_FET_REACT = -2113;
-    // 再移動
-    public static final int SKILL_FET_REMOVE = -2114;
-    // 指揮C
-    public static final int SKILL_FET_COMMAND_C = -2115;
-    // 指揮B
-    public static final int SKILL_FET_COMMAND_B = -2116;
-    // 指揮A
-    public static final int SKILL_FET_COMMAND_A = -2117;
-    // 指揮S
-    public static final int SKILL_FET_COMMAND_S = -2118;
-    // 防御半減攻撃
-    public static final int SKILL_FET_DEFENSE_HALF = -2119;
-    // 防御無視攻撃
-    public static final int SKILL_FET_DEFENSE_INVALIDATE = -2120;
+    public static final int SKILL_FET_PREEMPTIVE = -2101;
     
     //////////////////////////////////////////////////////
     // State
@@ -139,14 +100,9 @@ public class FEConst {
     //////////////////////////////////////////////////////
     // Item
     //////////////////////////////////////////////////////
-    // 種類
-    public static final int ITEM_KIND_CANT_USE = -4000;
-    public static final int ITEM_KIND_RECOVER_HP = -4001;
-    public static final int ITEM_KIND_DOPING = -4002;
-    public static final int ITEM_KIND_CLASS_CHANGE = -4002;
-    public static final int ITEM_KIND_LEARN_SKILL = -4003;
-    public static final int ITEM_KIND_UNLOCK = -4004;
-    public static final int ITEM_KIND_GAIN_STATE = -4005;
+    // アイテムの特徴
+    public static final int ITEM_FET_NONE = -4000;
+    public static final int ITEM_FET_RECOVER_HP = -4001;
     
     // 使用範囲
     public static final int ITEM_RANGE_OWN = -4100;
@@ -156,6 +112,14 @@ public class FEConst {
     // 使用フィルタ
     public static final int ITEM_FILTER_OWN = -4200;
     public static final int ITEM_FILTER_OTHER = -4201;
+    
+    //////////////////////////////////////////////////////
+    // Weapon
+    //////////////////////////////////////////////////////
+    // 威力タイプ
+    public static final int WEAPON_POWER_PHYSICS = -4500;
+    public static final int WEAPON_POWER_MAGIC = -4501;
+    public static final int WEAPON_POWER_UNKNOWN = -4502;
     
     //////////////////////////////////////////////////////
     // Map Object
@@ -182,4 +146,17 @@ public class FEConst {
     public static final int UNIT_IMPORTANCE_NORMAL = -6200;
     public static final int UNIT_IMPORTANCE_SUB_LEADER = -6201;
     public static final int UNIT_IMPORTANCE_LEADER = -6202;
+    
+    //////////////////////////////////////////////////////
+    // Battle Map
+    //////////////////////////////////////////////////////
+    // 先攻後攻(プレイヤーが)
+    public static final int BATTLE_PHASE_FIRST = -7000;
+    public static final int BATTLE_PHASE_AFTER = -7001;
+    
+    // 操作モード
+    public static final int BATTLE_MAP_MODE_NORMAL = -7000;
+    public static final int BATTLE_MAP_MODE_ACTIVE = -7001;
+    public static final int BATTLE_MAP_MODE_MOVING = -7002;
+    public static final int BATTLE_MAP_MODE_BACK_MENU = -7003;
 }

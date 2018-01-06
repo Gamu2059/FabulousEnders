@@ -1,0 +1,15 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "No Name",
+        "Avoid" : 0,
+        "Defense" : 0,
+        "MDefense" : 0,
+        "Recover" : 0,
+        "NORMAL" : 1,
+        "SORCERER" : 1,
+        "ARMOR" : 1,
+        "RIDER" : 1,
+        "FLYER" : 1
+    }
+]
