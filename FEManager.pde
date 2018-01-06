@@ -699,11 +699,12 @@ public class FEBattleMapManager {
             // プレイヤーユニットの出撃地点情報
             JsonArray playerPositions = json.GetJsonArray("Player Positions");
             if (playerPositions != null) {
+                FEProgressManager fePm = feManager.GetProgressDataBase();
                 JsonObject playerPosition;
                 FEMapElement elem;
                 FEUnit unit;
                 int x, y;
-                int unFixedNum = 0;
+                int unFixNum = 0;
                 _mapPlayerObjects.clear();
                 for (int i=0; i<playerPositions.Size(); i++) {
                     playerPosition = playerPositions.GetJsonObject(i);
@@ -714,18 +715,38 @@ public class FEBattleMapManager {
                     elem = new FEMapElement();
                     elem.GetPosition().x = x;
                     elem.GetPosition().y = y;
-                    unit = feManager.GetProgressDataBase().GetPlayerUnitOnID(playerPosition.GetInt("ID", -99999));
+                    unit = fePm.GetPlayerUnitOnID(playerPosition.GetInt("ID", -99999));
                     if (unit != null) {
                         elem.SetFixElement(true);
                         elem.SetMapObject(unit);
                     } else {
-                        unFixedNum++;
+                        unFixNum++;
                     }
                     _mapPlayerObjects.add(elem);
                 }
                 _sortableUnitNum = _mapPlayerObjects.size();
                 // 固定されていないユニットの中から出撃地点に埋め合わせを行う
-                int remainNum = min(_);
+                ArrayList<FEUnit> _units = feManager.GetProgressDataBase().GetPlayerUnits();
+                boolean flag;
+                for (int i=0; i<_units.size() || unFixNum > 0; i++) {
+                    unit = _units.get(i);
+                    flag = false;
+                    for (int j=0; j<_mapPlayerObjects.size(); j++) {
+                        elem = _mapPlayerObjects.get(j);
+                        if (elem.GetMapObject() == unit) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag) continue;
+                    for (int j=0; j<_mapPlayerObjects.size(); j++) {
+                        elem = _mapPlayerObjects.get(j);
+                        if (elem.GetMapObject() != null) continue;
+                        elem.SetMapObject(unit);
+                        unFixNum--;
+                        break;
+                    }
+                }
             }
         } 
         catch(Exception e) {
