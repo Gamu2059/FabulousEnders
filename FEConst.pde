@@ -153,13 +153,17 @@ public class FEConst {
     //////////////////////////////////////////////////////
     // Battle Map
     //////////////////////////////////////////////////////
+    public static final int BATTLE_SORTIE_MODE_NONE = -7000;
+    public static final int BATTLE_SORTIE_MODE_IN_PREPARATION = -7001;
+    public static final int BATTLE_SORTIE_MODE_SORTIE = -7002;
+    
     // 先攻後攻(プレイヤーが)
-    public static final int BATTLE_PHASE_FIRST = -7000;
-    public static final int BATTLE_PHASE_AFTER = -7001;
+    public static final int BATTLE_PHASE_FIRST = -7100;
+    public static final int BATTLE_PHASE_AFTER = -7101;
     
     // 操作モード
-    public static final int BATTLE_MAP_MODE_NORMAL = -7000;
-    public static final int BATTLE_MAP_MODE_ACTIVE = -7001;
-    public static final int BATTLE_MAP_MODE_MOVING = -7002;
-    public static final int BATTLE_MAP_MODE_BACK_MENU = -7003;
+    public static final int BATTLE_MAP_MODE_NORMAL = -7200;
+    public static final int BATTLE_MAP_MODE_ACTIVE = -7201;
+    public static final int BATTLE_MAP_MODE_MOVING = -7202;
+    public static final int BATTLE_MAP_MODE_BACK_MENU = -7203;
 }

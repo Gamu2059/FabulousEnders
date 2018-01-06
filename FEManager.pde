@@ -474,12 +474,14 @@ public class FEBattleMapManager {
         return _mapImagePath;
     }
 
-    /**
-     マップ規模
-     */
-    private PVector _mapSize;
-    public PVector GetMapSize() {
-        return _mapSize;
+    private int _mapWidth;
+    public int GetMapWidth() {
+        return _mapWidth;
+    }
+
+    private int _mapHeight;
+    public int GetMapHeight() {
+        return _mapHeight;
     }
 
     /**
@@ -507,14 +509,13 @@ public class FEBattleMapManager {
     }
 
     /**
-     自軍と敵軍のフェーズ判別
+     マップの現在の状態。
+     通常、出撃準備中、戦闘中など
      */
-    private int _phase;
-
-    /**
-     操作モード
-     */
-    private int _mode;
+    private int _mapMode;
+    public int GetMapMode() {
+        return _mapMode;
+    }
 
     /**
      経過ターン
@@ -537,6 +538,7 @@ public class FEBattleMapManager {
     public int GetSortableUnitNum() {
         return _sortableUnitNum;
     }
+
 
     /**
      現在の出撃しているプレイヤーユニットのリスト
@@ -600,6 +602,14 @@ public class FEBattleMapManager {
     }
 
     /**
+     マップ上のプレイヤーの存在情報
+     */
+    private ArrayList<FEMapElement> _mapPlayerObjects;
+    public ArrayList<FEMapElement> GetMapPlayerObjects() {
+        return _mapPlayerObjects;
+    }
+
+    /**
      マップ上にいるユニットやイベントの存在情報
      */
     private ArrayList<FEMapElement> _mapElements;
@@ -624,8 +634,7 @@ public class FEBattleMapManager {
     }
 
     public FEBattleMapManager() {
-        _mapSize = new PVector();
-
+        _mapWidth = _mapHeight = 0;
         _elapsedTurn = 0;
         _sortieUnits = new ArrayList<FEUnit>();
         _enemyUnits = new HashMap<Integer, FEOtherUnit>();
@@ -634,6 +643,7 @@ public class FEBattleMapManager {
         _terrains = new FETerrain[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _hazardAreas = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _actionRanges = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+        _mapPlayerObjects = new ArrayList<FEMapElement>();
         _mapElements = new ArrayList<FEMapElement>();
         _localVariables = new PHash<Integer>();
         _localSwitches = new PHash<Boolean>();
@@ -651,31 +661,76 @@ public class FEBattleMapManager {
             // マップ基本情報
             _mapName = json.GetString("Name", "No Data");
             _mapImagePath = json.GetString("Image Path", null);
-            _mapSize.x = json.GetInt("Width", -1);
-            _mapSize.y = json.GetInt("Height", -1);
+            _mapWidth = json.GetInt("Width", -1);
+            _mapHeight = json.GetInt("Height", -1);
 
+            // 戦闘開始に関わるフラグ
+            _isImmediatelySortie = json.GetBoolean("Immediately Sortie", true);
+            _isSkipPreparation = json.GetBoolean("Skip Preparation", true);
+            _isFirstPhase = json.GetBoolean("First Phase", true);
+
+            // 地形情報
+            boolean[][] terrain = new boolean[_mapHeight][_mapWidth];
+            FETerrain defTerrain = feManager.GetDataBase().GetTerrains().get(json.GetInt("Default Terrain ID", 0));
+            JsonArray terrainArray = json.GetJsonArray("Terrains");
+            JsonObject terrainObj;
+            if (terrainArray != null) {
+                int x, y, id;
+                boolean exsId;
+                for (int i=0; i<terrainArray.Size(); i++) {
+                    terrainObj = terrainArray.GetJsonObject(i);
+                    if (terrainObj == null) continue;
+                    x = terrainObj.GetInt("x", -1);
+                    y = terrainObj.GetInt("y", -1);
+                    id = terrainObj.GetInt("ID", -99999);
+                    exsId = feManager.GetDataBase().GetTerrains().containsKey(id);
+                    if (x == -1 || y == -1 || !exsId) continue;
+                    _terrains[y][x] = feManager.GetDataBase().GetTerrains().get(id);
+                    terrain[y][x] = true;
+                }
+            }
+            for (int i=0; i<_mapHeight; i++) {
+                for (int j=0; j<_mapWidth; j++) {
+                    if (terrain[i][j]) continue;
+                    _terrains[i][j] = defTerrain;
+                }
+            }
+
+            // プレイヤーユニットの出撃地点情報
             JsonArray playerPositions = json.GetJsonArray("Player Positions");
             if (playerPositions != null) {
                 JsonObject playerPosition;
-                int id;
-                _sortableUnitNum = playerPositions.Size();
-                _mapElements.clear();
-                for (int i=0; i<_sortableUnitNum; i++) {
+                FEMapElement elem;
+                FEUnit unit;
+                int x, y;
+                int unFixedNum = 0;
+                _mapPlayerObjects.clear();
+                for (int i=0; i<playerPositions.Size(); i++) {
                     playerPosition = playerPositions.GetJsonObject(i);
-                    FEMapElement elem = new FEMapElement();
-                    elem.GetPosition().x = playerPosition.GetInt("x", -1);
-                    elem.GetPosition().y = playerPosition.GetInt("y", -1);
-                    id = playerPosition.GetInt("ID", -99999);
-                    if (id != -99999) {
-                        elem.SetMapObject(feManager.GetProgressDataBase().GetPlayerUnitOnID(id));
+                    if (playerPosition == null) continue;
+                    x = playerPosition.GetInt("x", -1);
+                    y = playerPosition.GetInt("y", -1);
+                    if (x < 0 || x >= _mapWidth || y < 0 || y >= _mapHeight) continue;
+                    elem = new FEMapElement();
+                    elem.GetPosition().x = x;
+                    elem.GetPosition().y = y;
+                    unit = feManager.GetProgressDataBase().GetPlayerUnitOnID(playerPosition.GetInt("ID", -99999));
+                    if (unit != null) {
+                        elem.SetFixElement(true);
+                        elem.SetMapObject(unit);
+                    } else {
+                        unFixedNum++;
                     }
-                    _mapElements.add(elem);
+                    _mapPlayerObjects.add(elem);
                 }
+                _sortableUnitNum = _mapPlayerObjects.size();
+                // 固定されていないユニットの中から出撃地点に埋め合わせを行う
+                int remainNum = min(_);
             }
         } 
         catch(Exception e) {
             println(e);
-            dialog.Show("データの読込に失敗", "マップデータの読込に失敗しました。\npath = " + path);
+            dialog.Show("エラー", "マップデータの読込に失敗しました。\npath = " + path);
         }
     }
 
