@@ -89,10 +89,7 @@ public class SceneDialog extends Scene {
 
     public void Hide() {
         sceneManager.ReleaseScene(SceneID.SID_DIALOG);
-        if (!isProcessing) {
-            resetMatrix();
-            background(0);
-        }
+        background(0);
         exit();
     }
 }

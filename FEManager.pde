@@ -40,8 +40,8 @@ public class FEManager {
     }
 
     public void Init() {
-        config.Load("data/config/config.json");
-        dataBase.Load("data/database");
+        config.Load(FEConst.CONFIG_PATH + "config.json");
+        dataBase.Load(FEConst.DATABASE_PATH);
     }
 
     /**
@@ -49,12 +49,13 @@ public class FEManager {
      */
     public void StartGame() {
         try {
-            String path = "data/database/start.json";
+            String path = FEConst.DATABASE_PATH + "start.json";
             progressManager.LoadSavingData(path);
             battleMapManager.LoadSavingData(path);
         } 
         catch(Exception e) {
-            println(111);
+            println(e);
+            dialog.Show("エラー", "ゲームデータのロードに失敗しました。");
         }
     }
 
@@ -178,7 +179,7 @@ public class FEDataBase {
         String path;
 
         // タイル効果
-        path = dataBaseFolderPath + "/terrain_effect.json";
+        path = dataBaseFolderPath + "terrain_effect.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FETerrainEffect effect;
@@ -194,7 +195,7 @@ public class FEDataBase {
         }
 
         // タイル
-        path = dataBaseFolderPath + "/terrain.json";
+        path = dataBaseFolderPath + "terrain.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FETerrain terrain;
@@ -210,7 +211,7 @@ public class FEDataBase {
         }
 
         // 武器クラス
-        path = dataBaseFolderPath + "/weapon_class.json";
+        path = dataBaseFolderPath + "weapon_class.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEWeaponClass weaponClass;
@@ -226,7 +227,7 @@ public class FEDataBase {
         }
 
         // ステート
-        path = dataBaseFolderPath + "/state.json";
+        path = dataBaseFolderPath + "state.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEState state;
@@ -242,7 +243,7 @@ public class FEDataBase {
         }
 
         // スキル
-        path = dataBaseFolderPath + "/skill.json";
+        path = dataBaseFolderPath + "skill.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FESkill skill;
@@ -258,7 +259,7 @@ public class FEDataBase {
         }
 
         // アイテム
-        path = dataBaseFolderPath + "/item.json";
+        path = dataBaseFolderPath + "item.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEItem item;
@@ -274,7 +275,7 @@ public class FEDataBase {
         }
 
         // 武器
-        path = dataBaseFolderPath + "/weapon.json";
+        path = dataBaseFolderPath + "weapon.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEWeapon weapon;
@@ -290,7 +291,7 @@ public class FEDataBase {
         }
 
         // クラス
-        path = dataBaseFolderPath + "/class.json";
+        path = dataBaseFolderPath + "class.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEClass unitClass;
@@ -306,7 +307,7 @@ public class FEDataBase {
         }
 
         // プレイヤーユニット
-        path = dataBaseFolderPath + "/unit.json";
+        path = dataBaseFolderPath + "unit.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEUnit unit;
@@ -424,23 +425,24 @@ public class FEProgressManager {
         _globalSwitches = new PHash<Boolean>();
     }
 
+    /**
+     セーブデータから情報を完全にロードする。
+     */
     public void LoadSavingData(String dataPath) throws Exception {
         JsonObject json = new JsonObject();
         json.LoadWithThrowException(dataPath);
 
-        // money
-        int money = json.GetInt("Money", -1);
-        if (money >= 0) {
-            _money = money;
-        }
+        // お金
+        _money = json.GetInt("Money", -1);
 
-        // player units
+        // プレイヤーユニット
         JsonArray units = json.GetJsonArray("Player Units");
-        JsonObject unit;
         if (units != null) {
+            JsonObject unit;
             FEUnit playerUnit, copyBase;
             for (int i=0; i<units.Size(); i++) {
                 unit = units.GetJsonObject(i);
+                if (unit == null) continue;
                 playerUnit = new FEUnit();
                 copyBase = feManager.GetDataBase().GetPlayerUnits().get(unit.GetInt("ID", -99999));
                 if (copyBase == null) continue;
@@ -1232,6 +1234,8 @@ public class FEJsonUtility {
                 item = array.GetJsonObject(i);
                 if (item == null) continue;
                 actItem = feManager.GetDataBase().CreateItem(item.GetInt("ID", -99999), item.GetBoolean("Is Item", true));
+                actItem.SetEndurance(item.GetInt("Endurance", 0));
+                actItem.SetExchangeable(item.GetBoolean("Is Exchangeable", true));
                 if (actItem != null) {
                     unit.GetItemList().add(actItem);
                 }

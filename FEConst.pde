@@ -1,4 +1,7 @@
 public class FEConst {
+    public static final String CONFIG_PATH = "data/config/";
+    public static final String DATABASE_PATH = "data/database/";
+    public static final String SAVE_PATH = "data/save/";
     public static final String MAP_PATH = "data/map/";
     
     public static final int SYSTEM_MAP_GRID_PX = 40;
