@@ -39,7 +39,7 @@ public class FESceneBattleMap extends Scene {
         FEBattleMapManager bm = feManager.GetBattleMapManager();
         SceneObjectTransform objT = mapImageObj.GetTransform();
 
-        objT.SetSize(bm.GetMapSize().x * FEConst.SYSTEM_MAP_GRID_PX, bm.GetMapSize().y * FEConst.SYSTEM_MAP_GRID_PX);
+        objT.SetSize(bm.GetMapWidth() * FEConst.SYSTEM_MAP_GRID_PX, bm.GetMapHeight() * FEConst.SYSTEM_MAP_GRID_PX);
         mapImage.SetUsingImageName(bm.GetMapImagePath());
     }
 }
@@ -181,8 +181,8 @@ public class FEMapMouseCursor extends SceneObjectBehavior {
         _objT = GetObject().GetTransform();
         _in = new float[2];
         _out = new float[2];
-        _mapW = (int)feManager.GetBattleMapManager().GetMapSize().x;
-        _mapH = (int)feManager.GetBattleMapManager().GetMapSize().y;
+        _mapW = feManager.GetBattleMapManager().GetMapWidth();
+        _mapH = feManager.GetBattleMapManager().GetMapHeight();
     }
 
     /**
@@ -333,7 +333,7 @@ public class FEMapUnitViewer extends SceneObjectBehavior {
             }
             _objT.SetScale(1, 1);
 
-            boolean f = _mapCur.GetMapY() < feManager.GetBattleMapManager().GetMapSize().y / 2;
+            boolean f = _mapCur.GetMapY() < feManager.GetBattleMapManager().GetMapHeight() / 2;
             _objT.SetTranslation(0, (f?1:-1) * ((height - _objT.GetSize().y) / 2 - 5));
             FEUnit unit = (FEUnit)elem.GetMapObject();
             if (unit.GetFaceImagePath() == null) {

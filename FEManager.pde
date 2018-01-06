@@ -40,8 +40,8 @@ public class FEManager {
     }
 
     public void Init() {
-        config.Load("data/config/config.json");
-        dataBase.Load("data/database");
+        config.Load(FEConst.CONFIG_PATH + "config.json");
+        dataBase.Load(FEConst.DATABASE_PATH);
     }
 
     /**
@@ -49,12 +49,13 @@ public class FEManager {
      */
     public void StartGame() {
         try {
-            String path = "data/database/start.json";
+            String path = FEConst.DATABASE_PATH + "start.json";
             progressManager.LoadSavingData(path);
             battleMapManager.LoadSavingData(path);
         } 
         catch(Exception e) {
-            println(111);
+            println(e);
+            dialog.Show("エラー", "ゲームデータのロードに失敗しました。");
         }
     }
 
@@ -178,7 +179,7 @@ public class FEDataBase {
         String path;
 
         // タイル効果
-        path = dataBaseFolderPath + "/terrain_effect.json";
+        path = dataBaseFolderPath + "terrain_effect.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FETerrainEffect effect;
@@ -194,7 +195,7 @@ public class FEDataBase {
         }
 
         // タイル
-        path = dataBaseFolderPath + "/terrain.json";
+        path = dataBaseFolderPath + "terrain.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FETerrain terrain;
@@ -210,7 +211,7 @@ public class FEDataBase {
         }
 
         // 武器クラス
-        path = dataBaseFolderPath + "/weapon_class.json";
+        path = dataBaseFolderPath + "weapon_class.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEWeaponClass weaponClass;
@@ -226,7 +227,7 @@ public class FEDataBase {
         }
 
         // ステート
-        path = dataBaseFolderPath + "/state.json";
+        path = dataBaseFolderPath + "state.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEState state;
@@ -242,7 +243,7 @@ public class FEDataBase {
         }
 
         // スキル
-        path = dataBaseFolderPath + "/skill.json";
+        path = dataBaseFolderPath + "skill.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FESkill skill;
@@ -258,7 +259,7 @@ public class FEDataBase {
         }
 
         // アイテム
-        path = dataBaseFolderPath + "/item.json";
+        path = dataBaseFolderPath + "item.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEItem item;
@@ -274,7 +275,7 @@ public class FEDataBase {
         }
 
         // 武器
-        path = dataBaseFolderPath + "/weapon.json";
+        path = dataBaseFolderPath + "weapon.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEWeapon weapon;
@@ -290,7 +291,7 @@ public class FEDataBase {
         }
 
         // クラス
-        path = dataBaseFolderPath + "/class.json";
+        path = dataBaseFolderPath + "class.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEClass unitClass;
@@ -306,7 +307,7 @@ public class FEDataBase {
         }
 
         // プレイヤーユニット
-        path = dataBaseFolderPath + "/unit.json";
+        path = dataBaseFolderPath + "unit.json";
         try {
             jsonArray.LoadWithThrowException(path);
             FEUnit unit;
@@ -416,6 +417,18 @@ public class FEProgressManager {
         return _globalSwitches;
     }
 
+    /**
+     場面の状態
+     拠点にいるか、出撃しているか、など
+     */
+    private int _sceneMode;
+    public int GetSceneMode() {
+        return _sceneMode;
+    }
+    public void SetSceneMoce(int value) {
+        _sceneMode = value;
+    }
+
     public FEProgressManager() {
         _money = 0;
         _items = new ArrayList<FEItemBase>();
@@ -424,23 +437,24 @@ public class FEProgressManager {
         _globalSwitches = new PHash<Boolean>();
     }
 
+    /**
+     セーブデータから情報を完全にロードする。
+     */
     public void LoadSavingData(String dataPath) throws Exception {
         JsonObject json = new JsonObject();
         json.LoadWithThrowException(dataPath);
 
-        // money
-        int money = json.GetInt("Money", -1);
-        if (money >= 0) {
-            _money = money;
-        }
+        // お金
+        _money = json.GetInt("Money", -1);
 
-        // player units
+        // プレイヤーユニット
         JsonArray units = json.GetJsonArray("Player Units");
-        JsonObject unit;
         if (units != null) {
+            JsonObject unit;
             FEUnit playerUnit, copyBase;
             for (int i=0; i<units.Size(); i++) {
                 unit = units.GetJsonObject(i);
+                if (unit == null) continue;
                 playerUnit = new FEUnit();
                 copyBase = feManager.GetDataBase().GetPlayerUnits().get(unit.GetInt("ID", -99999));
                 if (copyBase == null) continue;
@@ -472,12 +486,14 @@ public class FEBattleMapManager {
         return _mapImagePath;
     }
 
-    /**
-     マップ規模
-     */
-    private PVector _mapSize;
-    public PVector GetMapSize() {
-        return _mapSize;
+    private int _mapWidth;
+    public int GetMapWidth() {
+        return _mapWidth;
+    }
+
+    private int _mapHeight;
+    public int GetMapHeight() {
+        return _mapHeight;
     }
 
     /**
@@ -505,14 +521,13 @@ public class FEBattleMapManager {
     }
 
     /**
-     自軍と敵軍のフェーズ判別
+     現在の出撃状態。
+     通常、出撃準備中、出撃中など
      */
-    private int _phase;
-
-    /**
-     操作モード
-     */
-    private int _mode;
+    private int _sortieMode;
+    public int GetSortieMode() {
+        return _sortieMode;
+    }
 
     /**
      経過ターン
@@ -535,6 +550,7 @@ public class FEBattleMapManager {
     public int GetSortableUnitNum() {
         return _sortableUnitNum;
     }
+
 
     /**
      現在の出撃しているプレイヤーユニットのリスト
@@ -598,6 +614,14 @@ public class FEBattleMapManager {
     }
 
     /**
+     マップ上のプレイヤーの存在情報
+     */
+    private ArrayList<FEMapElement> _mapPlayerObjects;
+    public ArrayList<FEMapElement> GetMapPlayerObjects() {
+        return _mapPlayerObjects;
+    }
+
+    /**
      マップ上にいるユニットやイベントの存在情報
      */
     private ArrayList<FEMapElement> _mapElements;
@@ -622,8 +646,7 @@ public class FEBattleMapManager {
     }
 
     public FEBattleMapManager() {
-        _mapSize = new PVector();
-
+        _mapWidth = _mapHeight = 0;
         _elapsedTurn = 0;
         _sortieUnits = new ArrayList<FEUnit>();
         _enemyUnits = new HashMap<Integer, FEOtherUnit>();
@@ -632,6 +655,7 @@ public class FEBattleMapManager {
         _terrains = new FETerrain[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _hazardAreas = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _actionRanges = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+        _mapPlayerObjects = new ArrayList<FEMapElement>();
         _mapElements = new ArrayList<FEMapElement>();
         _localVariables = new PHash<Integer>();
         _localSwitches = new PHash<Boolean>();
@@ -649,31 +673,103 @@ public class FEBattleMapManager {
             // マップ基本情報
             _mapName = json.GetString("Name", "No Data");
             _mapImagePath = json.GetString("Image Path", null);
-            _mapSize.x = json.GetInt("Width", -1);
-            _mapSize.y = json.GetInt("Height", -1);
+            _mapWidth = json.GetInt("Width", -1);
+            _mapHeight = json.GetInt("Height", -1);
 
-            JsonArray playerPositions = json.GetJsonArray("Player Positions");
-            if (playerPositions != null) {
-                JsonObject playerPosition;
-                int id;
-                _sortableUnitNum = playerPositions.Size();
-                _mapElements.clear();
-                for (int i=0; i<_sortableUnitNum; i++) {
-                    playerPosition = playerPositions.GetJsonObject(i);
-                    FEMapElement elem = new FEMapElement();
-                    elem.GetPosition().x = playerPosition.GetInt("x", -1);
-                    elem.GetPosition().y = playerPosition.GetInt("y", -1);
-                    id = playerPosition.GetInt("ID", -99999);
-                    if (id != -99999) {
-                        elem.SetMapObject(feManager.GetProgressDataBase().GetPlayerUnitOnID(id));
-                    }
-                    _mapElements.add(elem);
+            // 戦闘開始に関わるフラグ
+            _isImmediatelySortie = json.GetBoolean("Immediately Sortie", true);
+            _isSkipPreparation = json.GetBoolean("Skip Preparation", true);
+            _isFirstPhase = json.GetBoolean("First Phase", true);
+
+            // 地形情報
+            boolean[][] terrain = new boolean[_mapHeight][_mapWidth];
+            FETerrain defTerrain = feManager.GetDataBase().GetTerrains().get(json.GetInt("Default Terrain ID", 0));
+            JsonArray terrainArray = json.GetJsonArray("Terrains");
+            JsonObject terrainObj;
+            if (terrainArray != null) {
+                int x, y, id;
+                boolean exsId;
+                for (int i=0; i<terrainArray.Size(); i++) {
+                    terrainObj = terrainArray.GetJsonObject(i);
+                    if (terrainObj == null) continue;
+                    x = terrainObj.GetInt("x", -1);
+                    y = terrainObj.GetInt("y", -1);
+                    id = terrainObj.GetInt("ID", -99999);
+                    exsId = feManager.GetDataBase().GetTerrains().containsKey(id);
+                    if (x == -1 || y == -1 || !exsId) continue;
+                    _terrains[y][x] = feManager.GetDataBase().GetTerrains().get(id);
+                    terrain[y][x] = true;
                 }
             }
+            for (int i=0; i<_mapHeight; i++) {
+                for (int j=0; j<_mapWidth; j++) {
+                    if (terrain[i][j]) continue;
+                    _terrains[i][j] = defTerrain;
+                }
+            }
+
+            // プレイヤーユニットの出撃地点情報
+            JsonArray playerPositions = json.GetJsonArray("Player Positions");
+            if (playerPositions != null) {
+                FEProgressManager fePm = feManager.GetProgressDataBase();
+                JsonObject playerPosition;
+                FEMapElement elem;
+                FEUnit unit;
+                int x, y;
+                int unFixNum = 0;
+                _mapPlayerObjects.clear();
+                for (int i=0; i<playerPositions.Size(); i++) {
+                    playerPosition = playerPositions.GetJsonObject(i);
+                    if (playerPosition == null) continue;
+                    x = playerPosition.GetInt("x", -1);
+                    y = playerPosition.GetInt("y", -1);
+                    if (x < 0 || x >= _mapWidth || y < 0 || y >= _mapHeight) continue;
+                    elem = new FEMapElement();
+                    elem.GetPosition().x = x;
+                    elem.GetPosition().y = y;
+                    unit = fePm.GetPlayerUnitOnID(playerPosition.GetInt("ID", -99999));
+                    if (unit != null) {
+                        elem.SetFixElement(true);
+                        elem.SetMapObject(unit);
+                    } else {
+                        unFixNum++;
+                    }
+                    _mapPlayerObjects.add(elem);
+                }
+                _sortableUnitNum = _mapPlayerObjects.size();
+                // 固定されていないユニットの中から出撃地点に埋め合わせを行う
+                ArrayList<FEUnit> _units = feManager.GetProgressDataBase().GetPlayerUnits();
+                boolean flag;
+                for (int i=0; i<_units.size() || unFixNum > 0; i++) {
+                    unit = _units.get(i);
+                    flag = false;
+                    for (int j=0; j<_mapPlayerObjects.size(); j++) {
+                        elem = _mapPlayerObjects.get(j);
+                        if (elem.GetMapObject() == unit) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag) continue;
+                    for (int j=0; j<_mapPlayerObjects.size(); j++) {
+                        elem = _mapPlayerObjects.get(j);
+                        if (elem.GetMapObject() != null) continue;
+                        elem.SetMapObject(unit);
+                        unFixNum--;
+                        break;
+                    }
+                }
+            }
+
+            _sortieMode = FEConst.BATTLE_SORTIE_MODE_NONE;
         } 
         catch(Exception e) {
             println(e);
-            dialog.Show("データの読込に失敗", "マップデータの読込に失敗しました。\npath = " + path);
+            dialog.Show("エラー", "マップデータの読込に失敗しました。\npath = " + path);
+        }
+
+        if (_isImmediatelySortie) {
+            PrepareSortie();
         }
     }
 
@@ -682,6 +778,42 @@ public class FEBattleMapManager {
      ただし、マップに関する情報が保存されていない場合は何もしない。
      */
     public void LoadSavingData(String dataPath) {
+    }
+
+    /**
+     出撃準備に突入する。
+     スキップフラグが立っている場合は、準備を飛ばして戦闘を開始する。
+     */
+    public void PrepareSortie() {
+        if (_isSkipPreparation) {
+            StartSortie();
+            return;
+        }
+    }
+
+    /**
+     戦闘を開始する。
+     */
+    public void StartSortie() {
+        // 空白の出撃地点を削除する
+        FEMapElement elem;
+        ArrayList<FEMapElement> elems = new ArrayList<FEMapElement>();
+        for (int i=0; i<_mapPlayerObjects.size(); i++) {
+            elem = _mapPlayerObjects.get(i);
+            if (elem.GetMapObject() == null) {
+                elems.add(elem);
+            } else {
+                elem.SetFixElement(true);
+            }
+        }
+        for (int i=0; i<elems.size(); i++) {
+            _mapPlayerObjects.remove(elems.get(i));
+        }
+        // 出撃ユニットを確定する
+        _mapElements.clear();
+        for (int i=0; i<_mapPlayerObjects.size(); i++) {
+            _mapElements.add(_mapPlayerObjects.get(i));
+        }
     }
 
     /**
@@ -1232,6 +1364,8 @@ public class FEJsonUtility {
                 item = array.GetJsonObject(i);
                 if (item == null) continue;
                 actItem = feManager.GetDataBase().CreateItem(item.GetInt("ID", -99999), item.GetBoolean("Is Item", true));
+                actItem.SetEndurance(item.GetInt("Endurance", 0));
+                actItem.SetExchangeable(item.GetBoolean("Is Exchangeable", true));
                 if (actItem != null) {
                     unit.GetItemList().add(actItem);
                 }

@@ -1,7 +1,6 @@
 {
     "Money" : 0,
     "Items" : [
-        
     ],
     "Player Units" : [
         {
@@ -14,20 +13,6 @@
             "Importance" : "LEADER",
             "Class ID" : 0,
             "Level" : 4,
-            "Item List" : [
-                {
-                    "Is Item" : false,
-                    "ID" : 0,
-                    "Endurance" : 24,
-                    "Is Exchangeable" : true
-                },
-                {
-                    "Is Item" : true,
-                    "ID" : 1,
-                    "Endurance" : 2,
-                    "Is Exchangeable" : true
-                }
-            ],
             "Equip Weapon Index" : 0
         },
         {
@@ -39,11 +24,18 @@
             "Map Image Folder Path" : "character/map/ミゼル",
             "Importance" : "NORMAL",
             "Class ID" : 0,
-            "Level" : 4,
-            "Growth Rate" : {},
-            "Parameter" : {},
-            "Skills" : [
-            ]
+            "Level" : 4
+        },
+        {
+            "ID" : 2,
+            "Name" : "カナト",
+            "Explain" : "aaaaaaaaaa",
+            "Organization" : "ノーラス解放団",
+            "Face Image Path" : "character/face/カナト.png",
+            "Map Image Folder Path" : "character/map/ミゼル",
+            "Importance" : "NORMAL",
+            "Class ID" : 0,
+            "Level" : 4
         }
     ]
 }

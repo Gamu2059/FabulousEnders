@@ -5,7 +5,6 @@
  */
 
 import java.util.*;
-import java.lang.reflect.*;
 import java.io.*;
 
 // pjsで実行するときはfalseにする
@@ -31,9 +30,9 @@ void setup() {
         feManager.Init();
 
         sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
-
         sceneManager.Start();
         feManager.StartGame();
+        
         feManager.GetBattleMapManager().LoadMapData("test_map.json");
     } 
     catch(Exception e) {

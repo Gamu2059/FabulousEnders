@@ -1365,6 +1365,12 @@ public class FETerrain extends FEData {
 }
 
 /**
+ 出撃開始地点と、そこにどんな
+ */
+public class FEMapSortiePosition {
+}
+
+/**
  戦闘マップ上で扱うオブジェクトの情報
  */
 public class FEMapElement implements Comparable<FEMapElement> {
@@ -1381,7 +1387,19 @@ public class FEMapElement implements Comparable<FEMapElement> {
     }
 
     /**
+     実体を固定するかどうか
+     */
+    private boolean _isFixElement;
+    public boolean IsFixElement() {
+        return _isFixElement;
+    }
+    public void SetFixElement(boolean value) {
+        _isFixElement = value;
+    }
+
+    /**
      マップ上での座標
+     アニメーションでは実数値座標が必要になるので PVector を用いている
      */
     private PVector _position;
     public PVector GetPosition() {
