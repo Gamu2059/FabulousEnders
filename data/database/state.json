@@ -1,0 +1,21 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "毒",
+        "Explain" : "3ターンの間、HPが減っていく。",
+        "Icon Image Path" : "",
+        "Map Image Path" : "",
+        "Is Bad State" : true,
+        "Sustain Turn" : 3,
+        "Recover" : -5,
+        "Sealed Options" : [
+        ],
+        "Act Option" : "NONE",
+        "Release Option" : "NONE",
+        "Release Parameter" : 0,
+        "Parameter Bonus" : {
+        },
+        "Granted Skills" : [
+        ]
+    }
+]

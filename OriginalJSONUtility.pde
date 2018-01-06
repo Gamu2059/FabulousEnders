@@ -5,6 +5,11 @@ public final class JsonArray extends JsonUtility {
         _elem = new ArrayList<String>();
     }
 
+    public JsonArray(String path) {
+        this();
+        Load(path);
+    }
+
     public boolean IsNull() {
         return _elem == null;
     }
@@ -18,11 +23,18 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
         }
-        return _RemoveEscape(obj);
+
+        if (!_IsProper(obj, stringToken, stringToken)) {
+            return defaultValue;
+        }
+        return _RemoveEscape(_RemoveSideString(obj));
     }
 
     public int GetInt(int index, int defaultValue) {
@@ -30,6 +42,9 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
@@ -42,6 +57,9 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
@@ -54,6 +72,9 @@ public final class JsonArray extends JsonUtility {
             return defaultValue;
         }
 
+        if (_elem.size()<=index) {
+            return defaultValue;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return defaultValue;
@@ -65,7 +86,9 @@ public final class JsonArray extends JsonUtility {
         if (IsNull()) {
             return null;
         }
-
+        if (_elem.size()<=index) {
+            return null;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return null;
@@ -80,6 +103,9 @@ public final class JsonArray extends JsonUtility {
             return null;
         }
 
+        if (_elem.size()<=index) {
+            return null;
+        }
         String obj = _elem.get(index);
         if (obj == null) {
             return null;
@@ -89,16 +115,84 @@ public final class JsonArray extends JsonUtility {
         return jsonArray;
     }
 
-    public void AddElement(Object elem) {
+    /**
+     各パラメーターの追加
+     */
+    public void AddString(String elem) {
+        AddElement(stringToken + elem + stringToken);
+    }
+
+    public void AddInt(int elem) {
+        AddElement(elem);
+    }
+
+    public void AddFloat(float elem) {
+        AddElement(elem);
+    }
+
+    public void AddBoolean(boolean elem) {
+        AddElement(elem);
+    }
+
+    public void AddJsonObject(JsonObject elem) {
+        AddElement(elem);
+    }
+
+    public void AddJsonArray(JsonArray elem) {
+        AddElement(elem);
+    }
+
+    private void AddElement(Object elem) {
         _elem.add(elem.toString());
     }
 
-    public void SetElement(int index, Object elem) {
-        _elem.set(index, elem.toString());
+    /**
+     各パラメーターの設定
+     */
+    public void SetString(int index, String elem) {
+        SetElement(index, stringToken + elem + stringToken);
+    }
+
+    public void SetInt(int index, int elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetFloat(int index, float elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetBoolean(int index, boolean elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetJsonObject(int index, JsonObject elem) {
+        SetElement(index, elem);
+    }
+
+    public void SetJsonArray(int index, JsonArray elem) {
+        SetElement(index, elem);
+    }
+
+    private void SetElement(int index, Object elem) {
+        int elemSize=Size();
+        if (index < 0) {
+            println("IndexOutOfBoundsException : " + index);
+        } else {
+            if (elemSize <= index) {
+                for (int i=index-elemSize; 0<=i; i--) {
+                    _elem.add(null);
+                }
+            }
+            _elem.set(index, elem.toString());
+        }
     }
 
     public void RemoveElement(int index) {
         _elem.remove(index);
+    }
+
+    public void ClearElements() {
+        _elem.clear();
     }
 
     public int Size() {
@@ -114,14 +208,7 @@ public final class JsonArray extends JsonUtility {
         // 最初が '[' 最後が ']' でなければ生成しない
         if (!_IsProper(jsonContents, beginArrayToken, endArrayToken)) return;
 
-        _elem = _Split(jsonContents.substring(1, jsonContents.length() - 1));
-        String temp;
-        for (int i=0; i<_elem.size(); i++) {
-            temp = _elem.get(i);
-            if (_IsProper(temp, stringToken, stringToken)) {
-                _elem.set(i, _RemoveSideString(temp));
-            }
-        }
+        _elem = _Split(trim(_RemoveSideString(jsonContents)));
     }
 
     /**
@@ -129,58 +216,56 @@ public final class JsonArray extends JsonUtility {
      */
     protected ArrayList<String> _Split(String jsonContents) {
         ArrayList<String> jsonPair = new ArrayList<String>();
-        boolean isLiteral = false, isArray = false;
-        int objDepth = 0;
+        boolean isLiteral = false;
+        int arrayDepth = 0, objectDepth = 0;
         char temp;
         int lastSplitIdx = 0;
-        String pair;
-        for (int i=0; i<jsonContents.length(); i++) {
-            temp = jsonContents.charAt(i);
 
-            if (temp == stringToken) {
-                if (i == 0 || jsonContents.charAt(i - 1) != escapeToken) {
-                    isLiteral = !isLiteral;
+        if (jsonContents.length()!=0) {
+            for (int i=0; i<jsonContents.length(); i++) {
+                temp = jsonContents.charAt(i);
+
+                if (temp == stringToken) {
+                    if (i == 0 || jsonContents.charAt(i - 1) != escapeToken) {
+                        isLiteral = !isLiteral;
+                    }
+                }
+                if (!isLiteral) {
+                    if (temp == beginArrayToken) {
+                        arrayDepth++;
+                    } else if (temp == endArrayToken) {
+                        arrayDepth--;
+                    } else if (temp == beginObjectToken) {
+                        objectDepth++;
+                    } else if (temp == endObjectToken) {
+                        objectDepth--;
+                    }
+                }
+
+                if (temp == commaToken && !isLiteral && arrayDepth==0 && objectDepth == 0) {
+                    String elem=trim(jsonContents.substring(lastSplitIdx, i));
+                    if (elem.equals("null")) {
+                        elem=null;
+                    }
+                    jsonPair.add(elem);
+                    lastSplitIdx = i + 1;
                 }
             }
-            if (!isLiteral) {
-                if (temp == beginArrayToken) {
-                    isArray = true;
-                } else if (temp == endArrayToken) {
-                    isArray = false;
-                } else if (temp == beginObjectToken) {
-                    objDepth++;
-                } else if (temp == endObjectToken) {
-                    objDepth--;
-                }
-            }
-
-            if (temp == commaToken && !isLiteral && !isArray && objDepth == 0) {
-                jsonPair.add(trim(jsonContents.substring(lastSplitIdx, i)));
-                lastSplitIdx = i + 1;
-            }
+            jsonPair.add(trim(jsonContents.substring(lastSplitIdx)));
         }
-        jsonPair.add(trim(jsonContents.substring(lastSplitIdx)));
-
         return jsonPair;
     }
 
     public String toString() {
         try {
-            String elem, pair;
+            String elem;
             String[] product = new String[_elem.size()];
             for (int i=0; i<_elem.size(); i++) {
                 elem = _elem.get(i);
                 if (elem == null) {
                     continue;
                 }
-                if (_IsProper(elem, beginObjectToken, endObjectToken)) {
-                    pair = elem;
-                } else if (_IsProper(elem, beginArrayToken, endArrayToken)) {
-                    pair = elem;
-                } else {
-                    pair = stringToken + elem + stringToken;
-                }
-                product[i] = pair;
+                product[i] = elem;
             }
             return beginArrayToken + newLineToken + join(product, ",\n") + newLineToken + endArrayToken;
         } 
@@ -200,12 +285,21 @@ public final class JsonObject extends JsonUtility {
         _names = new ArrayList<String>();
     }
 
+    public JsonObject(String path) {
+        this();
+        Load(path);
+    }
+
     public boolean IsNull() {
         return _elem == null;
     }
 
     public boolean IsEmpty() {
         return _elem.isEmpty();
+    }
+
+    public boolean HasKey(String name) {
+        return _elem.containsKey(name);
     }
 
     public String GetString(String name, String defaultValue) {
@@ -217,7 +311,11 @@ public final class JsonObject extends JsonUtility {
         if (obj == null) {
             return defaultValue;
         }
-        return _RemoveEscape(obj);
+
+        if (!_IsProper(obj, stringToken, stringToken)) {
+            return defaultValue;
+        }
+        return _RemoveEscape(_RemoveSideString(obj));
     }
 
     public int GetInt(String name, int defaultValue) {
@@ -284,14 +382,39 @@ public final class JsonObject extends JsonUtility {
         return jsonArray;
     }
 
-    /**
-     全てのパラメータは文字列で管理されるべきなので、Setterはこれのみ。
-     */
-    public void SetElement(String name, Object elem) {
-        if (!_elem.containsKey(name)) {
+    public void SetString(String name, String elem) {
+        SetElement(name, stringToken + elem + stringToken);
+    }
+
+    public void SetInt(String name, int elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetFloat(String name, float elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetBoolean(String name, boolean elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetJsonObject(String name, JsonObject elem) {
+        SetElement(name, elem);
+    }
+
+    public void SetJsonArray(String name, JsonArray elem) {
+        SetElement(name, elem);
+    }
+
+    private void SetElement(String name, Object elem) {
+        if (!HasKey(name)) {
             _names.add(name);
         }
-        _elem.put(name, elem.toString());
+        if (elem == null) {
+            _elem.put(name, null);
+        } else {
+            _elem.put(name, elem.toString());
+        }
     }
 
     /**
@@ -301,7 +424,9 @@ public final class JsonObject extends JsonUtility {
         if (jsonContents == null) return;
 
         // 最初が '{' 最後が '}' でなければ生成しない
-        if (!_IsProper(jsonContents, beginObjectToken, endObjectToken)) return;
+        if (!_IsProper(jsonContents, beginObjectToken, endObjectToken)) {
+            return;
+        }
 
         _elem.clear();
         _names.clear();
@@ -310,22 +435,26 @@ public final class JsonObject extends JsonUtility {
         String[] pair = new String[2];
         char temp;
 
-        for (int i=0; i<jsonPair.size(); i++) {
+        for (int i=0, end=jsonPair.size(); i<end; i++) {
             String jsonElem = jsonPair.get(i);
 
-            for (int j=0; j<jsonElem.length(); j++) {
+            for (int j=0, end2=jsonElem.length(); j<end2; j++) {
                 temp = jsonElem.charAt(j);
 
                 if (temp == colonToken) {
                     pair[0] = trim(jsonElem.substring(0, j));
                     pair[1] = trim(jsonElem.substring(j+1));
 
-                    for (int k=0; k<pair.length; k++) {
-                        if (_IsProper(pair[k], stringToken, stringToken)) {
-                            pair[k] = _RemoveSideString(pair[k]);
-                        }
-                    }
 
+                    if (_IsProper(pair[0], stringToken, stringToken)) {
+                        pair[0] = _RemoveSideString(pair[0]);
+                    } else {
+                        println("Inappropriate name. There in no \"");
+                        continue;
+                    }
+                    if (pair[1].equals("null")) {
+                        pair[1]=null;
+                    }
                     SetElement(pair[0], pair[1]);
                     break;
                 }
@@ -338,7 +467,8 @@ public final class JsonObject extends JsonUtility {
      */
     protected ArrayList<String> _Split(String jsonContents) {
         ArrayList<String> jsonPair = new ArrayList<String>();
-        boolean isLiteral = false, isArray = false;
+        boolean isLiteral = false;
+        int arrayDepth=0, objectDepth=0;
         char temp;
         int lastSplitIdx = 0;
         for (int i=0; i<jsonContents.length(); i++) {
@@ -351,13 +481,17 @@ public final class JsonObject extends JsonUtility {
             }
             if (!isLiteral) {
                 if (temp == beginArrayToken) {
-                    isArray = true;
+                    arrayDepth++;
                 } else if (temp == endArrayToken) {
-                    isArray = false;
+                    arrayDepth--;
+                } else if (temp == beginObjectToken) {
+                    objectDepth++;
+                } else if (temp == endObjectToken) {
+                    objectDepth--;
                 }
             }
 
-            if (temp == commaToken && !isLiteral && !isArray) {
+            if (temp == commaToken && !isLiteral && arrayDepth==0&&objectDepth==0) {
                 jsonPair.add(trim(jsonContents.substring(lastSplitIdx, i)));
                 lastSplitIdx = i + 1;
             }
@@ -366,25 +500,15 @@ public final class JsonObject extends JsonUtility {
 
         return jsonPair;
     }
-    
+
     public String toString() {
         try {
-            String name, elem, pair;
+            String name, elem;
             String[] product = new String[_names.size()];
-            for (int i=0; i<_names.size(); i++) {
+            for (int i=0, end=_names.size(); i<end; i++) {
                 name = _names.get(i);
                 elem = _elem.get(name);
-                if (elem == null) {
-                    continue;
-                }
-                if (_IsProper(elem, beginObjectToken, endObjectToken)) {
-                    pair = elem;
-                } else if (_IsProper(elem, beginArrayToken, endArrayToken)) {
-                    pair = elem;
-                } else {
-                    pair = stringToken + elem + stringToken;
-                }
-                product[i] = stringToken + _InsertEscape(name) + stringToken + " : " + pair;
+                product[i] = stringToken + _InsertEscape(name) + stringToken + " : " + elem;
             }
             return beginObjectToken + newLineToken + join(product, ",\n") + newLineToken + endObjectToken;
         } 
@@ -418,19 +542,35 @@ public abstract class JsonUtility {
         }
     }
 
+    /**
+     例外が発生した場合にキャッチせずに投げる。
+     */
+    public void LoadWithThrowException(String path) throws Exception {
+        String[] jsonText = loadStrings(path);
+        String json = join(trim(jsonText), "");
+        Parse(json);
+    }
+
     public void Save(String path) {
         try {
-            saveStrings(path, new String[]{toString()});
+            saveStrings(path, new String[]{this.toString()});
         } 
         catch(Exception e) {
             println(e);
         }
     }
 
+    public void SaveWithThrowException(String path) throws Exception {
+        saveStrings(path, new String[]{this.toString()});
+    }
+
     public abstract void Parse(String content);
     protected abstract ArrayList<String> _Split(String content);
 
     protected boolean _IsProper(String content, char beginToken, char endToken) {
+        if (content.length()==0) {
+            return false;
+        }
         return content.charAt(0) == beginToken && content.charAt(content.length() - 1) == endToken;
     }
 
@@ -479,7 +619,6 @@ public abstract class JsonUtility {
         for (int i=0; i< proArray.length; i++) {
             proArray[i] = product.get(i);
         }
-
         return join(proArray, "");
     }
 

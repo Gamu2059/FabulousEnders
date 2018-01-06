@@ -1,7 +1,7 @@
 /**
  接頭辞について。
- PE ... ProcessingEngineの略称。Pjsで動作する保証がないクラス。要検証。
- PEO... ProcessingEngineOnlyの略称。Pjsで動作しないことが分かりきっているクラス。
+ FE ... FabulousEnders上で使用するクラスファイル群。
+ P  ... システム上で使用するクラスファイル群。
  */
 
 import java.util.*;
@@ -18,14 +18,23 @@ ImageManager imageManager;
 FontManager fontManager;
 TransformManager transformManager;
 
+FEJsonUtility feJsonUtility;
+FEManager feManager;
+
+SceneDialog dialog;
+
 void setup() {
-    size(890, 500);
+    size(880, 480);
     try {
         InitManager();
         SetScenes();
-        sceneManager.LoadScene(SceneID.SID_TITLE);
+        feManager.Init();
+
+        sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
 
         sceneManager.Start();
+        feManager.StartGame();
+        feManager.GetBattleMapManager().LoadMapData("test_map.json");
     } 
     catch(Exception e) {
         println(e);
@@ -38,12 +47,19 @@ void InitManager() {
     imageManager = new ImageManager();
     fontManager = new FontManager();
     transformManager = new TransformManager();
+
+    feJsonUtility = new FEJsonUtility();
+    feManager = new FEManager();
 }
 
 void SetScenes() {
+    dialog = new SceneDialog();
+    sceneManager.AddScene(dialog);
     sceneManager.AddScene(new SceneTitle());
     sceneManager.AddScene(new SceneOneIllust());
     sceneManager.AddScene(new SceneGameOver());
+
+    sceneManager.AddScene(new FESceneBattleMap());
 }
 
 void draw() {
@@ -51,6 +67,7 @@ void draw() {
         background(0);
         sceneManager.Update();
         inputManager.Update();
+        //println(frameRate);
     } 
     catch(Exception e) {
         println(e);

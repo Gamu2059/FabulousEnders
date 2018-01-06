@@ -538,7 +538,6 @@ public class SceneManager {
     private void _OnCheckMouseActiveScene() {
         if (!inputManager.IsMouseMode()) return;
         if (_drawScenes == null) return;
-
         Scene s;
         boolean f = false;
         for (int i=_drawScenes.size()-1; i>=0; i--) {
@@ -552,6 +551,8 @@ public class SceneManager {
                     _activeScene.OnDisabledActive();
                 }
                 _activeScene = s;
+                _activeScene.OnEnabledActive();
+                return;
             }
         }
         // 何もアクティブにならなければアクティブシーンも無効化する

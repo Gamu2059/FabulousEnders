@@ -87,6 +87,8 @@ public final class SceneGameOver extends Scene {
                 _obj = GetObject(gameOverBack);
                 _objT = _obj.GetTransform();
                 _objT.SetSize(0, 0);
+                SceneObjectImage img = (SceneObjectImage)_obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+                img.GetColorInfo().SetAlpha(255);
                 SceneObjectDuration _dur = (SceneObjectDuration)_obj.GetBehaviorOnID(ClassID.CID_DURATION);
                 settedTime = _dur.GetSettedTimer("Back Gradation");
             }
@@ -338,7 +340,8 @@ public final class SceneGameOver extends Scene {
         SceneObjectTimer timer;
 
         obj = GetObject(gameOverBack);
-        obj.GetTransform().SetSize(0, 0);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        img.GetColorInfo().SetAlpha(1);
 
         obj = GetObject(adjustLayer);
         obj.GetDrawBack().GetBackColorInfo().SetAlpha(255);
@@ -356,6 +359,8 @@ public final class SceneGameOver extends Scene {
         }
 
         obj = GetObject(sword[0]);
+        img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        img.GetColorInfo().SetAlpha(1);
         timer = (SceneObjectTimer)obj.GetBehaviorOnID(ClassID.CID_TIMER);
         timer.ResetTimer("Fire Start Event", 1);
         timer.Start("Fire Start Event");

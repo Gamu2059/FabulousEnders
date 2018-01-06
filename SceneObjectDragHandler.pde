@@ -3,8 +3,18 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         return ClassID.CID_DRAG_HANDLER;
     }
 
-    private boolean _isActive, _isDragging;
+    private boolean _isActive, _isDragging, _preDragging;
     private String _eventLabel;
+
+    private ActionEvent _draggedBeginHandler;
+    public ActionEvent GetDraggedBeginHandler() {
+        return _draggedBeginHandler;
+    }
+
+    private ActionEvent _draggedEndHandler;
+    public ActionEvent GetDraggedEndHandler() {
+        return _draggedEndHandler;
+    }
 
     private ActionEvent _draggedActionHandler;
     public ActionEvent GetDraggedActionHandler() {
@@ -25,6 +35,8 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         super();
 
         _eventLabel = eventLabel;
+        _draggedBeginHandler = new ActionEvent();
+        _draggedEndHandler = new ActionEvent();
         _draggedActionHandler = new ActionEvent();
         _enabledActiveHandler = new ActionEvent();
         _disabledActiveHandler = new ActionEvent();
@@ -59,11 +71,18 @@ public class SceneObjectDragHandler extends SceneObjectBehavior {
         if (_isActive) {
             if (inputManager.IsMouseDown()) {
                 _isDragging = true;
+                if (_isDragging != _preDragging) {
+                    GetDraggedBeginHandler().InvokeAllEvents();
+                }
             }
         }
         if (inputManager.IsMouseUp()) {
             _isDragging = false;
+            if (_isDragging != _preDragging) {
+                GetDraggedEndHandler().InvokeAllEvents();
+            }
         }
+        _preDragging = _isDragging;
     }
 
     protected void _OnDestroy() {

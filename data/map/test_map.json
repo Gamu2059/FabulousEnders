@@ -1,0 +1,35 @@
+{
+    "Name" : "テストマップ",
+    "Image Path" : "map/test.png",
+    "Width" : 10,
+    "Height" : 8,
+    "Immediately Sortie" : true,
+    "Skip Preparation" : true,
+    "First Phase" : true,
+    "Terrains" : [
+
+    ],
+    "Player Positions" : [
+        {
+            "x" : 0,
+            "y" : 2,
+            "ID" : 1
+        },
+        {
+            "x" : 6,
+            "y" : 7
+        }
+    ],
+    "Enemy Positions" : [
+
+    ],
+    "Event Positions" : [
+
+    ],
+    "Enemies" : [
+
+    ],
+    "Events" : [
+
+    ]
+}
