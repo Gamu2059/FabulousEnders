@@ -417,6 +417,18 @@ public class FEProgressManager {
         return _globalSwitches;
     }
 
+    /**
+     場面の状態
+     拠点にいるか、出撃しているか、など
+     */
+    private int _sceneMode;
+    public int GetSceneMode() {
+        return _sceneMode;
+    }
+    public void SetSceneMoce(int value) {
+        _sceneMode = value;
+    }
+
     public FEProgressManager() {
         _money = 0;
         _items = new ArrayList<FEItemBase>();
@@ -509,12 +521,12 @@ public class FEBattleMapManager {
     }
 
     /**
-     マップの現在の状態。
-     通常、出撃準備中、戦闘中など
+     現在の出撃状態。
+     通常、出撃準備中、出撃中など
      */
-    private int _mapMode;
-    public int GetMapMode() {
-        return _mapMode;
+    private int _sortieMode;
+    public int GetSortieMode() {
+        return _sortieMode;
     }
 
     /**
@@ -748,10 +760,16 @@ public class FEBattleMapManager {
                     }
                 }
             }
+
+            _sortieMode = FEConst.BATTLE_SORTIE_MODE_NONE;
         } 
         catch(Exception e) {
             println(e);
             dialog.Show("エラー", "マップデータの読込に失敗しました。\npath = " + path);
+        }
+
+        if (_isImmediatelySortie) {
+            PrepareSortie();
         }
     }
 
@@ -760,6 +778,42 @@ public class FEBattleMapManager {
      ただし、マップに関する情報が保存されていない場合は何もしない。
      */
     public void LoadSavingData(String dataPath) {
+    }
+
+    /**
+     出撃準備に突入する。
+     スキップフラグが立っている場合は、準備を飛ばして戦闘を開始する。
+     */
+    public void PrepareSortie() {
+        if (_isSkipPreparation) {
+            StartSortie();
+            return;
+        }
+    }
+
+    /**
+     戦闘を開始する。
+     */
+    public void StartSortie() {
+        // 空白の出撃地点を削除する
+        FEMapElement elem;
+        ArrayList<FEMapElement> elems = new ArrayList<FEMapElement>();
+        for (int i=0; i<_mapPlayerObjects.size(); i++) {
+            elem = _mapPlayerObjects.get(i);
+            if (elem.GetMapObject() == null) {
+                elems.add(elem);
+            } else {
+                elem.SetFixElement(true);
+            }
+        }
+        for (int i=0; i<elems.size(); i++) {
+            _mapPlayerObjects.remove(elems.get(i));
+        }
+        // 出撃ユニットを確定する
+        _mapElements.clear();
+        for (int i=0; i<_mapPlayerObjects.size(); i++) {
+            _mapElements.add(_mapPlayerObjects.get(i));
+        }
     }
 
     /**

@@ -25,6 +25,17 @@
             "Importance" : "NORMAL",
             "Class ID" : 0,
             "Level" : 4
+        },
+        {
+            "ID" : 2,
+            "Name" : "カナト",
+            "Explain" : "aaaaaaaaaa",
+            "Organization" : "ノーラス解放団",
+            "Face Image Path" : "character/face/カナト.png",
+            "Map Image Folder Path" : "character/map/ミゼル",
+            "Importance" : "NORMAL",
+            "Class ID" : 0,
+            "Level" : 4
         }
     ]
 }
