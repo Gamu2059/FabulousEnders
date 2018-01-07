@@ -9,6 +9,8 @@ public class FEConst {
     public static final int SYSTEM_MAP_MAX_HEIGHT = 50;
     public static final int SYSTEM_MAP_MAX_WIDTH = 50;
     
+    public static final int NOT_FOUND = -2954783;
+    
     //////////////////////////////////////////////////////
     // Static Config
     //////////////////////////////////////////////////////
@@ -167,6 +169,8 @@ public class FEConst {
     public static final int BATTLE_OPE_MODE_MOVING = -7202;
     public static final int BATTLE_OPE_MODE_FINISH_MOVE = -7203;
     public static final int BATTLE_OPE_MODE_BACK_MENU = -7204;
+    public static final int BATTLE_OPE_MODE_PRE_ATTACK = -7205;
+    public static final int BATTLE_OPE_MODE_ATTACK = -7206;
     
     // マーカ
     public static final int BATTLE_MAP_MARKER_ACTION = -7300;

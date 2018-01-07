@@ -458,7 +458,7 @@ public class FEProgressManager {
                 unit = units.GetJsonObject(i);
                 if (unit == null) continue;
                 playerUnit = new FEUnit();
-                copyBase = feManager.GetDataBase().GetPlayerUnits().get(unit.GetInt("ID", -99999));
+                copyBase = feManager.GetDataBase().GetPlayerUnits().get(unit.GetInt("ID", FEConst.NOT_FOUND));
                 if (copyBase == null) continue;
                 copyBase.CopyTo(playerUnit);
                 feJsonUtility.LoadUnit(playerUnit, unit);
@@ -773,7 +773,7 @@ public class FEBattleMapManager {
                     if (terrainObj == null) continue;
                     x = terrainObj.GetInt("x", -1);
                     y = terrainObj.GetInt("y", -1);
-                    id = terrainObj.GetInt("ID", -99999);
+                    id = terrainObj.GetInt("ID", FEConst.NOT_FOUND);
                     exsId = feManager.GetDataBase().GetTerrains().containsKey(id);
                     if (x == -1 || y == -1 || !exsId) continue;
                     _terrains[y][x] = feManager.GetDataBase().GetTerrains().get(id);
@@ -818,10 +818,10 @@ public class FEBattleMapManager {
                     x = playerPosition.GetInt("x", -1);
                     y = playerPosition.GetInt("y", -1);
                     if (!IsInMap(x, y)) continue;
-                    elem = new FEMapElement();
+                    elem = new FEMapElement(true);
                     elem.GetPosition().x = x;
                     elem.GetPosition().y = y;
-                    unit = fePm.GetPlayerUnitOnID(playerPosition.GetInt("ID", -99999));
+                    unit = fePm.GetPlayerUnitOnID(playerPosition.GetInt("ID", FEConst.NOT_FOUND));
                     if (unit != null) {
                         elem.SetFixElement(true);
                         elem.SetMapObject(unit);
@@ -870,10 +870,10 @@ public class FEBattleMapManager {
                     x = enemyPosition.GetInt("x", -1);
                     y = enemyPosition.GetInt("y", -1);
                     if (!IsInMap(x, y)) continue;
-                    elem = new FEMapElement();
+                    elem = new FEMapElement(false);
                     elem.GetPosition().x = x;
                     elem.GetPosition().y = y;
-                    unit = _enemyUnits.get(enemyPosition.GetInt("ID", -99999));
+                    unit = _enemyUnits.get(enemyPosition.GetInt("ID", FEConst.NOT_FOUND));
                     if (unit == null) continue;
                     toUnit = new FEOtherUnit();
                     unit.CopyTo(toUnit);
@@ -916,7 +916,7 @@ public class FEBattleMapManager {
     }
 
     /**
-     戦闘を開始する。
+     出撃する。
      */
     public void StartSortie() {
         // 空白の出撃地点を削除する
@@ -953,15 +953,19 @@ public class FEBattleMapManager {
         }
 
         // ユニットの行動範囲を更新
-        for (int i=0; i<_mapPlayerObjects.size(); i++) {
-            _UpdateSelfActionRange(_mapPlayerObjects.get(i));
-        }
-        for (int i=0; i<_mapEnemyObjects.size(); i++) {
-            _UpdateSelfActionRange(_mapEnemyObjects.get(i));
-        }
+        _UpdateAllActionRange();
 
         _sortieMode = FEConst.BATTLE_SORTIE_MODE_SORTIE;
         _operationMode = FEConst.BATTLE_OPE_MODE_NORMAL;
+    }
+
+    /**
+     戦闘を開始する。
+     */
+    public void StartBattle(FEMapElement attacker, FEMapElement defenser) {
+        _operationMode = FEConst.BATTLE_OPE_MODE_ATTACK;
+        attacker.SetRunning(true);
+        defenser.SetRunning(true);
     }
 
     /**
@@ -1018,12 +1022,12 @@ public class FEBattleMapManager {
                 if (elem == null) return;
                 FEMapObject mapObj = elem.GetMapObject();
                 if (!(mapObj instanceof FEUnit)) return;
-                if (_mapPlayerObjects.contains(elem)) {
+                if (elem.IsPlayerUnit()) {
                     _operationMode = FEConst.BATTLE_OPE_MODE_ACTIVE;
                     _selectedUnit = (FEUnit)mapObj;
                     _selectedElement = elem;
                     _selectedElement.SetRunning(true);
-                } else if (_mapEnemyObjects.contains(elem)) {
+                } else {
                     elem.SetDrawHazardAreas(!elem.IsDrawHazardAres());
                     _UpdateOverallHazardArea();
                 }
@@ -1039,7 +1043,7 @@ public class FEBattleMapManager {
                         break;
                     }
                     PVector baseP = _selectedElement.GetPosition();
-                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), x, y, (int)baseP.x, (int)baseP.y, _selectedUnit.GetBaseParameter().GetMobility());
+                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), x, y, (int)baseP.x, (int)baseP.y, _selectedUnit.GetBaseParameter().GetMov());
                     if (_unitRoute == null) {
                         _SetToNormalMode();
                     } else {
@@ -1086,9 +1090,6 @@ public class FEBattleMapManager {
         case FEConst.BATTLE_OPE_MODE_FINISH_MOVE:
             if (isLeft) {
                 _SetToNormalMode();
-                _UpdateAllActionRange();
-                _ClearIntegerArray(_actionRanges);
-                _UpdateOverallActionRange(_selectedElement);
                 _elementSorter.SortList(_mapElements);
             } else {
                 _selectedElement.GetPosition().x = _basePosOfMovingUnit.x;
@@ -1096,11 +1097,25 @@ public class FEBattleMapManager {
                 _SetToNormalMode();
             }
             break;
+        case FEConst.BATTLE_OPE_MODE_PRE_ATTACK:
+            if (isLeft) {
+                if (elem == null) return;
+                FEMapObject mapObj = elem.GetMapObject();
+                if (!(mapObj instanceof FEUnit)) return;
+                if (_selectedElement.IsPlayerUnit() == elem.IsPlayerUnit()) return;
+                // 戦闘開始
+            } else {
+                _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
+            }
+            break;
         }
     }
 
     private void _SetToNormalMode() {
         _operationMode = FEConst.BATTLE_OPE_MODE_NORMAL;
+        _UpdateAllActionRange();
+        _ClearIntegerArray(_actionRanges);
+        _UpdateOverallActionRange(_selectedElement);
         _selectedUnit = null;
         _selectedElement.SetRunning(false);
     }
@@ -1120,6 +1135,70 @@ public class FEBattleMapManager {
     public void OnFinishMoving() {
         _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
         _elementSorter.SortList(_mapElements);
+
+        // テスト用で戦闘準備にすぐ移行する
+        _operationMode = FEConst.BATTLE_OPE_MODE_PRE_ATTACK;
+        _ClearIntegerArray(_actionRanges);
+        _UpdateSelfActionRange(_selectedElement, false);
+        _UpdateOverallActionRange(_selectedElement);
+        // 攻撃範囲に敵ユニットが一切いない場合はモードを戻す
+        FEMapElement elem;
+        int x, y;
+        boolean flag = false;
+        for (int i=0; i<_mapElements.size(); i++) {
+            elem = _mapElements.get(i);
+            if (elem.IsPlayerUnit() == _selectedElement.IsPlayerUnit()) continue;
+            x = (int)elem.GetPosition().x;
+            y = (int)elem.GetPosition().y;
+            if (_selectedElement.GetAttackRange()[y][x]) {
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
+        }
+    }
+
+    /**
+     ユニットの自身のパラメータ、武器、アイテム、スキル、ステート、地形のパラメータ補正を総合的に合わせたパラメータを計算して保持する。
+     */
+    public void UpdateUnitParameter(FEMapElement elem) {
+        if (elem == null) return;
+        if (!(elem.GetMapObject() instanceof FEUnit)) return;
+        FEUnit unit = (FEUnit)elem.GetMapObject();
+
+        unit.GetCorrectParameter().Reset(0);
+        // 武器の補正
+        if (unit.GetEquipWeapon() != null) {
+            unit.GetEquipWeapon().GetItem().GetParameterBonus().AddTo(unit.GetCorrectParameter());
+        }
+        // アイテムの補正
+        FEActualItem item;
+        for (int i=0; i<unit.GetItemList().size(); i++) {
+            item = unit.GetItemList().get(i);
+            if (!item.IsItem()) continue;
+            item.GetItem().GetParameterBonus().AddTo(unit.GetCorrectParameter());
+        }
+        // TODO スキルの補正
+
+        // TODO ステートの補正
+
+        // 地形の補正
+        int x, y;
+        x = (int)elem.GetPosition().x;
+        y = (int)elem.GetPosition().y;
+        FETerrainEffect terE = feManager.GetDataBase().GetTerrainEffects().get(_terrains[y][x].GetEffectID());
+        if (terE != null) {
+            unit.GetCorrectParameter().AddDef(terE.GetDefense());
+            unit.GetCorrectParameter().AddMdf(terE.GetMDefense());
+        }
+
+        unit.GetBaseParameter().CopyTo(unit.GetParameter());
+        unit.GetCorrectParameter().AddTo(unit.GetParameter());
+
+        // 戦闘用パラメータ
+        
     }
 
     /**
@@ -1153,7 +1232,7 @@ public class FEBattleMapManager {
     private void _UpdateOverallActionRange(FEMapElement elem) {
         for (int i=0; i<_mapHeight; i++) {
             for (int j=0; j<_mapWidth; j++) {
-                if (elem.GetActionRange()[i][j]) {
+                if (elem.GetActionRange()[i][j] && GetMapElementOnPos(j, i) == null) {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_ACTION;
                 } else if (elem.GetAttackRange()[i][j]) {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_ATTACK;
@@ -1169,25 +1248,17 @@ public class FEBattleMapManager {
      */
     private void _UpdateAllActionRange() {
         for (int i=0; i<_mapElements.size(); i++) {
-            _UpdateSelfActionRange(_mapElements.get(i));
+            _UpdateSelfActionRange(_mapElements.get(i), true);
         }
     }
 
     /**
      指定したマップ要素の行動範囲マーカを更新する。
      */
-    private void _UpdateSelfActionRange(FEMapElement elem) {
+    private void _UpdateSelfActionRange(FEMapElement elem, boolean isConsiderMoving) {
         if (elem == null) return;
         if (!(elem.GetMapObject() instanceof FEUnit)) return;
         FEUnit unit = (FEUnit)elem.GetMapObject();
-        boolean isPlayerUnit;
-        if (_sortieUnits.contains(unit)) {
-            isPlayerUnit = true;
-        } else if (_sortieEnemyUnits.contains(unit)) {
-            isPlayerUnit = false;
-        } else {
-            return;
-        }
         // ユニットの行動範囲の初期化
         for (int i=0; i<_mapHeight; i++) {
             for (int j=0; j<_mapWidth; j++) {
@@ -1201,7 +1272,7 @@ public class FEBattleMapManager {
 
         // TODO 杖の射程を考慮
         int mov, minR, maxR, x, y;
-        mov = unit.GetBaseParameter().GetMobility();
+        mov = isConsiderMoving ? unit.GetBaseParameter().GetMov() : 0;
         minR = maxR = 0;
         FEActualItem aItem = unit.GetEquipWeapon();
         if (aItem != null) {
@@ -1211,10 +1282,10 @@ public class FEBattleMapManager {
         }
         x = (int)elem.GetPosition().x;
         y = (int)elem.GetPosition().y;
-        _SetRecursiveActionRange(elem, unitClass.GetClassType(), isPlayerUnit, x, y, mov, minR, maxR, 0);
+        _SetRecursiveActionRange(elem, unitClass.GetClassType(), x, y, mov, minR, maxR, 0);
     }
 
-    private void _SetRecursiveActionRange(FEMapElement elem, int classType, boolean isPlayerUnit, int x, int y, int remain, int minR, int maxR, int caneR) {
+    private void _SetRecursiveActionRange(FEMapElement elem, int classType, int x, int y, int remain, int minR, int maxR, int caneR) {
         if (!IsInMap(x, y)) return;
         if (remain < 0) return;
 
@@ -1225,8 +1296,9 @@ public class FEBattleMapManager {
 
         FEMapElement otherElem = GetMapElementOnPos(x, y);
         if (otherElem != null && otherElem.GetMapObject() instanceof FEUnit) {
-            if (_sortieUnits.contains(otherElem.GetMapObject()) && !isPlayerUnit) return;
-            if (_sortieEnemyUnits.contains(otherElem.GetMapObject()) && isPlayerUnit) return;
+            if (remain == 0) return;
+            if (_sortieUnits.contains(otherElem.GetMapObject()) && !elem.IsPlayerUnit()) return;
+            if (_sortieEnemyUnits.contains(otherElem.GetMapObject()) && elem.IsPlayerUnit()) return;
         }
 
         elem.GetActionRange()[y][x] = true;
@@ -1236,10 +1308,10 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x, y - 1, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x - 1, y, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x, y + 1, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x + 1, y, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x, y - 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x - 1, y, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x, y + 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x + 1, y, remain - cost, minR, maxR, caneR);
     }
 
     private void _SetRange(int x, int y, int minR, int maxR, boolean[][] target) {
@@ -1258,6 +1330,9 @@ public class FEBattleMapManager {
         }
     }
 
+    /**
+     いまいる座標から目標座標へのルートを作成する。
+     */
     private ArrayList<PVector> _MakeRouteToAimPosition(FEMapElement elem, int classType, int aimX, int aimY, int x, int y, int remain) {
         if (!IsInMap(x, y)) return null;
         if (remain < 0) return null;
@@ -1316,8 +1391,8 @@ public class FEJsonUtility {
         if (value != null) {
             data.SetExplain(value);
         }
-        id = json.GetInt("ID", -99999);
-        if (id != -99999) {
+        id = json.GetInt("ID", FEConst.NOT_FOUND);
+        if (id != FEConst.NOT_FOUND) {
             data.SetID(id);
         } else {
             dialog.Show("エラー", "IDが設定されていないデータがあります。\njson = " + json);
@@ -1392,19 +1467,14 @@ public class FEJsonUtility {
     public void LoadWeaponCompatibility(FEWeaponCompatibility wcm, JsonObject json) throws Exception {
         if (wcm == null || json == null) return;
         wcm.SetBadCompatibility(json.GetBoolean("Is Bad Compatibility", false));
-        int value = json.GetInt("Weapon Class ID", -99999);
-        if (value != -99999) {
+        int value = json.GetInt("Weapon Class ID", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
             wcm.SetWeaponClassID(value);
         } else {
             dialog.Show("エラー", "武器タイプIDが設定されていないデータがあります。\njson = " + json);
             throw new Exception();
         }
-        wcm.SetAttackCorrect(json.GetInt("Attack", 0));
-        wcm.SetDefenseCorrect(json.GetInt("Defense", 0));
-        wcm.SetAccuracyCorrect(json.GetInt("Accuracy", 0));
-        wcm.SetAvoidCorrect(json.GetInt("Avoid", 0));
-        wcm.SetCriticalCorrect(json.GetInt("Critical", 0));
-        wcm.SetCriticalAvoidCorrect(json.GetInt("Critical Avoid", 0));
+        LoadUnitBattleParameter(wcm.GetCorrect(), json.GetJsonObject("Correct"));
     }
 
     /**
@@ -1412,16 +1482,108 @@ public class FEJsonUtility {
      */
     public void LoadUnitParameter(FEUnitParameter prm, JsonObject json) {
         if (prm == null || json == null) return;
-        prm.SetHp(json.GetInt("HP", -1));
-        prm.SetAttack(json.GetInt("ATK", -1));
-        prm.SetMAttack(json.GetInt("MAT", -1));
-        prm.SetTech(json.GetInt("TEC", -1));
-        prm.SetSpeed(json.GetInt("SPD", -1));
-        prm.SetLucky(json.GetInt("LUC", -1));
-        prm.SetDefense(json.GetInt("DEF", -1));
-        prm.SetMDefense(json.GetInt("MDF", -1));
-        prm.SetMobility(json.GetInt("MOV", -1));
-        prm.SetProficiency(json.GetInt("PRO", -1));
+        int value;
+        value = json.GetInt("HP", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetHp(value);
+        }
+        value = json.GetInt("ATK", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetAtk(value);
+        }
+        value = json.GetInt("MAT", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMat(value);
+        }
+        value = json.GetInt("TEC", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetTec(value);
+        }
+        value = json.GetInt("SPD", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetSpd(value);
+        }
+        value = json.GetInt("LUC", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetLuc(value);
+        }
+        value = json.GetInt("DEF", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetDef(value);
+        }
+        value = json.GetInt("MDF", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMdf(value);
+        }
+        value = json.GetInt("MOV", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMov(value);
+        }
+        value = json.GetInt("PRO", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetPro(value);
+        }
+    }
+
+    /**
+     省略されたパラメータに代入しないよう退避処理を設けている。
+     */
+    public void LoadUnitBattleParameter(FEUnitBattleParameter prm, JsonObject json) {
+        if (prm == null || json == null) return;
+        int value;
+        value = json.GetInt("Power", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetPower(value);
+        }
+        String pType = json.GetString("Power Type", null);
+        if (pType != null) {
+            switch(pType) {
+            case "PHYSICS":
+                prm.SetPowerType(FEConst.WEAPON_POWER_PHYSICS);
+                break;
+            case "MAGIC":
+                prm.SetPowerType(FEConst.WEAPON_POWER_PHYSICS);
+                break;
+            case "UNKNOWN":
+                prm.SetPowerType(FEConst.WEAPON_POWER_PHYSICS);
+                break;
+            default:
+                prm.SetPowerType(FEConst.NOT_FOUND);
+                break;
+            }
+        }
+        value = json.GetInt("Defense", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetDefense(value);
+        }
+        value = json.GetInt("MDefense", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMDefense(value);
+        }
+        value = json.GetInt("Accuracy", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetAccuracy(value);
+        }
+        value = json.GetInt("Avoid", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetAvoid(value);
+        }
+        value = json.GetInt("Critical", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetCritical(value);
+        }
+        value = json.GetInt("Critical Avoid", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetCriticalAvoid(value);
+        }
+        value = json.GetInt("Min Range", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMinRange(value);
+        }
+        value = json.GetInt("Max Range", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMaxRange(value);
+        }
     }
 
     /**
@@ -1657,8 +1819,8 @@ public class FEJsonUtility {
     public void LoadWeapon(FEWeapon wep, JsonObject json) throws Exception {
         if (wep == null || json == null) return;
         LoadItemBase(wep, json);
-        int value = json.GetInt("Weapon Class ID", -99999);
-        if (value != -99999) {
+        int value = json.GetInt("Weapon Class ID", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
             wep.SetWeaponClassID(value);
         } else {
             dialog.Show("エラー", "武器タイプIDが設定されていないデータがあります。\njson = " + json);
@@ -1709,7 +1871,7 @@ public class FEJsonUtility {
             for (int i=0; i<array.Size(); i++) {
                 state = array.GetJsonObject(i);
                 if (state == null) continue;
-                wep.GetGrantingStates().put(state.GetInt("State ID", -99999), state.GetInt("Accuracy", 0));
+                wep.GetGrantingStates().put(state.GetInt("State ID", FEConst.NOT_FOUND), state.GetInt("Accuracy", 0));
             }
         }
     }
@@ -1745,6 +1907,7 @@ public class FEJsonUtility {
         LoadUnitParameter(cls.GetChangeBonus(), json.GetJsonObject("Class Change Bonus"));
         LoadUnitParameter(cls.GetGrowthBonus(), json.GetJsonObject("Growth Rate Bonus"));
         LoadUnitParameter(cls.GetGrowthLimit(), json.GetJsonObject("Growth Limit"));
+        LoadUnitBattleParameter(cls.GetBattleParameter(), json.GetJsonObject("Battle Parameter"));
         JsonArray array = json.GetJsonArray("Learnable Skills");
         if (array != null) {
             JsonObject skill;
@@ -1752,9 +1915,9 @@ public class FEJsonUtility {
             for (int i=0; i<array.Size(); i++) {
                 skill = array.GetJsonObject(i);
                 if (skill == null) continue;
-                id = skill.GetInt("Skill ID", -99999);
-                if (id != -99999) {
-                    cls.GetLearnabeSkills().put(id, skill.GetInt("Level", -99999));
+                id = skill.GetInt("Skill ID", FEConst.NOT_FOUND);
+                if (id != FEConst.NOT_FOUND) {
+                    cls.GetLearnabeSkills().put(id, skill.GetInt("Level", FEConst.NOT_FOUND));
                 } else {
                     dialog.Show("エラー", "スキルIDが設定されていないデータがあります。\njson = " + json);
                     throw new Exception();
@@ -1767,8 +1930,8 @@ public class FEJsonUtility {
         if (unit == null || json == null) return;
         LoadFEData(unit, json);
         unit.SetOrganization(json.GetString("Organization", "無所属"));
-        int classID = json.GetInt("Class ID", -99999);
-        if (classID != -99999) {
+        int classID = json.GetInt("Class ID", FEConst.NOT_FOUND);
+        if (classID != FEConst.NOT_FOUND) {
             unit.SetUnitClassID(classID);
         } else {
             dialog.Show("エラー", "クラスIDが設定されていないデータがあります。\njson = " + json);
@@ -1820,8 +1983,8 @@ public class FEJsonUtility {
         if (array != null) {
             int id;
             for (int i=0; i<array.Size(); i++) {
-                id = array.GetInt(i, -99999);
-                if (id != -99999) {
+                id = array.GetInt(i, FEConst.NOT_FOUND);
+                if (id != FEConst.NOT_FOUND) {
                     unit.GetLearnSkillList().add(id);
                 } else {
                     dialog.Show("エラー", "スキルIDが設定されていないデータがあります。\njson = " + json);
@@ -1837,7 +2000,7 @@ public class FEJsonUtility {
             for (int i=0; i<array.Size(); i++) {
                 item = array.GetJsonObject(i);
                 if (item == null) continue;
-                actItem = feManager.GetDataBase().CreateItem(item.GetInt("ID", -99999), item.GetBoolean("Is Item", true));
+                actItem = feManager.GetDataBase().CreateItem(item.GetInt("ID", FEConst.NOT_FOUND), item.GetBoolean("Is Item", true));
                 actItem.SetEndurance(item.GetInt("Endurance", 0));
                 actItem.SetExchangeable(item.GetBoolean("Is Exchangeable", true));
                 if (actItem != null) {
@@ -1845,8 +2008,8 @@ public class FEJsonUtility {
                 }
             }
         }
-        int idx = json.GetInt("Equip Weapon Index", -99999);
-        if (idx != -99999) {
+        int idx = json.GetInt("Equip Weapon Index", FEConst.NOT_FOUND);
+        if (idx != FEConst.NOT_FOUND) {
             unit.SetEquipWeapon(unit.GetItemList().get(idx));
         }
     }

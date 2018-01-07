@@ -102,52 +102,13 @@ public class FEWeaponCompatibility {
         _isBadCompatibility = value;
     }
 
-    private int _attackCorrect;
-    public int GetAttackCorrect() {
-        return _attackCorrect;
-    }
-    public void SetAttackCorrect(int value) {
-        _attackCorrect = value;
+    private FEUnitBattleParameter _correct;
+    public FEUnitBattleParameter GetCorrect() {
+        return _correct;
     }
 
-    private int _defenseCorrect;
-    public int GetDefenseCorrect() {
-        return _defenseCorrect;
-    }
-    public void SetDefenseCorrect(int value) {
-        _defenseCorrect = value;
-    }
-
-    private int _accuracyCorrect;
-    public int GetAccuracyCorrect() {
-        return _accuracyCorrect;
-    }
-    public void SetAccuracyCorrect(int value) {
-        _accuracyCorrect = value;
-    }
-
-    private int _avoidCorrect;
-    public int GetAvoidCorrect() {
-        return _avoidCorrect;
-    }
-    public void SetAvoidCorrect(int value) {
-        _avoidCorrect = value;
-    }
-
-    private int _criticalCorrect;
-    public int GetCriticalCorrect() {
-        return _criticalCorrect;
-    }
-    public void SetCriticalCorrect(int value) {
-        _criticalCorrect = value;
-    }
-
-    private int _criticalAvoidCorrect;
-    public int GetCriticalAvoidCorrect() {
-        return _criticalAvoidCorrect;
-    }
-    public void SetCriticalAvoidCorrect(int value) {
-        _criticalAvoidCorrect = value;
+    public FEWeaponCompatibility() {
+        _correct = new FEUnitBattleParameter();
     }
 }
 
@@ -167,101 +128,101 @@ public class FEUnitParameter implements Copyable<FEUnitParameter> {
     }
 
     private int _atk;
-    public int GetAttack() {
+    public int GetAtk() {
         return _atk;
     }
-    public void SetAttack(int value) {
+    public void SetAtk(int value) {
         _atk = value;
     }
-    public void AddAttack(int value) {
+    public void AddAtk(int value) {
         _atk += value;
     }
 
     private int _mat;
-    public int GetMAttack() {
+    public int GetMat() {
         return _mat;
     }
-    public void SetMAttack(int value) {
+    public void SetMat(int value) {
         _mat = value;
     }
-    public void AddMAttack(int value) {
+    public void AddMat(int value) {
         _mat += value;
     }
 
     private int _tec;
-    public int GetTech() {
+    public int GetTec() {
         return _tec;
     }
-    public void SetTech(int value) {
+    public void SetTec(int value) {
         _tec = value;
     }
-    public void AddTech(int value) {
+    public void AddTec(int value) {
         _tec += value;
     }
 
     private int _spd;
-    public int GetSpeed() {
+    public int GetSpd() {
         return _spd;
     }
-    public void SetSpeed(int value) {
+    public void SetSpd(int value) {
         _spd = value;
     }
-    public void AddSpeed(int value) {
+    public void AddSpd(int value) {
         _spd += value;
     }
 
     private int _luc;
-    public int GetLucky() {
+    public int GetLuc() {
         return _luc;
     }
-    public void SetLucky(int value) {
+    public void SetLuc(int value) {
         _luc = value;
     }
-    public void AddLucky(int value) {
+    public void AddLuc(int value) {
         _luc += value;
     }
 
     private int _def;
-    public int GetDefense() {
+    public int GetDef() {
         return _def;
     }
-    public void SetDefense(int value) {
+    public void SetDef(int value) {
         _def = value;
     }
-    public void AddDefense(int value) {
+    public void AddDef(int value) {
         _def += value;
     }
 
     private int _mdf;
-    public int GetMDefense() {
+    public int GetMdf() {
         return _mdf;
     }
-    public void SetMDefense(int value) {
+    public void SetMdf(int value) {
         _mdf = value;
     }
-    public void AddMDefense(int value) {
+    public void AddMdf(int value) {
         _mdf += value;
     }
 
     private int _mov;
-    public int GetMobility() {
+    public int GetMov() {
         return _mov;
     }
-    public void SetMobility(int value) {
+    public void SetMov(int value) {
         _mov = value;
     }
-    public void AddMobility(int value) {
+    public void AddMov(int value) {
         _mov += value;
     }
 
     private int _pro;
-    public int GetProficiency() {
+    public int GetPro() {
         return _pro;
     }
-    public void SetProficiency(int value) {
+    public void SetPro(int value) {
         _pro = value;
     }
-    public void AddProficiency(int value) {
+    public void AddPro(int value) {
         _pro += value;
     }
 
@@ -277,6 +238,197 @@ public class FEUnitParameter implements Copyable<FEUnitParameter> {
         own._mdf = _mdf;
         own._mov = _mov;
         own._pro = _pro;
+    }
+
+    /**
+     全てのパラメータを任意の値でリセットする。
+     */
+    public void Reset(int value) {
+        SetHp(value);
+        SetAtk(value);
+        SetMat(value);
+        SetTec(value);
+        SetSpd(value);
+        SetLuc(value);
+        SetDef(value);
+        SetMdf(value);
+        SetMov(value);
+        SetPro(value);
+    }
+
+    /**
+     他のパラメータに加算する。
+     代入は CopyTo を使えば良い。
+     */
+    public void AddTo(FEUnitParameter own) {
+        if (own == null) return;
+        own._hp += _hp;
+        own._atk += _atk;
+        own._mat += _mat;
+        own._tec += _tec;
+        own._spd += _spd;
+        own._luc += _luc;
+        own._def += _def;
+        own._mdf += _mdf;
+        own._mov += _mov;
+        own._pro += _pro;
+    }
+}
+
+/**
+ 威力、威力タイプ、防御、命中、回避、会心など、戦闘に関わるパラメータを保持する。
+ */
+public class FEUnitBattleParameter implements Copyable<FEUnitBattleParameter> {
+    private int _power;
+    public int GetPower() {
+        return _power;
+    }
+    public void SetPower(int value) {
+        _power = value;
+    }
+    public void AddPower(int value) {
+        _power += value;
+    }
+
+    private int _powerType;
+    public int GetPowerType() {
+        return _powerType;
+    }
+    public void SetPowerType(int value) {
+        _powerType = value;
+    }
+    public void AddPowerType(int value) {
+        _powerType += value;
+    }
+
+    private int _defense;
+    public int GetDefense() {
+        return _defense;
+    }
+    public void SetDefense(int value) {
+        _defense = value;
+    }
+    public void AddDefense(int value) {
+        _defense += value;
+    }
+
+    private int _mDefense;
+    public int GetMDefense() {
+        return _mDefense;
+    }
+    public void SetMDefense(int value) {
+        _mDefense = value;
+    }
+    public void AddMDefense(int value) {
+        _mDefense += value;
+    }
+
+    private int _accuracy;
+    public int GeAccuracy() {
+        return _accuracy;
+    }
+    public void SetAccuracy(int value) {
+        _accuracy = value;
+    }
+    public void AddAccuracy(int value) {
+        _accuracy += value;
+    }
+
+    private int _avoid;
+    public int GetAvoid() {
+        return _avoid;
+    }
+    public void SetAvoid(int value) {
+        _avoid = value;
+    }
+    public void AddAvoid(int value) {
+        _avoid += value;
+    }
+
+    private int _critical;
+    public int GetCritical() {
+        return _critical;
+    }
+    public void SetCritical(int value) {
+        _critical = value;
+    }
+    public void AddCritical(int value) {
+        _critical += value;
+    }
+
+    private int _criticalAvoid;
+    public int GetCriticalAvoid() {
+        return _criticalAvoid;
+    }
+    public void SetCriticalAvoid(int value) {
+        _criticalAvoid = value;
+    }
+    public void AddCriticalAvoid(int value) {
+        _criticalAvoid += value;
+    }
+
+    private int _speed;
+    public int GetSpeed() {
+        return _speed;
+    }
+    public void SetSpeed(int value) {
+        _speed = value;
+    }
+    public void AddSpeed(int value) {
+        _speed += value;
+    }
+
+    private int _minRange;
+    public int GetMinRange() {
+        return _minRange;
+    }
+    public void SetMinRange(int value) {
+        _minRange = value;
+    }
+    public void AddMinRange(int value) {
+        _minRange += value;
+    }
+
+    private int _maxRange;
+    public int GetMaxRange() {
+        return _maxRange;
+    }
+    public void SetMaxRange(int value) {
+        _maxRange = value;
+    }
+    public void AddMaxRange(int value) {
+        _maxRange += value;
+    }
+
+    public void CopyTo(FEUnitBattleParameter own) {
+        if (own == null) return;
+        own._power = _power;
+        own._powerType = _powerType;
+        own._defense = _defense;
+        own._mDefense = _mDefense;
+        own._accuracy = _accuracy;
+        own._avoid = _avoid;
+        own._critical = _critical;
+        own._criticalAvoid = _criticalAvoid;
+        own._speed = _speed;
+        own._minRange = _minRange;
+        own._maxRange = _maxRange;
+    }
+
+    /**
+     Power Type以外のすべてを任意の値でリセットする。
+     */
+    public void Reset(int value) {
+        _power = value;
+        _power = FEConst.NOT_FOUND;
+        _defense = value;
+        _mDefense = value;
+        _accuracy = value;
+        _avoid = value;
+        _critical = value;
+        _criticalAvoid = value;
+        _minRange = value;
+        _maxRange = value;
     }
 }
 
@@ -427,6 +579,14 @@ public class FEUnit extends FEMapObject {
     }
 
     /**
+     戦闘用パラメータ    
+     */
+    private FEUnitBattleParameter _battleParameter;
+    public FEUnitBattleParameter GetBattleParameter() {
+        return _battleParameter;
+    }
+
+    /**
      ユニット自身が習得しているスキルのリスト
      ID保持
      */
@@ -454,6 +614,14 @@ public class FEUnit extends FEMapObject {
     private ArrayList<FEActualItem> _itemList;
     public ArrayList<FEActualItem> GetItemList() {
         return _itemList;
+    }
+
+    /**
+     現在受けているステート
+     */
+    private ArrayList<FEActualState> _stateList;
+    public ArrayList<FEActualState> GetStateList() {
+        return _stateList;
     }
 
     /**
@@ -495,9 +663,11 @@ public class FEUnit extends FEMapObject {
         _parameter = new FEUnitParameter();
         _baseGrowthRate = new FEUnitParameter();
         _correctGrowthRate = new FEUnitParameter();
+        _battleParameter = new FEUnitBattleParameter();
         _learnSkillList = new ArrayList<Integer>();
         _skillList = new ArrayList<Integer>();
         _itemList = new ArrayList<FEActualItem>();
+        _stateList = new ArrayList<FEActualState>();
     }
 
     public void CopyTo(FEUnit own) {
@@ -682,11 +852,17 @@ public class FEClass extends FEData {
         return _growthLimit;
     }
 
+    private FEUnitBattleParameter _battleParameter;
+    public FEUnitBattleParameter GetBattleParameter() {
+        return _battleParameter;
+    }
+
     public FEClass() {
         super();
         _changeBonus = new FEUnitParameter();
         _growthBonus = new FEUnitParameter();
         _growthLimit = new FEUnitParameter();
+        _battleParameter = new FEUnitBattleParameter();
         _learnabeSkills = new HashMap<Integer, Integer>();
     }
 }
@@ -1384,6 +1560,11 @@ public class FEMapElement implements Comparable<FEMapElement> {
         _mapObject = value;
     }
 
+    private boolean _isPlayerUnit;
+    public boolean IsPlayerUnit() {
+        return _isPlayerUnit;
+    }
+
     /**
      実体を固定するかどうか
      */
@@ -1495,11 +1676,13 @@ public class FEMapElement implements Comparable<FEMapElement> {
         _isDrawHazardAres = value;
     }
 
-    public FEMapElement() {
+    public FEMapElement(boolean isPlayerUnit) {
         _position = new PVector();
         _actionRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _attackRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _caneRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+
+        _isPlayerUnit = isPlayerUnit;
     }
 
     public boolean IsSamePosition(int x, int y) {
