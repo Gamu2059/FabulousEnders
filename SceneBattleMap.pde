@@ -2,7 +2,7 @@
  戦闘マップ及びマップイベントを描画するシーン。
  */
 public class FESceneBattleMap extends Scene {
-    private SceneObject mapImageObj, hazardAreaObj, actionRangeObj, terrainImageObj, mapElementObj, unitViewObj, terrainViewObj, cursorObj;
+    private SceneObject mapImageObj, actionRangeObj, mapElementObj, unitViewObj, terrainViewObj, cursorObj;
 
     private SceneObjectImage mapImage;
 
@@ -17,10 +17,10 @@ public class FESceneBattleMap extends Scene {
         SceneObjectTransform objT;
 
         mapImageObj = new SceneObject("Map Image Object", this);
-        mapImage = new SceneObjectImage(mapImageObj, null);
         objT = mapImageObj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetPivot(0, 0);
+        mapImage = new FEMapImageDrawer(mapImageObj, null);
         mapCursor = new FEMapMouseCursor(mapImageObj);
 
         actionRangeObj = new SceneObject("Action Range Object", this);
@@ -63,6 +63,40 @@ public class FESceneBattleMap extends Scene {
 }
 
 /**
+ マップ背景および地形オブジェクトの描画を行う振る舞い。
+ */
+public class FEMapImageDrawer extends SceneObjectImage {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_IMAGE_DRAWER;
+    }
+    private FEBattleMapManager bm;
+    float offset;
+    public FEMapImageDrawer(SceneObject obj, String path) {
+        super(obj, path);
+    }
+    public void Start() {
+        super.Start();
+        bm = feManager.GetBattleMapManager();
+        offset = (FEConst.SYSTEM_MAP_GRID_PX - FEConst.SYSTEM_MAP_OBJECT_PX) / 2;
+    }
+    public void Draw() {
+        super.Draw();
+        float x, y;
+        String imgPath;
+        for (int i=0; i<bm.GetMapHeight(); i++) {
+            for (int j=0; j<bm.GetMapWidth(); j++) {
+                imgPath = bm.GetTerrains()[i][j].GetMapImagePath();
+                if (imageManager.GetImage(imgPath) == null) continue;
+                tint(255, 255, 255);
+                x = j * FEConst.SYSTEM_MAP_GRID_PX + offset;
+                y = i * FEConst.SYSTEM_MAP_GRID_PX + offset;
+                image(imageManager.GetImage(imgPath), x, y, FEConst.SYSTEM_MAP_OBJECT_PX, FEConst.SYSTEM_MAP_OBJECT_PX);
+            }
+        }
+    }
+}
+
+/**
  ユニットの行動範囲を描画する振る舞い。
  */
 public class FEMapActionRangeDrawer extends SceneObjectBehavior {
@@ -89,7 +123,7 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
 
     public void Draw() {
         super.Draw();
-        
+
         int[][] ar;
         // 危険領域
         ar = bm.GetHazardAreas();
@@ -203,8 +237,9 @@ public class FEMapObjectDrawer extends SceneObjectBehavior {
 
         FEMapElement e;
         FEMapObject o;
+        FEUnit u;
         PVector pos;
-        float x, y;
+        float x, y, rate;
         String imgPath;
         for (int i=0; i<bm.GetMapElements().size(); i++) {
             e = bm.GetMapElements().get(i);
@@ -219,7 +254,26 @@ public class FEMapObjectDrawer extends SceneObjectBehavior {
             y = pos.y;
             x = x * FEConst.SYSTEM_MAP_GRID_PX + offset;
             y = y * FEConst.SYSTEM_MAP_GRID_PX + offset;
+            colorMode(RGB, 255, 255, 255);
+            if (e.IsDrawHazardAres()) {
+                tint(200, 120, 120);
+            } else {
+                tint(255);
+            }
             image(imageManager.GetImage(imgPath), x, y, FEConst.SYSTEM_MAP_OBJECT_PX, FEConst.SYSTEM_MAP_OBJECT_PX);
+
+            // HPゲージを表示する
+            if (!(o instanceof FEUnit)) continue;
+            u = (FEUnit) o;
+            noStroke();
+            fill(0);
+            rect(x + 12, y + FEConst.SYSTEM_MAP_OBJECT_PX - 15, 36, 5);
+            colorMode(HSB, 360, 100, 100);
+            rate = (float)u.GetHp() / u.GetBaseParameter().GetHp();
+            fill(0, 100, 20);
+            rect(x + 13, y + FEConst.SYSTEM_MAP_OBJECT_PX - 14, 34, 3);
+            fill(rate * 180, 100, 100);
+            rect(x + 13, y + FEConst.SYSTEM_MAP_OBJECT_PX - 14, 34 * rate, 3);
         }
     }
 
@@ -679,6 +733,7 @@ public class FEMapCursor extends SceneObjectBehavior {
         _cursorCenter.x = _mapCur.GetMapX() * FEConst.SYSTEM_MAP_GRID_PX + rad;
         _cursorCenter.y = _mapCur.GetMapY() * FEConst.SYSTEM_MAP_GRID_PX + rad;
 
+        colorMode(RGB, 255, 255, 255);
         translate(_cursorCenter.x, _cursorCenter.y);
         for (int i=0; i<4; i++) {
             translate(-offset, -offset);

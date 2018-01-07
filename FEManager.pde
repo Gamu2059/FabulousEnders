@@ -1039,7 +1039,7 @@ public class FEBattleMapManager {
                         break;
                     }
                     PVector baseP = _selectedElement.GetPosition();
-                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), baseP, x, y, (int)baseP.x, (int)baseP.y, 0, _selectedUnit.GetBaseParameter().GetMobility());
+                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), x, y, (int)baseP.x, (int)baseP.y, _selectedUnit.GetBaseParameter().GetMobility());
                     if (_unitRoute == null) {
                         _SetToNormalMode();
                     } else {
@@ -1086,7 +1086,7 @@ public class FEBattleMapManager {
         case FEConst.BATTLE_OPE_MODE_FINISH_MOVE:
             if (isLeft) {
                 _SetToNormalMode();
-                _UpdateSelfActionRange(_selectedElement);
+                _UpdateAllActionRange();
                 _ClearIntegerArray(_actionRanges);
                 _UpdateOverallActionRange(_selectedElement);
                 _elementSorter.SortList(_mapElements);
@@ -1164,17 +1164,12 @@ public class FEBattleMapManager {
         }
     }
 
-    private void _UpdateOverallRange(int[][] range, FEMapElement elem) {
-        for (int i=0; i<_mapHeight; i++) {
-            for (int j=0; j<_mapWidth; j++) {
-                if (elem.GetActionRange()[i][j]) {
-                    range[i][j] = FEConst.BATTLE_MAP_MARKER_ACTION;
-                } else if (elem.GetAttackRange()[i][j]) {
-                    range[i][j] = FEConst.BATTLE_MAP_MARKER_ATTACK;
-                } else if (elem.GetCaneRange()[i][j]) {
-                    range[i][j] = FEConst.BATTLE_MAP_MARKER_CANE;
-                }
-            }
+    /**
+     自軍、敵軍全てのユニットの行動範囲を更新する。
+     */
+    private void _UpdateAllActionRange() {
+        for (int i=0; i<_mapElements.size(); i++) {
+            _UpdateSelfActionRange(_mapElements.get(i));
         }
     }
 
@@ -1216,16 +1211,12 @@ public class FEBattleMapManager {
         }
         x = (int)elem.GetPosition().x;
         y = (int)elem.GetPosition().y;
-        _SetRecursiveActionRange(elem, unitClass.GetClassType(), isPlayerUnit, x, y, x, y, 0, mov, minR, maxR, 0);
+        _SetRecursiveActionRange(elem, unitClass.GetClassType(), isPlayerUnit, x, y, mov, minR, maxR, 0);
     }
 
-    private void _SetRecursiveActionRange(FEMapElement elem, int classType, boolean isPlayerUnit, int baseX, int baseY, int x, int y, int dir, int remain, int minR, int maxR, int caneR) {
+    private void _SetRecursiveActionRange(FEMapElement elem, int classType, boolean isPlayerUnit, int x, int y, int remain, int minR, int maxR, int caneR) {
         if (!IsInMap(x, y)) return;
         if (remain < 0) return;
-        if (x != baseX || y != baseY) {
-            if (dir == 0 && y >= baseY || dir == 1 && x >= baseX || dir == 2 && y <= baseY || dir == 3 && x <= baseX) return;
-        }
-        if (elem.GetActionRange()[y][x]) return;
 
         FETerrain ter = GetTerrains()[y][x];
         FETerrainEffect terE = feManager.GetDataBase().GetTerrainEffects().get(ter.GetEffectID());
@@ -1245,10 +1236,10 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x, y - 1, 0, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x - 1, y, 1, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x, y + 1, 2, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x + 1, y, 3, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x, y - 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x - 1, y, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x, y + 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, x + 1, y, remain - cost, minR, maxR, caneR);
     }
 
     private void _SetRange(int x, int y, int minR, int maxR, boolean[][] target) {
@@ -1267,12 +1258,9 @@ public class FEBattleMapManager {
         }
     }
 
-    private ArrayList<PVector> _MakeRouteToAimPosition(FEMapElement elem, int classType, PVector baseP, int aimX, int aimY, int x, int y, int dir, int remain) {
+    private ArrayList<PVector> _MakeRouteToAimPosition(FEMapElement elem, int classType, int aimX, int aimY, int x, int y, int remain) {
         if (!IsInMap(x, y)) return null;
         if (remain < 0) return null;
-        if (x != baseP.x || y != baseP.y) {
-            if (dir == 0 && y >= baseP.y || dir == 1 && x >= baseP.x || dir == 2 && y <= baseP.y || dir == 3 && x <= baseP.x) return null;
-        }
         if (!elem.GetActionRange()[y][x]) return null;
 
         FETerrain ter = GetTerrains()[y][x];
@@ -1288,22 +1276,22 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x, y - 1, 0, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x, y - 1, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x - 1, y, 1, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x - 1, y, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x, y + 1, 2, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x, y + 1, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x + 1, y, 3, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x + 1, y, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
@@ -1824,6 +1812,8 @@ public class FEJsonUtility {
             break;
         }
         unit.SetLevel(json.GetInt("Level", -1));
+        unit.SetHp(json.GetInt("HP", -1));
+        unit.SetExp(json.GetInt("Exp", -1));
         LoadUnitParameter(unit.GetBaseGrowthRate(), json.GetJsonObject("Growth Rate"));
         LoadUnitParameter(unit.GetBaseParameter(), json.GetJsonObject("Parameter"));
         JsonArray array = json.GetJsonArray("Skills");

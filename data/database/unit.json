@@ -9,6 +9,8 @@
         "Importance" : "LEADER",
         "Class ID" : 0,
         "Level" : 4,
+        "HP" : 24,
+        "Exp" : 0,
         "Growth Rate" : {
             "HP" : 8,
             "ATK" : 15,
@@ -61,9 +63,19 @@
         "Importance" : "NORMAL",
         "Class ID" : 0,
         "Level" : 4,
-        "Growth Rate" : {},
+        "HP" : 24,
+        "Exp" : 0,
         "Parameter" : {
-            "MOV" : 2
+            "HP" : 24,
+            "ATK" : 6,
+            "MAT" : 0,
+            "TEC" : 7,
+            "SPD" : 6,
+            "LUC" : 2,
+            "DEF" : 4,
+            "MDF" : 2,
+            "MOV" : 4,
+            "PRO" : 12
         },
         "Skills" : [
         ]
@@ -78,6 +90,8 @@
         "Importance" : "NORMAL",
         "Class ID" : 0,
         "Level" : 4,
+        "HP" : 24,
+        "Exp" : 0,
         "Growth Rate" : {},
         "Parameter" : {},
         "Skills" : [

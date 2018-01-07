@@ -51,6 +51,8 @@
             "Importance" : "LEADER",
             "Class ID" : 0,
             "Level" : 4,
+            "HP" : 24,
+            "Exp" : 0,
             "Growth Rate" : {
                 "HP" : 8,
                 "ATK" : 15,

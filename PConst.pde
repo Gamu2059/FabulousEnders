@@ -46,6 +46,7 @@ public final class ClassID {
     public static final int CID_FE_MAP_UNIT_ROUTER = 10004;
     public static final int CID_FE_MAP_CURSOR = 10005;
     public static final int CID_FE_MAP_ACTION_RANGE_DRAWER = 10006;
+    public static final int CID_FE_MAP_IMAGE_DRAWER = 10007;
 }
 
 public final class SceneID {
