@@ -62,7 +62,9 @@
         "Class ID" : 0,
         "Level" : 4,
         "Growth Rate" : {},
-        "Parameter" : {},
+        "Parameter" : {
+            "MOV" : 2
+        },
         "Skills" : [
         ]
     },

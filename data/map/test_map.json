@@ -1,23 +1,28 @@
 {
     "Name" : "テストマップ",
     "Image Path" : "map/back/test.png",
-    "Width" : 10,
-    "Height" : 8,
+    "Width" : 14,
+    "Height" : 14,
     "Immediately Sortie" : true,
     "Skip Preparation" : true,
     "First Phase" : true,
     "Default Terrain ID" : 0,
     "Terrains" : [
+        {
+            "x" : 3,
+            "y" : 6,
+            "ID" : 1
+        }
     ],
     "Player Positions" : [
         {
-            "x" : 0,
-            "y" : 2,
+            "x" : 5,
+            "y" : 4,
             "ID" : 0
         },
         {
-            "x" : 0,
-            "y" : 3
+            "x" : 2,
+            "y": 3
         }
     ],
     "Enemy Positions" : [

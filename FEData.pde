@@ -1365,12 +1365,6 @@ public class FETerrain extends FEData {
 }
 
 /**
- 出撃開始地点と、そこにどんな
- */
-public class FEMapSortiePosition {
-}
-
-/**
  戦闘マップ上で扱うオブジェクトの情報
  */
 public class FEMapElement implements Comparable<FEMapElement> {
@@ -1420,6 +1414,14 @@ public class FEMapElement implements Comparable<FEMapElement> {
         _direction = value;
     }
 
+    private boolean _isRunning;
+    public boolean IsRunning() {
+        return _isRunning;
+    }
+    public void SetRunning(boolean value) {
+        _isRunning = value;
+    }
+
     /**
      アニメーションするかどうか
      */
@@ -1454,8 +1456,35 @@ public class FEMapElement implements Comparable<FEMapElement> {
         _isAlready = value;
     }
 
+    /**
+     行動範囲
+     */
+    private boolean[][] _actionRange;
+    public boolean[][] GetActionRange() {
+        return _actionRange;
+    }
+
+    /**
+     攻撃範囲
+     */
+    private boolean[][] _attackRange;
+    public boolean[][] GetAttackRange() {
+        return _attackRange;
+    }
+
+    /**
+     杖の射程範囲
+     */
+    private boolean[][] _caneRange;
+    public boolean[][] GetCaneRange() {
+        return _caneRange;
+    }
+
     public FEMapElement() {
         _position = new PVector();
+        _actionRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+        _attackRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+        _caneRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
     }
 
     public boolean IsSamePosition(int x, int y) {
