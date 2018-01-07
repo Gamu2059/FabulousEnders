@@ -4,5 +4,11 @@
         "Name" : "平原",
         "Effect ID" : 0,
         "Map Image Path" : null
+    },
+    {
+        "ID" : 1,
+        "Name" : "瓦礫",
+        "Effect ID" : 1,
+        "Map Image Path" : null
     }
 ]

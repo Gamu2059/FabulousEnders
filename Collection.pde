@@ -100,3 +100,9 @@ public class Collection<R extends Comparable> {
         return l;
     }
 }
+
+public class ArrayListRemover<R> extends ArrayList<R> {
+    public void RemoveRange(int bigin, int end) {
+        removeRange(bigin, end);
+    }
+}

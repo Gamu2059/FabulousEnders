@@ -1,5 +1,4 @@
 {
-    "Grid Speed" : 1,
     "Message Speed" : 1,
-    "Is Show Battle" : true
+    "Unit Move Time" : 0.1
 }

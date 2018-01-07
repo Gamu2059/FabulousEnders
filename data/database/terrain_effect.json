@@ -10,6 +10,21 @@
         "SORCERER" : 1,
         "ARMOR" : 1,
         "RIDER" : 1,
-        "FLYER" : 1
+        "FLYER" : 1,
+        "Is Movable" : true
+    },
+    {
+        "ID" : 1,
+        "Name" : "Not Movable",
+        "Avoid" : 0,
+        "Defense" : 0,
+        "MDefense" : 0,
+        "Recover" : 0,
+        "NORMAL" : 1,
+        "SORCERER" : 1,
+        "ARMOR" : 1,
+        "RIDER" : 1,
+        "FLYER" : 1,
+        "Is Movable" : false
     }
 ]
