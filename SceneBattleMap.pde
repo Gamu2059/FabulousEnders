@@ -89,9 +89,26 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
 
     public void Draw() {
         super.Draw();
+        
+        int[][] ar;
+        // 危険領域
+        ar = bm.GetHazardAreas();
+        for (int i=0; i<bm.GetMapHeight(); i++) {
+            for (int j=0; j<bm.GetMapWidth(); j++) {
+                switch(ar[i][j]) {
+                case FEConst.BATTLE_MAP_MARKER_ATTACK:
+                    _DrawRange(j, i, 200, 0, 0, 150);
+                    break;
+                case FEConst.BATTLE_MAP_MARKER_CANE:
+                    _DrawRange(j, i, 0, 200, 200, 150);
+                    break;
+                }
+            }
+        }
 
+        // 行動範囲
         if (!_IsDrawable()) return;
-        int[][] ar = bm.GetActionRanges();
+        ar = bm.GetActionRanges();
         boolean f = bm.GetOperationMode() == FEConst.BATTLE_OPE_MODE_ACTIVE;
         for (int i=0; i<bm.GetMapHeight(); i++) {
             for (int j=0; j<bm.GetMapWidth(); j++) {
@@ -507,15 +524,13 @@ public class FEMapUnitViewer extends SceneObjectBehavior {
                 _faceBackObj.GetTransform().SetScale(1, 1);
                 _faceImg.SetUsingImageName(unit.GetFaceImagePath());
             }
-            _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
-            _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
-            //if (feManager.GetBattleMapManager().GetSortieUnits().contains(unit)) {
-            //    _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
-            //    _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
-            //} else if (feManager.GetBattleMapManager().GetSortieEnemyUnits().contains(unit)) {
-            //    _prmBack.GetBackColorInfo().SetColor(150, 0, 20);
-            //    _faceBack.GetBackColorInfo().SetColor(150, 0, 20);
-            //}
+            if (feManager.GetBattleMapManager().GetSortieUnits().contains(unit)) {
+                _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
+                _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
+            } else if (feManager.GetBattleMapManager().GetSortieEnemyUnits().contains(unit)) {
+                _prmBack.GetBackColorInfo().SetColor(150, 0, 20);
+                _faceBack.GetBackColorInfo().SetColor(150, 0, 20);
+            }
         }
     }
 }

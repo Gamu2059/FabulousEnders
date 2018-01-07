@@ -563,6 +563,10 @@ public class FEOtherUnit extends FEUnit {
     public FEAttackPriority[] GetAttackPriority() {
         return _attackPriority;
     }
+
+    public FEOtherUnit() {
+        super();
+    }
 }
 
 public class FEAttackPriority {
@@ -1478,6 +1482,17 @@ public class FEMapElement implements Comparable<FEMapElement> {
     private boolean[][] _caneRange;
     public boolean[][] GetCaneRange() {
         return _caneRange;
+    }
+
+    /**
+     危険領域に自身の行動範囲を描画するかどうか
+     */
+    private boolean _isDrawHazardAres;
+    public boolean IsDrawHazardAres() {
+        return _isDrawHazardAres;
+    }
+    public void SetDrawHazardAreas(boolean value) {
+        _isDrawHazardAres = value;
     }
 
     public FEMapElement() {

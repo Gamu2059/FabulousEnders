@@ -26,13 +26,67 @@
         }
     ],
     "Enemy Positions" : [
-
+        {
+            "x" : 5,
+            "y" : 7,
+            "ID" : 0
+        },
+        {
+            "x" : 5,
+            "y" : 9,
+            "ID" : 0
+        }
     ],
     "Event Positions" : [
 
     ],
     "Enemies" : [
-
+        {
+            "ID" : 0,
+            "Name" : "Pepper",
+            "Explain" : "暴走したロボット。人を見境なく攻撃する。",
+            "Organization" : "ロボット",
+            "Face Image Path" : "character/face/pepper.png",
+            "Map Image Folder Path" : "character/map/ミゼル",
+            "Importance" : "LEADER",
+            "Class ID" : 0,
+            "Level" : 4,
+            "Growth Rate" : {
+                "HP" : 8,
+                "ATK" : 15,
+                "MAT" : 2,
+                "TEC" : 20,
+                "SPD" : 18,
+                "LUC" : 3,
+                "DEF" : 10,
+                "MDF" : 4,
+                "MOV" : 0,
+                "PRO" : 25
+            },
+            "Parameter" : {
+                "HP" : 24,
+                "ATK" : 6,
+                "MAT" : 0,
+                "TEC" : 7,
+                "SPD" : 6,
+                "LUC" : 2,
+                "DEF" : 4,
+                "MDF" : 2,
+                "MOV" : 4,
+                "PRO" : 12
+            },
+            "Skills" : [
+            ],
+            "Item List" : [
+                {
+                    "Is Item" : false,
+                    "ID" : 0,
+                    "Endurance" : 24,
+                    "Is Exchangeable" : true
+                }
+            ],
+            "Equip Weapon Index" : 0
+        }
     ],
     "Events" : [
 

@@ -1113,6 +1113,10 @@ public class FEOtherUnit extends FEUnit {
     public FEAttackPriority[] GetAttackPriority() {
         return _attackPriority;
     }
+
+    public FEOtherUnit() {
+        super();
+    }
 }
 
 public class FEAttackPriority {
@@ -2030,6 +2034,17 @@ public class FEMapElement implements Comparable<FEMapElement> {
         return _caneRange;
     }
 
+    /**
+     危険領域に自身の行動範囲を描画するかどうか
+     */
+    private boolean _isDrawHazardAres;
+    public boolean IsDrawHazardAres() {
+        return _isDrawHazardAres;
+    }
+    public void SetDrawHazardAreas(boolean value) {
+        _isDrawHazardAres = value;
+    }
+
     public FEMapElement() {
         _position = new PVector();
         _actionRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
@@ -2132,18 +2147,6 @@ public class FEManager {
  ゲーム内で設定を変更することができるコンフィグパラメータを保持するクラス。
  */
 public class FEConfig {
-    // グリッドカーソルを移動させる速さ
-    private int _gridSpeed;
-    public int GetGridSpeed() {
-        return _gridSpeed;
-    }
-    public void SetGridSpeed(int value) {
-        _gridSpeed = value;
-    }
-    public void AddGridSpeed(int value) {
-        _gridSpeed += value;
-    }
-
     // メッセージウィンドウに表示させる文章の表示の速さ
     private int _messageSpeed;
     public int GetMessageSpeed() {
@@ -2156,12 +2159,26 @@ public class FEConfig {
         _messageSpeed += value;
     }
 
+    /**
+     マップ上のユニットが移動する時に、1マス移動するのに掛かる時間
+     */
+    private float _unitMoveTime;
+    public float GetUnitMoveTime() {
+        return _unitMoveTime;
+    }
+    public void SetUnitMoveTime(float value) {
+        _unitMoveTime = value;
+    }
+    public void AddUnitMoveTime(float value) {
+        _unitMoveTime += value;
+    }
+
     public void Load(String path) {
         JsonObject json = new JsonObject();
         json.Load(path);
 
-        _gridSpeed = json.GetInt("Grid Speed", -1);
         _messageSpeed = json.GetInt("Message Speed", -1);
+        _unitMoveTime = json.GetFloat("Unit Move Time", 0.1);
     }
 }
 
@@ -2614,6 +2631,14 @@ public class FEBattleMapManager {
     }
 
     /**
+     現在カーソルで重ねられているマップエレメント
+     */
+    private FEMapElement _overlappedElement;
+    public FEMapElement GetOverlappedElement() {
+        return _overlappedElement;
+    }
+
+    /**
      現在カーソルで重ねられているユニット
      */
     private FEUnit _overlappedUnit;
@@ -2715,11 +2740,19 @@ public class FEBattleMapManager {
     }
 
     /**
-     マップ上のプレイヤーの存在情報
+     マップ上のプレイヤーユニットの存在情報
      */
     private ArrayList<FEMapElement> _mapPlayerObjects;
     public ArrayList<FEMapElement> GetMapPlayerObjects() {
         return _mapPlayerObjects;
+    }
+
+    /**
+     マップ上の敵ユニットの存在情報
+     */
+    private ArrayList<FEMapElement> _mapEnemyObjects;
+    public ArrayList<FEMapElement> GetMapEnemyObjects() {
+        return _mapEnemyObjects;
     }
 
     /**
@@ -2729,6 +2762,11 @@ public class FEBattleMapManager {
     public ArrayList<FEMapElement> GetMapElements() {
         return _mapElements;
     }
+
+    /**
+     描画順序を考慮するために用意
+     */
+    private Collection<FEMapElement> _elementSorter;
 
     /**
      ローカル変数
@@ -2748,17 +2786,24 @@ public class FEBattleMapManager {
 
     public FEBattleMapManager() {
         _mapWidth = _mapHeight = 0;
+
         _basePosOfMovingUnit = new PVector();
         _elapsedTurn = 0;
+
         _sortieUnits = new ArrayList<FEUnit>();
         _enemyUnits = new HashMap<Integer, FEOtherUnit>();
         _sortieEnemyUnits = new ArrayList<FEOtherUnit>();
         _events = new ArrayList<FEMapObject>();
+
         _terrains = new FETerrain[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _hazardAreas = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _actionRanges = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+
         _mapPlayerObjects = new ArrayList<FEMapElement>();
+        _mapEnemyObjects = new ArrayList<FEMapElement>();
         _mapElements = new ArrayList<FEMapElement>();
+        _elementSorter = new Collection<FEMapElement>();
+
         _localVariables = new PHash<Integer>();
         _localSwitches = new PHash<Boolean>();
     }
@@ -2771,6 +2816,7 @@ public class FEBattleMapManager {
         try {
             JsonObject json = new JsonObject();
             json.LoadWithThrowException(path);
+            JsonArray array;
 
             // マップ基本情報
             _mapName = json.GetString("Name", "No Data");
@@ -2786,13 +2832,13 @@ public class FEBattleMapManager {
             // 地形情報
             boolean[][] terrain = new boolean[_mapHeight][_mapWidth];
             FETerrain defTerrain = feManager.GetDataBase().GetTerrains().get(json.GetInt("Default Terrain ID", 0));
-            JsonArray terrainArray = json.GetJsonArray("Terrains");
+            array = json.GetJsonArray("Terrains");
             JsonObject terrainObj;
-            if (terrainArray != null) {
+            if (array != null) {
                 int x, y, id;
                 boolean exsId;
-                for (int i=0; i<terrainArray.Size(); i++) {
-                    terrainObj = terrainArray.GetJsonObject(i);
+                for (int i=0; i<array.Size(); i++) {
+                    terrainObj = array.GetJsonObject(i);
                     if (terrainObj == null) continue;
                     x = terrainObj.GetInt("x", -1);
                     y = terrainObj.GetInt("y", -1);
@@ -2810,18 +2856,33 @@ public class FEBattleMapManager {
                 }
             }
 
+            // 敵ユニットの原本生成
+            _enemyUnits.clear();
+            array = json.GetJsonArray("Enemies");
+            if (array != null) {
+                JsonObject enemy;
+                FEOtherUnit otherUnit;
+                for (int i=0; i<array.Size(); i++) {
+                    enemy = array.GetJsonObject(i);
+                    if (enemy == null) continue;
+                    otherUnit = new FEOtherUnit();
+                    feJsonUtility.LoadOtherUnit(otherUnit, enemy);
+                    _enemyUnits.put(otherUnit.GetID(), otherUnit);
+                }
+            }
+
             // プレイヤーユニットの出撃地点情報
-            JsonArray playerPositions = json.GetJsonArray("Player Positions");
-            if (playerPositions != null) {
+            array = json.GetJsonArray("Player Positions");
+            _mapPlayerObjects.clear();
+            if (array != null) {
                 FEProgressManager fePm = feManager.GetProgressDataBase();
                 JsonObject playerPosition;
                 FEMapElement elem;
                 FEUnit unit;
                 int x, y;
                 int unFixNum = 0;
-                _mapPlayerObjects.clear();
-                for (int i=0; i<playerPositions.Size(); i++) {
-                    playerPosition = playerPositions.GetJsonObject(i);
+                for (int i=0; i<array.Size(); i++) {
+                    playerPosition = array.GetJsonObject(i);
                     if (playerPosition == null) continue;
                     x = playerPosition.GetInt("x", -1);
                     y = playerPosition.GetInt("y", -1);
@@ -2860,6 +2921,34 @@ public class FEBattleMapManager {
                         unFixNum--;
                         break;
                     }
+                }
+            }
+
+            // 敵ユニットの出撃地点情報
+            array = json.GetJsonArray("Enemy Positions");
+            _mapEnemyObjects.clear();
+            if (array != null) {
+                FEProgressManager fePm = feManager.GetProgressDataBase();
+                JsonObject enemyPosition;
+                FEMapElement elem;
+                FEUnit unit, toUnit;
+                int x, y;
+                for (int i=0; i<array.Size(); i++) {
+                    enemyPosition = array.GetJsonObject(i);
+                    if (enemyPosition == null) continue;
+                    x = enemyPosition.GetInt("x", -1);
+                    y = enemyPosition.GetInt("y", -1);
+                    if (!IsInMap(x, y)) continue;
+                    elem = new FEMapElement();
+                    elem.GetPosition().x = x;
+                    elem.GetPosition().y = y;
+                    unit = _enemyUnits.get(enemyPosition.GetInt("ID", -99999));
+                    if (unit == null) continue;
+                    toUnit = new FEOtherUnit();
+                    unit.CopyTo(toUnit);
+                    elem.SetFixElement(true);
+                    elem.SetMapObject(toUnit);
+                    _mapEnemyObjects.add(elem);
                 }
             }
 
@@ -2913,14 +3002,31 @@ public class FEBattleMapManager {
         for (int i=0; i<elems.size(); i++) {
             _mapPlayerObjects.remove(elems.get(i));
         }
-        // 出撃ユニットを確定する
+
+        // マップエレメントの生成処理
         _mapElements.clear();
+        // 出撃プレイヤーユニットを確定する
         _sortieUnits.clear();
         for (int i=0; i<_mapPlayerObjects.size(); i++) {
             elem = _mapPlayerObjects.get(i);
             _mapElements.add(elem);
             _sortieUnits.add((FEUnit)elem.GetMapObject());
-            _UpdateSelfActionRange(elem);
+        }
+
+        // 出撃敵ユニットを確定する
+        _sortieEnemyUnits.clear();
+        for (int i=0; i<_mapEnemyObjects.size(); i++) {
+            elem = _mapEnemyObjects.get(i);
+            _mapElements.add(elem);
+            _sortieEnemyUnits.add((FEOtherUnit)elem.GetMapObject());
+        }
+
+        // ユニットの行動範囲を更新
+        for (int i=0; i<_mapPlayerObjects.size(); i++) {
+            _UpdateSelfActionRange(_mapPlayerObjects.get(i));
+        }
+        for (int i=0; i<_mapEnemyObjects.size(); i++) {
+            _UpdateSelfActionRange(_mapEnemyObjects.get(i));
         }
 
         _sortieMode = FEConst.BATTLE_SORTIE_MODE_SORTIE;
@@ -2954,7 +3060,8 @@ public class FEBattleMapManager {
         case FEConst.BATTLE_OPE_MODE_NORMAL:
             FEMapElement elem = GetMapElementOnPos(x, y);
             if (elem != _preOverlappedElement) {
-                _preOverlappedElement = elem;
+                _preOverlappedElement = _overlappedElement;
+                _overlappedElement = elem;
                 _ClearIntegerArray(_actionRanges);
                 if (elem != null) {
                     if (elem.GetMapObject() instanceof FEUnit) {
@@ -2985,6 +3092,9 @@ public class FEBattleMapManager {
                     _selectedUnit = (FEUnit)mapObj;
                     _selectedElement = elem;
                     _selectedElement.SetRunning(true);
+                } else if (_mapEnemyObjects.contains(elem)) {
+                    elem.SetDrawHazardAreas(!elem.IsDrawHazardAres());
+                    _UpdateOverallHazardArea();
                 }
             } else {
             }
@@ -2998,13 +3108,44 @@ public class FEBattleMapManager {
                         break;
                     }
                     PVector baseP = _selectedElement.GetPosition();
-                    _unitRoute = _MakeRouteToAimPosition(unitClass.GetClassType(), baseP, x, y, (int)baseP.x, (int)baseP.y, 0, _selectedUnit.GetBaseParameter().GetMobility());
+                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), baseP, x, y, (int)baseP.x, (int)baseP.y, 0, _selectedUnit.GetBaseParameter().GetMobility());
                     if (_unitRoute == null) {
                         _SetToNormalMode();
                     } else {
-                        _operationMode = FEConst.BATTLE_OPE_MODE_MOVING;
                         _basePosOfMovingUnit.x = baseP.x;
                         _basePosOfMovingUnit.y = baseP.y;
+
+                        // 冗長なルートをカットする
+                        int idx1 = 0, idx2 = 0;
+                        boolean flag;
+                        PVector pos1, pos2;
+                        while (true) {
+                            flag = false;
+                            for (int i=0; i<_unitRoute.size()-1; i++) {
+                                pos1 = _unitRoute.get(i);
+                                idx2 = -1;
+                                for (int j=i+1; j<_unitRoute.size(); j++) {
+                                    pos2 = _unitRoute.get(j);
+                                    if (pos1.x == pos2.x && pos1.y == pos2.y) {
+                                        idx2 = j;
+                                        break;
+                                    }
+                                }
+                                if (idx2 > 0 && i != idx2) {
+                                    flag = true;
+                                    idx1 = i;
+                                    break;
+                                }
+                            }
+                            if (flag) {
+                                for (int i = idx2 - idx1; i>0; i--) {
+                                    _unitRoute.remove(idx1);
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+                        _operationMode = FEConst.BATTLE_OPE_MODE_MOVING;
                     }
                 }
             } else {
@@ -3017,6 +3158,7 @@ public class FEBattleMapManager {
                 _UpdateSelfActionRange(_selectedElement);
                 _ClearIntegerArray(_actionRanges);
                 _UpdateOverallActionRange(_selectedElement);
+                _elementSorter.SortList(_mapElements);
             } else {
                 _selectedElement.GetPosition().x = _basePosOfMovingUnit.x;
                 _selectedElement.GetPosition().y = _basePosOfMovingUnit.y;
@@ -3046,6 +3188,32 @@ public class FEBattleMapManager {
      */
     public void OnFinishMoving() {
         _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
+        _elementSorter.SortList(_mapElements);
+    }
+
+    /**
+     マップ上にいる敵ユニットの行動範囲で危険領域を更新する。
+     */
+    private void _UpdateOverallHazardArea() {
+        int a;
+        FEMapElement elem;
+        _ClearIntegerArray(_hazardAreas);
+        for (int i=0; i<_mapHeight; i++) {
+            for (int j=0; j<_mapWidth; j++) {
+                a = 0;
+                for (int k=0; k<_mapEnemyObjects.size(); k++) {
+                    elem = _mapEnemyObjects.get(k);
+                    if (!elem.IsDrawHazardAres()) continue;
+                    if (elem.GetAttackRange()[i][j]) {
+                        a = FEConst.BATTLE_MAP_MARKER_ATTACK;
+                        break;
+                    } else if (elem.GetCaneRange()[i][j]) {
+                        a = FEConst.BATTLE_MAP_MARKER_CANE;
+                    }
+                }
+                _hazardAreas[i][j] = a;
+            }
+        }
     }
 
     /**
@@ -3060,6 +3228,20 @@ public class FEBattleMapManager {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_ATTACK;
                 } else if (elem.GetCaneRange()[i][j]) {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_CANE;
+                }
+            }
+        }
+    }
+
+    private void _UpdateOverallRange(int[][] range, FEMapElement elem) {
+        for (int i=0; i<_mapHeight; i++) {
+            for (int j=0; j<_mapWidth; j++) {
+                if (elem.GetActionRange()[i][j]) {
+                    range[i][j] = FEConst.BATTLE_MAP_MARKER_ACTION;
+                } else if (elem.GetAttackRange()[i][j]) {
+                    range[i][j] = FEConst.BATTLE_MAP_MARKER_ATTACK;
+                } else if (elem.GetCaneRange()[i][j]) {
+                    range[i][j] = FEConst.BATTLE_MAP_MARKER_CANE;
                 }
             }
         }
@@ -3103,10 +3285,10 @@ public class FEBattleMapManager {
         }
         x = (int)elem.GetPosition().x;
         y = (int)elem.GetPosition().y;
-        _SetRecursiveActionRange(elem, unitClass.GetClassType(), x, y, x, y, 0, mov, minR, maxR, 0);
+        _SetRecursiveActionRange(elem, unitClass.GetClassType(), isPlayerUnit, x, y, x, y, 0, mov, minR, maxR, 0);
     }
 
-    private void _SetRecursiveActionRange(FEMapElement elem, int classType, int baseX, int baseY, int x, int y, int dir, int remain, int minR, int maxR, int caneR) {
+    private void _SetRecursiveActionRange(FEMapElement elem, int classType, boolean isPlayerUnit, int baseX, int baseY, int x, int y, int dir, int remain, int minR, int maxR, int caneR) {
         if (!IsInMap(x, y)) return;
         if (remain < 0) return;
         if (x != baseX || y != baseY) {
@@ -3119,6 +3301,12 @@ public class FEBattleMapManager {
         if (terE == null) return;
         if (!terE.IsMovable()) return;
 
+        FEMapElement otherElem = GetMapElementOnPos(x, y);
+        if (otherElem != null && otherElem.GetMapObject() instanceof FEUnit) {
+            if (_sortieUnits.contains(otherElem.GetMapObject()) && !isPlayerUnit) return;
+            if (_sortieEnemyUnits.contains(otherElem.GetMapObject()) && isPlayerUnit) return;
+        }
+
         elem.GetActionRange()[y][x] = true;
         _SetRange(x, y, minR, maxR, elem.GetAttackRange());
         if (caneR > 0) {
@@ -3126,10 +3314,10 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        _SetRecursiveActionRange(elem, classType, baseX, baseY, x, y - 1, 0, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, baseX, baseY, x - 1, y, 1, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, baseX, baseY, x, y + 1, 2, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, baseX, baseY, x + 1, y, 3, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x, y - 1, 0, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x - 1, y, 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x, y + 1, 2, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x + 1, y, 3, remain - cost, minR, maxR, caneR);
     }
 
     private void _SetRange(int x, int y, int minR, int maxR, boolean[][] target) {
@@ -3148,12 +3336,13 @@ public class FEBattleMapManager {
         }
     }
 
-    private ArrayList<PVector> _MakeRouteToAimPosition(int classType, PVector baseP, int aimX, int aimY, int x, int y, int dir, int remain) {
+    private ArrayList<PVector> _MakeRouteToAimPosition(FEMapElement elem, int classType, PVector baseP, int aimX, int aimY, int x, int y, int dir, int remain) {
         if (!IsInMap(x, y)) return null;
         if (remain < 0) return null;
         if (x != baseP.x || y != baseP.y) {
             if (dir == 0 && y >= baseP.y || dir == 1 && x >= baseP.x || dir == 2 && y <= baseP.y || dir == 3 && x <= baseP.x) return null;
         }
+        if (!elem.GetActionRange()[y][x]) return null;
 
         FETerrain ter = GetTerrains()[y][x];
         FETerrainEffect terE = feManager.GetDataBase().GetTerrainEffects().get(ter.GetEffectID());
@@ -3168,22 +3357,22 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        aim =  _MakeRouteToAimPosition(classType, baseP, aimX, aimY, x, y - 1, 0, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x, y - 1, 0, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(classType, baseP, aimX, aimY, x - 1, y, 1, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x - 1, y, 1, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(classType, baseP, aimX, aimY, x, y + 1, 2, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x, y + 1, 2, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(classType, baseP, aimX, aimY, x + 1, y, 3, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x + 1, y, 3, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
@@ -3739,6 +3928,11 @@ public class FEJsonUtility {
         if (idx != -99999) {
             unit.SetEquipWeapon(unit.GetItemList().get(idx));
         }
+    }
+
+    public void LoadOtherUnit(FEOtherUnit unit, JsonObject json) throws Exception {
+        if (unit == null || json == null) return;
+        LoadUnit(unit, json);
     }
 }
 public final static class GeneralCalc {
@@ -5805,8 +5999,26 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
 
     public void Draw() {
         super.Draw();
+        
+        int[][] ar;
+        // 危険領域
+        ar = bm.GetHazardAreas();
+        for (int i=0; i<bm.GetMapHeight(); i++) {
+            for (int j=0; j<bm.GetMapWidth(); j++) {
+                switch(ar[i][j]) {
+                case FEConst.BATTLE_MAP_MARKER_ATTACK:
+                    _DrawRange(j, i, 200, 0, 0, 150);
+                    break;
+                case FEConst.BATTLE_MAP_MARKER_CANE:
+                    _DrawRange(j, i, 0, 200, 200, 150);
+                    break;
+                }
+            }
+        }
 
-        int[][] ar = bm.GetActionRanges();
+        // 行動範囲
+        if (!_IsDrawable()) return;
+        ar = bm.GetActionRanges();
         boolean f = bm.GetOperationMode() == FEConst.BATTLE_OPE_MODE_ACTIVE;
         for (int i=0; i<bm.GetMapHeight(); i++) {
             for (int j=0; j<bm.GetMapWidth(); j++) {
@@ -5829,6 +6041,16 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
         noStroke();
         fill(r, g, b, a);
         rect(x * FEConst.SYSTEM_MAP_GRID_PX + 1, y * FEConst.SYSTEM_MAP_GRID_PX + 1, FEConst.SYSTEM_MAP_GRID_PX - 2, FEConst.SYSTEM_MAP_GRID_PX - 2);
+    }
+
+    private boolean _IsDrawable() {
+        switch(bm.GetOperationMode()) {
+        default:
+            return true;
+        case FEConst.BATTLE_OPE_MODE_MOVING:
+        case FEConst.BATTLE_OPE_MODE_FINISH_MOVE:
+            return false;
+        }
     }
 }
 
@@ -5974,7 +6196,6 @@ public class FEMapUnitRouter extends SceneObjectBehavior {
                 crtPos = elem.GetPosition();
                 dX = aimPos.x - crtPos.x;
                 dY = aimPos.y - crtPos.y;
-                println(dX, dY);
             }
             public boolean IsContinue() {
                 return false;
@@ -5988,7 +6209,7 @@ public class FEMapUnitRouter extends SceneObjectBehavior {
                 crtPos.y = aimPos.y;
                 routeIdx--;
                 if (routeIdx >= 0) {
-                    dur.ResetTimer(_durationLabel, 0.1);
+                    dur.ResetTimer(_durationLabel, feManager.GetConfig().GetUnitMoveTime());
                     dur.Start(_durationLabel);
                 } else {
                     isMoving = false;
@@ -6006,7 +6227,7 @@ public class FEMapUnitRouter extends SceneObjectBehavior {
             isMoving = true;
             routeIdx = bm.GetUnitRoute().size() - 1;
             _duration.SetUseTimer(_durationLabel, true);
-            _duration.ResetTimer(_durationLabel, 0.1);
+            _duration.ResetTimer(_durationLabel, feManager.GetConfig().GetUnitMoveTime());
             _duration.Start(_durationLabel);
         }
     }
@@ -6213,15 +6434,13 @@ public class FEMapUnitViewer extends SceneObjectBehavior {
                 _faceBackObj.GetTransform().SetScale(1, 1);
                 _faceImg.SetUsingImageName(unit.GetFaceImagePath());
             }
-            _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
-            _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
-            //if (feManager.GetBattleMapManager().GetSortieUnits().contains(unit)) {
-            //    _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
-            //    _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
-            //} else if (feManager.GetBattleMapManager().GetSortieEnemyUnits().contains(unit)) {
-            //    _prmBack.GetBackColorInfo().SetColor(150, 0, 20);
-            //    _faceBack.GetBackColorInfo().SetColor(150, 0, 20);
-            //}
+            if (feManager.GetBattleMapManager().GetSortieUnits().contains(unit)) {
+                _prmBack.GetBackColorInfo().SetColor(20, 60, 130);
+                _faceBack.GetBackColorInfo().SetColor(20, 60, 130);
+            } else if (feManager.GetBattleMapManager().GetSortieEnemyUnits().contains(unit)) {
+                _prmBack.GetBackColorInfo().SetColor(150, 0, 20);
+                _faceBack.GetBackColorInfo().SetColor(150, 0, 20);
+            }
         }
     }
 }
