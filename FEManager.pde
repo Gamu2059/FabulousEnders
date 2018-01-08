@@ -1184,10 +1184,8 @@ public class FEBattleMapManager {
         if (atk.GetHp() == 0 || def.GetHp() == 0) {
             _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE_RESULT;
             if (atk.GetHp() == 0) {
-                _attackerElement.SetAnimation(false);
                 _attackerElement.SetDead(true);
             } else {
-                _defenderElement.SetAnimation(false);
                 _defenderElement.SetDead(true);
             }
             return true;
@@ -1228,8 +1226,16 @@ public class FEBattleMapManager {
     public void OnFinishBattle() {
         _attackerElement.SetRunning(false);
         _defenderElement.SetRunning(false);
-
         SetAlreadyUnit(_attackerElement);
+        if (_attackerElement.IsDead() || _defenderElement.IsDead()) {
+            _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE_DEAD;
+            if (_attackerElement.IsDead()) {
+                _attackerElement.SetAnimation(false);
+            }
+            if (_defenderElement.IsDead()) {
+                _defenderElement.SetAnimation(false);
+            }
+        }
     }
 
     /**
@@ -1247,6 +1253,7 @@ public class FEBattleMapManager {
             _sortieEnemyUnits.remove(elem.GetMapObject());
         }
         _ConfirmUnitList();
+        _operationMode = FEConst.BATTLE_OPE_MODE_NORMAL;
     }
 
     /**

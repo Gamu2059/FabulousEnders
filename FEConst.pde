@@ -174,6 +174,7 @@ public class FEConst {
     public static final int BATTLE_OPE_MODE_BATTLE = -7207;
     public static final int BATTLE_OPE_MODE_BATTLE_END = -7209;
     public static final int BATTLE_OPE_MODE_BATTLE_RESULT = -7209;
+    public static final int BATTLE_OPE_MODE_BATTLE_DEAD = -7210;
     
     // マーカ
     public static final int BATTLE_MAP_MARKER_ACTION = -7300;
