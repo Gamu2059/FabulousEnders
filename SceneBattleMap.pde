@@ -2,7 +2,7 @@
  戦闘マップ及びマップイベントを描画するシーン。
  */
 public class FESceneBattleMap extends Scene {
-    private SceneObject mapImageObj, hazardAreaObj, actionRangeObj, terrainImageObj, mapElementObj, unitViewObj, terrainViewObj, cursorObj;
+    private SceneObject mapImageObj, actionRangeObj, mapElementObj, unitViewObj, terrainViewObj, cursorObj;
 
     private SceneObjectImage mapImage;
 
@@ -17,10 +17,10 @@ public class FESceneBattleMap extends Scene {
         SceneObjectTransform objT;
 
         mapImageObj = new SceneObject("Map Image Object", this);
-        mapImage = new SceneObjectImage(mapImageObj, null);
         objT = mapImageObj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
         objT.SetPivot(0, 0);
+        mapImage = new FEMapImageDrawer(mapImageObj, null);
         mapCursor = new FEMapMouseCursor(mapImageObj);
 
         actionRangeObj = new SceneObject("Action Range Object", this);
@@ -36,7 +36,7 @@ public class FESceneBattleMap extends Scene {
         objT.SetParent(mapImageObj.GetTransform(), true);
         objT.AddPriority(4);
         new FEMapObjectDrawer(mapElementObj);
-        new FEMapUnitRouter(mapElementObj);
+        new FEMapUnitAnimator(mapElementObj);
 
         unitViewObj = new SceneObject("Unit View Object", this);
         new FEMapUnitViewer(unitViewObj);
@@ -59,6 +59,40 @@ public class FESceneBattleMap extends Scene {
 
         objT.SetSize(bm.GetMapWidth() * FEConst.SYSTEM_MAP_GRID_PX, bm.GetMapHeight() * FEConst.SYSTEM_MAP_GRID_PX);
         mapImage.SetUsingImageName(bm.GetMapImagePath());
+    }
+}
+
+/**
+ マップ背景および地形オブジェクトの描画を行う振る舞い。
+ */
+public class FEMapImageDrawer extends SceneObjectImage {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_IMAGE_DRAWER;
+    }
+    private FEBattleMapManager bm;
+    float offset;
+    public FEMapImageDrawer(SceneObject obj, String path) {
+        super(obj, path);
+    }
+    public void Start() {
+        super.Start();
+        bm = feManager.GetBattleMapManager();
+        offset = (FEConst.SYSTEM_MAP_GRID_PX - FEConst.SYSTEM_MAP_OBJECT_PX) / 2;
+    }
+    public void Draw() {
+        super.Draw();
+        float x, y;
+        String imgPath;
+        for (int i=0; i<bm.GetMapHeight(); i++) {
+            for (int j=0; j<bm.GetMapWidth(); j++) {
+                imgPath = bm.GetTerrains()[i][j].GetMapImagePath();
+                if (imageManager.GetImage(imgPath) == null) continue;
+                tint(255, 255, 255);
+                x = j * FEConst.SYSTEM_MAP_GRID_PX + offset;
+                y = i * FEConst.SYSTEM_MAP_GRID_PX + offset;
+                image(imageManager.GetImage(imgPath), x, y, FEConst.SYSTEM_MAP_OBJECT_PX, FEConst.SYSTEM_MAP_OBJECT_PX);
+            }
+        }
     }
 }
 
@@ -89,7 +123,7 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
 
     public void Draw() {
         super.Draw();
-        
+
         int[][] ar;
         // 危険領域
         ar = bm.GetHazardAreas();
@@ -139,6 +173,9 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
             return true;
         case FEConst.BATTLE_OPE_MODE_MOVING:
         case FEConst.BATTLE_OPE_MODE_FINISH_MOVE:
+        case FEConst.BATTLE_OPE_MODE_BATTLE_START:
+        case FEConst.BATTLE_OPE_MODE_BATTLE:
+        case FEConst.BATTLE_OPE_MODE_BATTLE_RESULT:
             return false;
         }
     }
@@ -203,23 +240,48 @@ public class FEMapObjectDrawer extends SceneObjectBehavior {
 
         FEMapElement e;
         FEMapObject o;
+        FEUnit u;
         PVector pos;
-        float x, y;
+        float x, y, rate;
         String imgPath;
+        colorMode(HSB, 360, 100, 100);
+        noStroke();
         for (int i=0; i<bm.GetMapElements().size(); i++) {
             e = bm.GetMapElements().get(i);
             o = e.GetMapObject();
             if (o == null) continue;
             if (o.GetMapImageFolderPath() == null) continue;
 
-            imgPath = o.GetMapImageFolderPath() + "/N" + _DrawIdx(e.IsRunning()?runIdx:normalIdx) + ".png";
+            imgPath = o.GetMapImageFolderPath() + "/N" + (e.IsAnimation()&&!e.IsAlready()?_DrawIdx(e.IsRunning()?runIdx:normalIdx):0) + ".png";
             if (imageManager.GetImage(imgPath) == null) continue;
             pos = e.GetPosition();
             x = pos.x;
             y = pos.y;
             x = x * FEConst.SYSTEM_MAP_GRID_PX + offset;
             y = y * FEConst.SYSTEM_MAP_GRID_PX + offset;
+            if (e.IsDrawHazardAres()) {
+                tint(0, 100, e.IsAlready()?50:100, e.GetAlpha());
+            } else {
+                tint(0, 0, e.IsAlready()?50:100, e.GetAlpha());
+            }
             image(imageManager.GetImage(imgPath), x, y, FEConst.SYSTEM_MAP_OBJECT_PX, FEConst.SYSTEM_MAP_OBJECT_PX);
+            if (e.IsDead()) {
+                e.SetAlpha((int)(e.GetAlpha() - 255/frameRate));
+                if (e.GetAlpha() <= 0) {
+                    bm.RemoveDeadElement(e);
+                }
+            }
+
+            // HPゲージを表示する
+            if (!(o instanceof FEUnit)) continue;
+            u = (FEUnit) o;
+            fill(0);
+            rect(x + 12, y + FEConst.SYSTEM_MAP_OBJECT_PX - 15, 36, 5);
+            rate = (float)u.GetHp() / u.GetBaseParameter().GetHp();
+            fill(0, 100, 20);
+            rect(x + 13, y + FEConst.SYSTEM_MAP_OBJECT_PX - 14, 34, 3);
+            fill(rate * 180, 100, 100);
+            rect(x + 13, y + FEConst.SYSTEM_MAP_OBJECT_PX - 14, 34 * rate, 3);
         }
     }
 
@@ -238,24 +300,33 @@ public class FEMapObjectDrawer extends SceneObjectBehavior {
 }
 
 /**
- ユニットの移動イベントが生じた時に、自動的にイベントを移動させる。
+ ユニットのアニメーションイベントが生じた時に、自動的にイベントを移動させる。
  */
-public class FEMapUnitRouter extends SceneObjectBehavior {
+public class FEMapUnitAnimator extends SceneObjectBehavior {
     public int GetID() {
-        return ClassID.CID_FE_MAP_UNIT_ROUTER;
+        return ClassID.CID_FE_MAP_UNIT_ANIMATOR;
     }
 
-    private SceneObjectDuration _duration;
-    private String _durationLabel;
+    private SceneObjectDuration duration;
+    private String moveLabel, battleLabel;
 
     private FEBattleMapManager bm;
-    private boolean isMoving;
+    private boolean isMoving, isBattling;
+    // 移動に使用する変数
     private int routeIdx;
 
-    public FEMapUnitRouter(SceneObject obj) {
+    // 戦闘に使用する変数
+    private PVector atkPos, defPos, pos;
+    private float atkRad;
+    private float atkDir;
+    private boolean isGoing;
+
+    public FEMapUnitAnimator(SceneObject obj) {
         super();
-        _duration = new SceneObjectDuration(obj);
-        _durationLabel = "FEMapUnitRouter Duration";
+        duration = new SceneObjectDuration(obj);
+        moveLabel = "FEMapUnitAnimator Moving Duration";
+        battleLabel = "FEMapUnitAnimator Battler Duration";
+        pos = new PVector();
         if (obj == null) return;
         obj.AddBehavior(this);
     }
@@ -269,19 +340,19 @@ public class FEMapUnitRouter extends SceneObjectBehavior {
         bm = feManager.GetBattleMapManager();
         isMoving = false;
 
-        _duration.GetDurations().Add(_durationLabel, new IDuration() {
+        duration.GetDurations().Add(moveLabel, new IDuration() {
             private PVector aimPos, crtPos;
             private FEMapElement elem;
             private SceneObjectDuration dur;
             private float settedTime, dX, dY;
 
             public void OnInit() {
-                dur = _duration;
-                settedTime = dur.GetSettedTimer(_durationLabel);
+                dur = duration;
+                settedTime = dur.GetSettedTimer(moveLabel);
                 aimPos = bm.GetUnitRoute().get(routeIdx);
                 elem = bm.GetSelectedElement();
                 if (elem == null) {
-                    _duration.Stop(_durationLabel);
+                    duration.Stop(moveLabel);
                 }
                 crtPos = elem.GetPosition();
                 dX = aimPos.x - crtPos.x;
@@ -299,11 +370,79 @@ public class FEMapUnitRouter extends SceneObjectBehavior {
                 crtPos.y = aimPos.y;
                 routeIdx--;
                 if (routeIdx >= 0) {
-                    dur.ResetTimer(_durationLabel, feManager.GetConfig().GetUnitMoveTime());
-                    dur.Start(_durationLabel);
+                    dur.ResetTimer(moveLabel, feManager.GetConfig().GetUnitMoveTime());
+                    dur.Start(moveLabel);
                 } else {
                     isMoving = false;
                     bm.OnFinishMoving();
+                }
+            }
+        }
+        );
+        duration.GetDurations().Add(battleLabel, new IDuration() {
+            private SceneObjectDuration dur;
+            private float settedTime;
+            private int attackNum;
+            public void OnInit() {
+                dur = duration;
+                settedTime = dur.GetSettedTimer(battleLabel);
+
+                // 戦闘開始時は攻撃回数をリセットする
+                if (bm.GetOperationMode() == FEConst.BATTLE_OPE_MODE_BATTLE_START) {
+                    if (bm.GetBattlePhase()) {
+                        attackNum = bm.GetAttackerAttackNum();
+                    } else {
+                        attackNum = bm.GetDefenderAttackNum();
+                    }
+                }
+                if (isGoing) {
+                    // 命中判定などを行う
+                    bm.Battle();
+                    if (bm.GetBattlePhase()) {
+                        pos.x = atkPos.x;
+                        pos.y = atkPos.y;
+                    } else {
+                        pos.x = defPos.x;
+                        pos.y = defPos.y;
+                    }
+                }
+            }
+
+            public boolean IsContinue() {
+                return true;
+            }
+
+            public void OnUpdate() {
+                _BattlerGoing(settedTime);
+            }
+
+            public void OnEnd() {
+                if (isGoing) {
+                    isGoing = false;
+                    bm.BattleDamage();
+                    dur.ResetTimer(battleLabel, 0.1);
+                    dur.Start(battleLabel);
+                } else {
+                    if (bm.GetBattlePhase()) {
+                        atkPos.x = pos.x;
+                        atkPos.y = pos.y;
+                    } else {
+                        defPos.x = pos.x;
+                        defPos.y = pos.y;
+                    }
+                    if (bm.IsBattlerDead()) {
+                        _BattleEnd();
+                        return;
+                    }
+                    isGoing = true;
+                    attackNum--;
+                    if (attackNum == 0 && bm.IsBattleEnd()) {
+                        _BattleEnd();
+                        return;
+                    }
+                    duration.SetUseTimer(battleLabel, true);
+                    duration.ResetTimer(battleLabel, 0.1);
+                    duration.Start(battleLabel);
                 }
             }
         }
@@ -312,14 +451,48 @@ public class FEMapUnitRouter extends SceneObjectBehavior {
 
     public void Update() {
         super.Update();
-
         if (bm.GetOperationMode() == FEConst.BATTLE_OPE_MODE_MOVING && !isMoving) {
             isMoving = true;
             routeIdx = bm.GetUnitRoute().size() - 1;
-            _duration.SetUseTimer(_durationLabel, true);
-            _duration.ResetTimer(_durationLabel, feManager.GetConfig().GetUnitMoveTime());
-            _duration.Start(_durationLabel);
+            duration.SetUseTimer(moveLabel, true);
+            duration.ResetTimer(moveLabel, feManager.GetConfig().GetUnitMoveTime());
+            duration.Start(moveLabel);
+        } else if (bm.GetOperationMode() == FEConst.BATTLE_OPE_MODE_BATTLE_START && !isBattling) {
+            isBattling = true;
+            atkPos = bm.GetAttackerElement().GetPosition();
+            defPos = bm.GetDefenderElement().GetPosition();
+            atkRad = GeneralCalc.GetRad(defPos, atkPos);
+            isGoing = true;
+            duration.SetUseTimer(battleLabel, true);
+            duration.ResetTimer(battleLabel, 0.1);
+            duration.Start(battleLabel);
         }
+    }
+
+    private void _BattlerGoing(float settedTime) {
+        if (bm.GetBattlePhase()) {
+            if (isGoing) {
+                atkPos.x += 0.4 * cos(atkRad) / (frameRate * settedTime);
+                atkPos.y += 0.4 * sin(atkRad) / (frameRate * settedTime);
+            } else {
+                atkPos.x -= 0.4 * cos(atkRad) / (frameRate * settedTime);
+                atkPos.y -= 0.4 * sin(atkRad) / (frameRate * settedTime);
+            }
+        } else {
+            if (isGoing) {
+                defPos.x += 0.4 * cos(atkRad + PI) / (frameRate * settedTime);
+                defPos.y += 0.4 * sin(atkRad + PI) / (frameRate * settedTime);
+            } else {
+                defPos.x -= 0.4 * cos(atkRad + PI) / (frameRate * settedTime);
+                defPos.y -= 0.4 * sin(atkRad + PI) / (frameRate * settedTime);
+            }
+        }
+    }
+
+    private void _BattleEnd() {
+        duration.Stop(battleLabel);
+        isBattling = false;
+        bm.OnFinishBattle();
     }
 }
 
@@ -679,6 +852,7 @@ public class FEMapCursor extends SceneObjectBehavior {
         _cursorCenter.x = _mapCur.GetMapX() * FEConst.SYSTEM_MAP_GRID_PX + rad;
         _cursorCenter.y = _mapCur.GetMapY() * FEConst.SYSTEM_MAP_GRID_PX + rad;
 
+        colorMode(RGB, 255, 255, 255);
         translate(_cursorCenter.x, _cursorCenter.y);
         for (int i=0; i<4; i++) {
             translate(-offset, -offset);

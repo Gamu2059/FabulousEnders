@@ -30,5 +30,37 @@
         ],
         "Granting States" : [
         ]
+    },
+    {
+        "ID" : 1,
+        "Name" : "武勲の剣",
+        "Explain" : "サンスの栄誉を讃えて国王から贈られた誉れ高き剣。",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 30,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Weapon Class ID" : 0,
+        "Power Type" : "PHYSICS",
+        "Power" : 7,
+        "Weight" : 1,
+        "Min Range" : 2,
+        "Max Range" : 3,
+        "Accuracy" : 100,
+        "Critical" : 5,
+        "Attack Num" : 2,
+        "Wearable Proficiency" : 12,
+        "Special Attacks" : [
+        ],
+        "Granted Skills" : [
+        ],
+        "Granting States" : [
+        ]
     }
 ]

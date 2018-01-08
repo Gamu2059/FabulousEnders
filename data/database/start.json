@@ -13,6 +13,8 @@
             "Importance" : "LEADER",
             "Class ID" : 0,
             "Level" : 4,
+            "HP" : 24,
+            "Exp" : 0,
             "Equip Weapon Index" : 0
         },
         {
@@ -24,7 +26,9 @@
             "Map Image Folder Path" : "character/map/ミゼル",
             "Importance" : "NORMAL",
             "Class ID" : 0,
-            "Level" : 4
+            "Level" : 4,
+            "HP" : 24,
+            "Exp" : 0
         },
         {
             "ID" : 2,
@@ -35,7 +39,9 @@
             "Map Image Folder Path" : "character/map/ミゼル",
             "Importance" : "NORMAL",
             "Class ID" : 0,
-            "Level" : 4
+            "Level" : 4,
+            "HP" : 24,
+            "Exp" : 0
         }
     ]
 }

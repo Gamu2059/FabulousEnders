@@ -12,4 +12,8 @@ public final static class GeneralCalc {
         if (x < 0) a += PI;
         return a;
     }
+    
+    public static float GetRad(PVector pos1, PVector pos2) {
+        return GetRad(pos1.x, pos1.y, pos2.x, pos2.y);
+    }
 }

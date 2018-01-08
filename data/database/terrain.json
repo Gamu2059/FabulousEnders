@@ -9,6 +9,6 @@
         "ID" : 1,
         "Name" : "瓦礫",
         "Effect ID" : 1,
-        "Map Image Path" : null
+        "Map Image Path" : "map/terrain/test.png"
     }
 ]

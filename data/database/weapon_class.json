@@ -10,22 +10,20 @@
             {
                 "Is Bad Compatibility" : false,
                 "Weapon Class ID" : 1,
-                "Attack" : 2,
-                "Defense" : 1,
-                "Accuracy" : 5,
-                "Avoid" : 5,
-                "Critical" : 2,
-                "Critical Avoid" : 2
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
             },
             {
                 "Is Bad Compatibility" : true,
                 "Weapon Class ID" : 2,
-                "Attack" : 2,
-                "Defense" : 1,
-                "Accuracy" : 5,
-                "Avoid" : 5,
-                "Critical" : 2,
-                "Critical Avoid" : 2
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
             }
         ]
     },

@@ -458,7 +458,7 @@ public class FEProgressManager {
                 unit = units.GetJsonObject(i);
                 if (unit == null) continue;
                 playerUnit = new FEUnit();
-                copyBase = feManager.GetDataBase().GetPlayerUnits().get(unit.GetInt("ID", -99999));
+                copyBase = feManager.GetDataBase().GetPlayerUnits().get(unit.GetInt("ID", FEConst.NOT_FOUND));
                 if (copyBase == null) continue;
                 copyBase.CopyTo(playerUnit);
                 feJsonUtility.LoadUnit(playerUnit, unit);
@@ -472,56 +472,48 @@ public class FEProgressManager {
  戦闘マップに関するデータと処理を管理するマネージャ。
  */
 public class FEBattleMapManager {
-    /**
-     マップ名
-     */
+    //////////////////////////////////////////////////////
+    // マップ基本情報
+    //////////////////////////////////////////////////////
     private String _mapName;
     public String GetMapName() {
         return _mapName;
     }
-
-    /**
-     マップ背景パス
-     */
     private String _mapImagePath;
     public String GetMapImagePath() {
         return _mapImagePath;
     }
-
     private int _mapWidth;
     public int GetMapWidth() {
         return _mapWidth;
     }
-
     private int _mapHeight;
     public int GetMapHeight() {
         return _mapHeight;
     }
 
-    /**
-     マップデータを読み込んだ直後に出撃準備を開始するかどうか
-     */
+    //////////////////////////////////////////////////////
+    // 出撃フラグ情報
+    //////////////////////////////////////////////////////
+    // マップデータを読み込んだ直後に出撃準備を開始するかどうか
     private boolean _isImmediatelySortie;
     public boolean IsImmediatelySortie() {
         return _isImmediatelySortie;
     }
-
-    /**
-     出撃準備を飛ばすかどうか
-     */
+    // 出撃準備を飛ばすかどうか     
     private boolean _isSkipPreparation;
     public boolean IsSkipPreparation() {
         return _isSkipPreparation;
     }
-
-    /**
-     プレイヤーが先攻かどうか
-     */
+    // プレイヤーが先攻かどうか     
     private boolean _isFirstPhase;
     public boolean IsFirstPhase() {
         return _isFirstPhase;
     }
 
+    //////////////////////////////////////////////////////
+    // モード制御用
+    //////////////////////////////////////////////////////
     /**
      現在の出撃状態。
      通常、出撃準備中、出撃中など
@@ -530,18 +522,19 @@ public class FEBattleMapManager {
     public int GetSortieMode() {
         return _sortieMode;
     }
-
     /**
      現在の操作状態。
+     通常、選択中、移動中、戦闘中など
      */
     private int _operationMode;
     public int GetOperationMode() {
         return _operationMode;
     }
 
-    /**
-     経過ターン
-     */
+    //////////////////////////////////////////////////////
+    // 戦闘全体情報
+    //////////////////////////////////////////////////////
+    // 経過ターン
     private int _elapsedTurn;
     public int GetElapsedTurn() {
         return _elapsedTurn;
@@ -552,63 +545,108 @@ public class FEBattleMapManager {
     public void AddElapsedTurn(int value) {
         _elapsedTurn += value;
     }
-
-    /**
-     出撃可能人数
-     */
+    // プレイヤーユニット側の出撃可能人数     
     private int _sortableUnitNum;
     public int GetSortableUnitNum() {
         return _sortableUnitNum;
     }
-
-    /**
-     現在カーソルで重ねられているマップエレメント
+    private FETerrain[][] _terrains;
+    public FETerrain[][] GetTerrains() {
+        return _terrains;
+    }
+    /** 
+     行動フェーズ
+     プレイヤーユニットの番の場合はtrue、敵ユニットの番の場合はfalse
      */
+    private boolean _actionPhase;
+    public boolean GetActionPhase() {
+        return _actionPhase;
+    }
+
+    //////////////////////////////////////////////////////
+    // 制御用バッファ情報
+    //////////////////////////////////////////////////////
+    // 現在カーソルで重ねられているマップエレメント     
     private FEMapElement _overlappedElement;
     public FEMapElement GetOverlappedElement() {
         return _overlappedElement;
     }
-
-    /**
-     現在カーソルで重ねられているユニット
-     */
+    // 現在カーソルで重ねられているユニット     
     private FEUnit _overlappedUnit;
     public FEUnit GetOverlappedUnit() {
         return _overlappedUnit;
     }
-
-    /**
-     現在選択中のマップエレメント
-     */
+    // 現在選択中のマップエレメント     
     private FEMapElement _selectedElement;
     public FEMapElement GetSelectedElement() {
         return _selectedElement;
     }
-
-    /**
-     現在選択中のユニット
-     */
+    // 現在選択中のユニット     
     private FEUnit _selectedUnit;
     public FEUnit GetSelectedUnit() {
         return _selectedUnit;
     }
-
-    /**
-     選択中のユニットの移動ルート
-     */
+    // 選択中のユニットの移動ルート     
     private ArrayList<PVector> _unitRoute;
     public ArrayList<PVector> GetUnitRoute() {
         return _unitRoute;
     }
-
-    /**
-     現在移動しているユニットの元の座標
-     */
+    // 移動しているユニットの元の座標     
     private PVector _basePosOfMovingUnit;
     public PVector GetBasePosOfMovingUnit() {
         return _basePosOfMovingUnit;
     }
 
+    //////////////////////////////////////////////////////
+    // 戦闘用情報
+    //////////////////////////////////////////////////////
+    private FEMapElement _attackerElement;
+    public FEMapElement GetAttackerElement() {
+        return _attackerElement;
+    }
+    private FEMapElement _defenderElement;
+    public FEMapElement GetDefenderElement() {
+        return _defenderElement;
+    }
+    private boolean _battlePhase;
+    public boolean GetBattlePhase() {
+        return _battlePhase;
+    }
+    public void SetBattlePhase(boolean value) {
+        _battlePhase = value;
+    }
+    private int _attackerAttackNum;
+    public int GetAttackerAttackNum() {
+        return _attackerAttackNum;
+    }
+    private int _defenderAttackNum;
+    public int GetDefenderAttackNum() {
+        return _defenderAttackNum;
+    }
+    private int _remainAttackerChance;
+    public int GetRemainAttackerChance() {
+        return _remainAttackerChance;
+    }
+    private int _remainDefenderChance;
+    public int GetRemainDefenderChance() {
+        return _remainDefenderChance;
+    }
+    private FEUnitBattleConsider _attackerValue;
+    public FEUnitBattleConsider GetAttackerValue() {
+        return _attackerValue;
+    }
+    private FEUnitBattleConsider _defenderValue;
+    public FEUnitBattleConsider GetDefenderValue() {
+        return _defenderValue;
+    }
+    private FEUnitBattleConsider _battleResult;
+    public FEUnitBattleConsider GetBattleResult() {
+        return _battleResult;
+    }
+
+    //////////////////////////////////////////////////////
+    // 出撃ユニット及びイベント情報
+    //////////////////////////////////////////////////////
     /**
      現在の出撃しているプレイヤーユニットのリスト
      playerUnitsの要素を参照保持
@@ -617,16 +655,14 @@ public class FEBattleMapManager {
     public ArrayList<FEUnit> GetSortieUnits() {
         return _sortieUnits;
     }
-
     /**
      エネミーユニットのリスト
-     データの原本であることに注意
+     データの原本であるため、要素の変更はしてはならない
      */
     private HashMap<Integer, FEOtherUnit> _enemyUnits;
     public HashMap<Integer, FEOtherUnit> GetEnemyUnits() {
         return _enemyUnits;
     }
-
     /**
      現在の出撃しているエネミーユニットのリスト
      enemyUnitsの要素を複製保持
@@ -634,8 +670,7 @@ public class FEBattleMapManager {
     private ArrayList<FEOtherUnit> _sortieEnemyUnits;
     public ArrayList<FEOtherUnit> GetSortieEnemyUnits() {
         return _sortieEnemyUnits;
-    } 
-
+    }
     /**
      現在のマップに存在するイベントのリスト
      イベントは一意のため原本保持はしない
@@ -645,71 +680,43 @@ public class FEBattleMapManager {
         return _events;
     }
 
-    /**
-     現在のマップの地形情報
-     */
-    private FETerrain[][] _terrains;
-    public FETerrain[][] GetTerrains() {
-        return _terrains;
-    }
-
-    /**
-     危険領域
-     */
+    //////////////////////////////////////////////////////
+    // 特定描画領域情報
+    //////////////////////////////////////////////////////
     private int[][] _hazardAreas;
     public int[][] GetHazardAreas() {
         return _hazardAreas;
     }
-
-    /**
-     行動範囲
-     */
-    /***/
     private int[][] _actionRanges;
     public int[][] GetActionRanges() {
         return _actionRanges;
     }
 
-    /**
-     マップ上のプレイヤーユニットの存在情報
-     */
+    //////////////////////////////////////////////////////
+    // マップ上のオブジェクト情報
+    //////////////////////////////////////////////////////
     private ArrayList<FEMapElement> _mapPlayerObjects;
     public ArrayList<FEMapElement> GetMapPlayerObjects() {
         return _mapPlayerObjects;
     }
-
-    /**
-     マップ上の敵ユニットの存在情報
-     */
     private ArrayList<FEMapElement> _mapEnemyObjects;
     public ArrayList<FEMapElement> GetMapEnemyObjects() {
         return _mapEnemyObjects;
-    }
-
-    /**
-     マップ上にいるユニットやイベントの存在情報
-     */
+    } 
     private ArrayList<FEMapElement> _mapElements;
     public ArrayList<FEMapElement> GetMapElements() {
         return _mapElements;
-    }
-
-    /**
-     描画順序を考慮するために用意
-     */
+    } 
     private Collection<FEMapElement> _elementSorter;
 
-    /**
-     ローカル変数
-     */
+
+    //////////////////////////////////////////////////////
+    // イベント制御用
+    //////////////////////////////////////////////////////
     private PHash<Integer> _localVariables;
     public PHash<Integer> GetLocalVariables() {
         return _localVariables;
     }
-
-    /**
-     ローカルスイッチ
-     */
     private PHash<Boolean> _localSwitches;
     public PHash<Boolean> GetLocalSwitches() {
         return _localSwitches;
@@ -725,6 +732,10 @@ public class FEBattleMapManager {
         _enemyUnits = new HashMap<Integer, FEOtherUnit>();
         _sortieEnemyUnits = new ArrayList<FEOtherUnit>();
         _events = new ArrayList<FEMapObject>();
+
+        _attackerValue = new FEUnitBattleConsider();
+        _defenderValue = new FEUnitBattleConsider();
+        _battleResult = new FEUnitBattleConsider();
 
         _terrains = new FETerrain[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
         _hazardAreas = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
@@ -773,7 +784,7 @@ public class FEBattleMapManager {
                     if (terrainObj == null) continue;
                     x = terrainObj.GetInt("x", -1);
                     y = terrainObj.GetInt("y", -1);
-                    id = terrainObj.GetInt("ID", -99999);
+                    id = terrainObj.GetInt("ID", FEConst.NOT_FOUND);
                     exsId = feManager.GetDataBase().GetTerrains().containsKey(id);
                     if (x == -1 || y == -1 || !exsId) continue;
                     _terrains[y][x] = feManager.GetDataBase().GetTerrains().get(id);
@@ -818,10 +829,10 @@ public class FEBattleMapManager {
                     x = playerPosition.GetInt("x", -1);
                     y = playerPosition.GetInt("y", -1);
                     if (!IsInMap(x, y)) continue;
-                    elem = new FEMapElement();
+                    elem = new FEMapElement(true);
                     elem.GetPosition().x = x;
                     elem.GetPosition().y = y;
-                    unit = fePm.GetPlayerUnitOnID(playerPosition.GetInt("ID", -99999));
+                    unit = fePm.GetPlayerUnitOnID(playerPosition.GetInt("ID", FEConst.NOT_FOUND));
                     if (unit != null) {
                         elem.SetFixElement(true);
                         elem.SetMapObject(unit);
@@ -870,10 +881,10 @@ public class FEBattleMapManager {
                     x = enemyPosition.GetInt("x", -1);
                     y = enemyPosition.GetInt("y", -1);
                     if (!IsInMap(x, y)) continue;
-                    elem = new FEMapElement();
+                    elem = new FEMapElement(false);
                     elem.GetPosition().x = x;
                     elem.GetPosition().y = y;
-                    unit = _enemyUnits.get(enemyPosition.GetInt("ID", -99999));
+                    unit = _enemyUnits.get(enemyPosition.GetInt("ID", FEConst.NOT_FOUND));
                     if (unit == null) continue;
                     toUnit = new FEOtherUnit();
                     unit.CopyTo(toUnit);
@@ -916,7 +927,7 @@ public class FEBattleMapManager {
     }
 
     /**
-     戦闘を開始する。
+     出撃する。
      */
     public void StartSortie() {
         // 空白の出撃地点を削除する
@@ -952,16 +963,297 @@ public class FEBattleMapManager {
             _sortieEnemyUnits.add((FEOtherUnit)elem.GetMapObject());
         }
 
+        // ユニットのパラメータを更新
+        UpdateAllUnitParameter();
+
         // ユニットの行動範囲を更新
-        for (int i=0; i<_mapPlayerObjects.size(); i++) {
-            _UpdateSelfActionRange(_mapPlayerObjects.get(i));
-        }
-        for (int i=0; i<_mapEnemyObjects.size(); i++) {
-            _UpdateSelfActionRange(_mapEnemyObjects.get(i));
-        }
+        _UpdateAllActionRange();
 
         _sortieMode = FEConst.BATTLE_SORTIE_MODE_SORTIE;
         _operationMode = FEConst.BATTLE_OPE_MODE_NORMAL;
+    }
+
+    /**
+     戦闘を開始する。
+     */
+    public void StartBattle(FEMapElement attacker, FEMapElement defender) {
+        attacker.SetRunning(true);
+        defender.SetRunning(true);
+        // パラメータ更新
+        _UpdateBattlerValues(attacker, defender);
+        // 攻撃回数、攻撃チャンス数更新
+        _UpdateBattlerAttackChances(attacker, defender);
+        // 戦闘開始時の先攻(trueは攻撃者、falseは非攻撃者)
+        _battlePhase = true;
+        _attackerElement = attacker;
+        _defenderElement = defender;
+        _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE_START;
+    }
+
+    /**
+     戦闘に加わるユニット同士の威力、ダメージ、命中率、会心率を更新する。
+     */
+    private void _UpdateBattlerValues(FEMapElement attacker, FEMapElement defenser) {
+        // 各々単独のパラメータを更新
+        UpdateUnitParameter(attacker);
+        UpdateUnitParameter(defenser);
+
+        // 互いの考慮
+        _attackerValue.Reset(0);
+        _defenderValue.Reset(0);
+        FEUnit atk, def;
+        atk = (FEUnit) attacker.GetMapObject();
+        def = (FEUnit) defenser.GetMapObject();
+        FEClass atkC, defC;
+        atkC = feManager.GetDataBase().GetUnitClasses().get(atk.GetUnitClassID());
+        defC = feManager.GetDataBase().GetUnitClasses().get(def.GetUnitClassID());
+        FEWeapon atkW, defW;
+        atkW = atk.GetEquipWeapon() != null ? (FEWeapon)atk.GetEquipWeapon().GetItem() : null;
+        defW = def.GetEquipWeapon() != null ? (FEWeapon)def.GetEquipWeapon().GetItem() : null;
+        boolean atkSpecial, defSpecial;
+        if (atkW != null) {
+            atkSpecial = atkW.IsContainSpecialAttack(defC.GetClassType());
+        } else {
+            atkSpecial = false;
+        }
+        if (defW != null) {
+            defSpecial = defW.IsContainSpecialAttack(atkC.GetClassType());
+        } else {
+            defSpecial = false;
+        }
+        // 相性考慮
+        if (atkW != null && defW != null) {
+            FEWeaponClass atkWC, defWC;
+            atkWC = feManager.GetDataBase().GetWeaponClasses().get(atkW.GetWeaponClassID());
+            defWC = feManager.GetDataBase().GetWeaponClasses().get(defW.GetWeaponClassID());
+            _ConsiderCompatibility(atkWC, defW, _attackerValue);
+            _ConsiderCompatibility(defWC, atkW, _attackerValue);
+        }
+        // 特効係数を考慮して威力確定
+        _ConsiderPower(atk, atkW, atkSpecial, _attackerValue);
+        _ConsiderPower(def, defW, defSpecial, _defenderValue);
+        // 互いの威力を考慮してダメージ値確定
+        _ConsiderDamager(def, atk, _defenderValue, _attackerValue);
+        _ConsiderDamager(atk, def, _attackerValue, _defenderValue);
+        // 命中率と会心率を設定
+        _ConsiderAccuracyAndCritical(atk, def, _attackerValue);
+        _ConsiderAccuracyAndCritical(def, atk, _defenderValue);
+        // 下限修正
+        _attackerValue.CorrectToLimit();
+        _defenderValue.CorrectToLimit();
+    }
+
+    /**
+     武器相性を考慮する。
+     */
+    private void _ConsiderCompatibility(FEWeaponClass wc, FEWeapon w, FEUnitBattleConsider consider) {
+        if (wc != null) {
+            FEWeaponCompatibility comp = wc.GetCompatibility().get(w.GetWeaponClassID());
+            if (comp != null) {
+                FEUnitBattleParameter correct = comp.GetCorrect();
+                int a = comp.IsBadCompatibility()?-1:1;
+                consider.AddPower(a * correct.GetPower());
+                consider.AddAccuracy(a * correct.GetAccuracy());
+                consider.AddCritical(a * correct.GetCritical());
+            }
+        }
+    }
+
+    /**
+     威力を考慮する。
+     */
+    private void _ConsiderPower(FEUnit unit, FEWeapon w, boolean isSpecialAttack, FEUnitBattleConsider consider) {
+        if (w != null) {
+            consider.AddPower((int)(unit.GetBattleParameter().GetPower() * (isSpecialAttack?FEConst.CONFIG_SPECIAL_HIT_RATE:1)));
+        } else {
+            consider.SetPower(0);
+        }
+    }
+
+    /**
+     ダメージを考慮する。
+     */
+    private void _ConsiderDamager(FEUnit damaging, FEUnit damaged, FEUnitBattleConsider damagingValue, FEUnitBattleConsider damagedValue) {
+        switch(damaging.GetBattleParameter().GetPowerType()) {
+        case FEConst.WEAPON_POWER_PHYSICS:
+            damagedValue.AddDamage(damagingValue.GetPower() - damaged.GetBattleParameter().GetDefense());
+            break;
+        case FEConst.WEAPON_POWER_MAGIC:
+            damagedValue.AddDamage(damagingValue.GetPower() - damaged.GetBattleParameter().GetMDefense());
+            break;
+        case FEConst.WEAPON_POWER_UNKNOWN:
+            damagedValue.AddDamage(damagingValue.GetPower());
+            break;
+        }
+    }
+
+    /**
+     命中率と会心率を考慮する。
+     */
+    private void _ConsiderAccuracyAndCritical(FEUnit damaging, FEUnit damaged, FEUnitBattleConsider damagingValue) {
+        damagingValue.AddAccuracy(damaging.GetBattleParameter().GetAccuracy() - damaged.GetBattleParameter().GetAvoid());
+        damagingValue.AddAccuracy(damaging.GetBattleParameter().GetCritical() - damaged.GetBattleParameter().GetCriticalAvoid());
+    }
+
+    /**
+     互いの攻撃チャンス数と攻撃回数を更新する。
+     */
+    private void _UpdateBattlerAttackChances(FEMapElement attacker, FEMapElement defenser) {
+        // 攻撃チャンス数の考慮
+        _remainAttackerChance = _remainDefenderChance = 1;
+        FEUnit atk, def;
+        atk = (FEUnit) attacker.GetMapObject();
+        def = (FEUnit) defenser.GetMapObject();
+        FEUnitBattleParameter atkB, defB;
+        atkB = atk.GetBattleParameter();
+        defB = def.GetBattleParameter();
+        int speed = atkB.GetSpeed() - defB.GetSpeed();
+        if (speed >= 5) {
+            _remainAttackerChance++;
+        } else if (speed <= -5) {
+            _remainDefenderChance++;
+        }
+        float x, y;
+        x = attacker.GetPosition().x - defenser.GetPosition().x;
+        y = attacker.GetPosition().y - defenser.GetPosition().y;
+        int range = (int)(abs(x)) + (int)(abs(y));
+        if (range < defB.GetMinRange() || range > defB.GetMaxRange()) {
+            _remainDefenderChance = 0;
+        }
+        // 攻撃回数の考慮
+        _attackerAttackNum = _defenderAttackNum = 0;
+        _attackerAttackNum = atkB.GetAttackNum();
+        _defenderAttackNum = defB.GetAttackNum();
+    }
+
+    /**
+     命中判定、会心判定を行い、ダメージ量を求める。
+     */
+    public void Battle() {
+        if (_battlePhase) {
+            _SetBattleResult(_attackerValue, _defenderValue);
+        } else {
+            _SetBattleResult(_defenderValue, _attackerValue);
+        }
+        _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE;
+    }
+
+    /**
+     指定された確率に当たったらtrueを返す。
+     100以上は必ずtrueになる。
+     */
+    private boolean _IsHitOn(int parcentage) {
+        return random(0, 100) < parcentage;
+    }
+
+    private void _SetBattleResult(FEUnitBattleConsider damaging, FEUnitBattleConsider damaged) {
+        _battleResult.Reset(0);
+        boolean isHit, isCritical = false;
+        isHit = _IsHitOn(damaging.GetAccuracy());
+        _battleResult.SetAccuracy(isHit?1:0);
+        if (isHit) {
+            isCritical = _IsHitOn(damaging.GetCritical());
+        }
+        _battleResult.SetCritical(isCritical?1:0);
+        _battleResult.SetDamage(isHit?(int)(damaged.GetDamage()*(isCritical?FEConst.CONFIG_CRITICAL_HIT_RATE:1)):0);
+    }
+
+    /**
+     HPを減少させる。
+     分けておかないと自動的にHPバーに反映されてしまう。
+     */
+    public void BattleDamage() {
+        FEUnit unit;
+        if (_battlePhase) {
+            unit = (FEUnit)_defenderElement.GetMapObject();
+            unit.AddHp(-_battleResult.GetDamage());
+        } else {
+            unit = (FEUnit)_attackerElement.GetMapObject();
+            unit.AddHp(-_battleResult.GetDamage());
+        }
+        if (unit.GetHp() < 0) unit.SetHp(0);
+    }
+
+    /**
+     戦闘に参加したどちらかがHP0の場合はtrueを返し、操作モードもBATTLE_RESULTにする。
+     */
+    public boolean IsBattlerDead() {
+        FEUnit atk, def;
+        atk = (FEUnit)_attackerElement.GetMapObject();
+        def = (FEUnit)_defenderElement.GetMapObject();
+        if (atk.GetHp() == 0 || def.GetHp() == 0) {
+            _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE_RESULT;
+            if (atk.GetHp() == 0) {
+                _attackerElement.SetAnimation(false);
+                _attackerElement.SetDead(true);
+            } else {
+                _defenderElement.SetAnimation(false);
+                _defenderElement.SetDead(true);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     戦闘を終了するかどうかを決める。
+     どちらかがHP0もしくは、どちらの残り攻撃チャンス回数も0になっていた場合は終了とし、trueを返して操作モードをBATTLE_RESULTにする。
+     それ以外は継続とし、falseを返して操作モードをBATTLE_STARTにする。
+     */
+    public boolean IsBattleEnd() {
+        if (IsBattlerDead()) {
+            return true;
+        }
+        if (_battlePhase) {
+            _remainAttackerChance--;
+        } else {
+            _remainDefenderChance--;
+        }
+        if (_remainAttackerChance <= 0 && _remainDefenderChance <= 0) {
+            _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE_RESULT;
+            return true;
+        }
+        if (_battlePhase) {
+            _battlePhase = _remainDefenderChance <= 0;
+        } else {
+            _battlePhase = _remainAttackerChance > 0;
+        }
+        _operationMode = FEConst.BATTLE_OPE_MODE_BATTLE_START;
+        return false;
+    }
+
+    /**
+     戦闘が終了した時に呼び出される。
+     */
+    public void OnFinishBattle() {
+        _attackerElement.SetRunning(false);
+        _defenderElement.SetRunning(false);
+
+        SetAlreadyUnit(_attackerElement);
+    }
+
+    /**
+     死亡した(透過0)ユニットを出撃リストから削除する。
+     */
+    public void RemoveDeadElement(FEMapElement elem) {
+        if (_mapElements.contains(elem)) {
+            _mapElements.remove(elem);
+        }
+        if (elem.IsPlayerUnit()) {
+            _mapPlayerObjects.remove(elem);
+            _sortieUnits.remove(elem.GetMapObject());
+        } else {
+            _mapEnemyObjects.remove(elem);
+            _sortieEnemyUnits.remove(elem.GetMapObject());
+        }
+        _ConfirmUnitList();
+    }
+
+    /**
+     ユニットリストを確認し、勝敗条件を満足しているかどうかなどを確認する。
+     */
+    private void _ConfirmUnitList() {
+        
     }
 
     /**
@@ -984,6 +1276,59 @@ public class FEBattleMapManager {
     }
 
     /**
+     ユニットを待機状態にして行動範囲を更新する。
+     もし、全ての同じ軍のユニットが待機状態になっている場合は強制的にフェーズを移行する。
+     */
+    public void SetAlreadyUnit(FEMapElement elem) {
+        if (elem == null) return;
+        elem.SetAlready(true);
+        boolean flag = false;
+        ArrayList<FEMapElement> elems;
+        if (elem.IsPlayerUnit()) {
+            elems = _mapPlayerObjects;
+        } else {
+            elems = _mapEnemyObjects;
+        }
+        for (int i=0; i<elems.size(); i++) {
+            if (!elems.get(i).IsAlready()) {
+                flag = true;
+                break;
+            }
+        }
+        _SetToNormalMode();
+        if (flag) return;
+        ChangeSortiePhase();
+    }
+
+    /**
+     行動フェーズを切り替える。
+     もし切り替え先の軍に誰一人として行動可能なユニットがいない場合は切り替え元の軍にフェーズが戻ってくる。
+     */
+    public void ChangeSortiePhase() {
+        if (_actionPhase) {
+            if (!_mapEnemyObjects.isEmpty()) {
+                _actionPhase = !_actionPhase;
+            }
+            // テスト用 常にプレイヤーのターン
+            _actionPhase = true;
+        } else {
+            if (!_mapPlayerObjects.isEmpty()) {
+                _actionPhase = !_actionPhase;
+            }
+        }
+        _ResetAllUnitActivities();
+    }
+
+    /**
+     全てのユニットの行動力を回復する。
+     */
+    private void _ResetAllUnitActivities() {
+        for (int i=0; i<_mapElements.size(); i++) {
+            _mapElements.get(i).SetAlready(false);
+        }
+    }
+
+    /**
      カーソルが重なっている座標を受け取る。
      */
     public void OnOverlapped(int x, int y) {
@@ -998,7 +1343,7 @@ public class FEBattleMapManager {
                     if (elem.GetMapObject() instanceof FEUnit) {
                         _overlappedUnit = (FEUnit)elem.GetMapObject();
                     }
-                    _UpdateOverallActionRange(elem);
+                    _UpdateOverallActionRange(elem, true);
                 }
             }
             break;
@@ -1018,16 +1363,19 @@ public class FEBattleMapManager {
                 if (elem == null) return;
                 FEMapObject mapObj = elem.GetMapObject();
                 if (!(mapObj instanceof FEUnit)) return;
-                if (_mapPlayerObjects.contains(elem)) {
+                if (elem.IsPlayerUnit()) {
+                    if (elem.IsAlready()) return;
                     _operationMode = FEConst.BATTLE_OPE_MODE_ACTIVE;
                     _selectedUnit = (FEUnit)mapObj;
                     _selectedElement = elem;
                     _selectedElement.SetRunning(true);
-                } else if (_mapEnemyObjects.contains(elem)) {
+                } else {
                     elem.SetDrawHazardAreas(!elem.IsDrawHazardAres());
                     _UpdateOverallHazardArea();
                 }
             } else {
+                // テスト用 ユニットのステータス表示
+                println(elem.GetMapObject());
             }
             break;
         case FEConst.BATTLE_OPE_MODE_ACTIVE:
@@ -1039,43 +1387,13 @@ public class FEBattleMapManager {
                         break;
                     }
                     PVector baseP = _selectedElement.GetPosition();
-                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), baseP, x, y, (int)baseP.x, (int)baseP.y, 0, _selectedUnit.GetBaseParameter().GetMobility());
+                    _unitRoute = _MakeRouteToAimPosition(_selectedElement, unitClass.GetClassType(), x, y, (int)baseP.x, (int)baseP.y, _selectedUnit.GetBaseParameter().GetMov());
                     if (_unitRoute == null) {
                         _SetToNormalMode();
                     } else {
                         _basePosOfMovingUnit.x = baseP.x;
                         _basePosOfMovingUnit.y = baseP.y;
-
-                        // 冗長なルートをカットする
-                        int idx1 = 0, idx2 = 0;
-                        boolean flag;
-                        PVector pos1, pos2;
-                        while (true) {
-                            flag = false;
-                            for (int i=0; i<_unitRoute.size()-1; i++) {
-                                pos1 = _unitRoute.get(i);
-                                idx2 = -1;
-                                for (int j=i+1; j<_unitRoute.size(); j++) {
-                                    pos2 = _unitRoute.get(j);
-                                    if (pos1.x == pos2.x && pos1.y == pos2.y) {
-                                        idx2 = j;
-                                        break;
-                                    }
-                                }
-                                if (idx2 > 0 && i != idx2) {
-                                    flag = true;
-                                    idx1 = i;
-                                    break;
-                                }
-                            }
-                            if (flag) {
-                                for (int i = idx2 - idx1; i>0; i--) {
-                                    _unitRoute.remove(idx1);
-                                }
-                            } else {
-                                break;
-                            }
-                        }
+                        _CutRedundantRoute();
                         _operationMode = FEConst.BATTLE_OPE_MODE_MOVING;
                     }
                 }
@@ -1085,24 +1403,77 @@ public class FEBattleMapManager {
             break;
         case FEConst.BATTLE_OPE_MODE_FINISH_MOVE:
             if (isLeft) {
-                _SetToNormalMode();
-                _UpdateSelfActionRange(_selectedElement);
-                _ClearIntegerArray(_actionRanges);
-                _UpdateOverallActionRange(_selectedElement);
-                _elementSorter.SortList(_mapElements);
+                SetAlreadyUnit(_selectedElement);
             } else {
                 _selectedElement.GetPosition().x = _basePosOfMovingUnit.x;
                 _selectedElement.GetPosition().y = _basePosOfMovingUnit.y;
                 _SetToNormalMode();
             }
             break;
+        case FEConst.BATTLE_OPE_MODE_PRE_BATTLE:
+            if (isLeft) {
+                if (elem == null) return;
+                FEMapObject mapObj = elem.GetMapObject();
+                if (!(mapObj instanceof FEUnit)) return;
+                if (_selectedElement.IsPlayerUnit() == elem.IsPlayerUnit()) return;
+                // 戦闘開始
+                StartBattle(_selectedElement, elem);
+            } else {
+                _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
+            }
+            break;
+            //case FEConst.BATTLE_OPE_MODE_BATTLE_RESULT:
+            //    _selectedElement.SetAlready(true);
+            //    _SetToNormalMode();
+            //    break;
         }
     }
 
+    /**
+     探索したルートの同じ座標を行き来している部分を検出し、そこをショートカットする。
+     */
+    private void _CutRedundantRoute() {
+        int idx1 = 0, idx2 = 0;
+        boolean flag;
+        PVector pos1, pos2;
+        while (true) {
+            flag = false;
+            for (int i=0; i<_unitRoute.size()-1; i++) {
+                pos1 = _unitRoute.get(i);
+                idx2 = -1;
+                for (int j=i+1; j<_unitRoute.size(); j++) {
+                    pos2 = _unitRoute.get(j);
+                    if (pos1.x == pos2.x && pos1.y == pos2.y) {
+                        idx2 = j;
+                        break;
+                    }
+                }
+                if (idx2 > 0 && i != idx2) {
+                    flag = true;
+                    idx1 = i;
+                    break;
+                }
+            }
+            if (flag) {
+                for (int i = idx2 - idx1; i>0; i--) {
+                    _unitRoute.remove(idx1);
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    /**
+     操作をNORMALに移行する。
+     */
     private void _SetToNormalMode() {
         _operationMode = FEConst.BATTLE_OPE_MODE_NORMAL;
+        _UpdateAllActionRange();
+        _UpdateOverallActionRange(_selectedElement, true);
         _selectedUnit = null;
         _selectedElement.SetRunning(false);
+        _elementSorter.SortList(_mapElements);
     }
 
     private void _ClearIntegerArray(int[][] ary) {
@@ -1120,6 +1491,122 @@ public class FEBattleMapManager {
     public void OnFinishMoving() {
         _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
         _elementSorter.SortList(_mapElements);
+
+        // テスト用で戦闘準備にすぐ移行する
+        _operationMode = FEConst.BATTLE_OPE_MODE_PRE_BATTLE;
+        _UpdateOverallActionRange(_selectedElement, false);
+        // 攻撃範囲に敵ユニットが一切いない場合はモードを戻す
+        FEMapElement elem;
+        int x, y;
+        boolean flag = false;
+        for (int i=0; i<_mapElements.size(); i++) {
+            elem = _mapElements.get(i);
+            if (elem.IsPlayerUnit() == _selectedElement.IsPlayerUnit()) continue;
+            x = (int)elem.GetPosition().x;
+            y = (int)elem.GetPosition().y;
+            if (_selectedElement.GetAttackRange()[y][x]) {
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
+        }
+    }
+
+    /**
+     自軍、敵軍全てのユニットのパラメータを更新する。
+     */
+    private void UpdateAllUnitParameter() {
+        for (int i=0; i<_mapElements.size(); i++) {
+            UpdateUnitParameter(_mapElements.get(i));
+        }
+    }
+
+    /**
+     ユニットの自身のパラメータ、武器、アイテム、スキル、ステート、地形のパラメータ補正を総合的に合わせたパラメータを計算して保持する。
+     */
+    public void UpdateUnitParameter(FEMapElement elem) {
+        if (elem == null) return;
+        if (!(elem.GetMapObject() instanceof FEUnit)) return;
+        FEUnit unit = (FEUnit)elem.GetMapObject();
+        FEUnitParameter prm;
+
+        // 通常パラメータ
+        prm = unit.GetCorrectParameter();
+        prm.Reset(0);
+        // 武器の補正
+        if (unit.GetEquipWeapon() != null) {
+            unit.GetEquipWeapon().GetItem().GetParameterBonus().AddTo(prm);
+        }
+        // アイテムの補正
+        FEActualItem item;
+        for (int i=0; i<unit.GetItemList().size(); i++) {
+            item = unit.GetItemList().get(i);
+            if (!item.IsItem()) continue;
+            item.GetItem().GetParameterBonus().AddTo(prm);
+        }
+        // TODO スキルの補正
+
+        // TODO ステートの補正
+
+        // 地形の補正
+        int x, y;
+        x = (int)elem.GetPosition().x;
+        y = (int)elem.GetPosition().y;
+        FETerrainEffect terE = feManager.GetDataBase().GetTerrainEffects().get(_terrains[y][x].GetEffectID());
+        if (terE != null) {
+            prm.AddDef(terE.GetDefense());
+            prm.AddMdf(terE.GetMDefense());
+        }
+
+        unit.GetBaseParameter().CopyTo(unit.GetParameter());
+        prm.AddTo(unit.GetParameter());
+
+        // パラメータが下限を超えないように修正
+        unit.GetParameter().CorrectToLimit();
+
+        // 戦闘用パラメータ
+        FEUnitBattleParameter bPrm = unit.GetBattleParameter();
+        bPrm.Reset(0);
+        // クラス補正
+        FEClass unitClass = feManager.GetDataBase().GetUnitClasses().get(unit.GetUnitClassID());
+        if (unitClass == null) {
+            bPrm.Reset(FEConst.NOT_FOUND);
+            return;
+        }
+        unitClass.GetBattleParameter().CopyTo(bPrm);
+        // 武器の補正
+        if (unit.GetEquipWeapon() != null) {
+            FEWeapon wep = (FEWeapon) unit.GetEquipWeapon().GetItem();
+            bPrm.SetPowerType(wep.GetPowerType());
+            bPrm.AddPower(wep.GetPower());
+            bPrm.AddAccuracy(wep.GetAccuracy());
+            bPrm.AddCritical(wep.GetCritical());
+            bPrm.SetMinRange(wep.GetMinRange());
+            bPrm.SetMaxRange(wep.GetMaxRange());
+            bPrm.AddSpeed(-wep.GetWeight());
+            bPrm.SetAttackNum(wep.GetAttackNum());
+        }
+        // パラメータの補正
+        prm = unit.GetParameter(); 
+        int p = 0;
+        if (bPrm.GetPowerType() == FEConst.WEAPON_POWER_PHYSICS) {
+            p = prm.GetAtk();
+        } else if (bPrm.GetPowerType() == FEConst.WEAPON_POWER_MAGIC) {
+            p = prm.GetMat();
+        }
+        bPrm.AddPower(p);
+        bPrm.AddDefense(prm.GetDef());
+        bPrm.AddMDefense(prm.GetMdf());
+        bPrm.AddAccuracy((prm.GetTec() * 3 + prm.GetLuc()) / 2);
+        bPrm.AddSpeed(prm.GetSpd());
+        bPrm.AddAvoid((prm.GetSpd() * 3 + prm.GetLuc()) / 2);
+        bPrm.AddCritical((prm.GetTec() - 4) / 2);
+        bPrm.AddCriticalAvoid(prm.GetLuc() / 2);
+
+        // パラメータが下限を超えないように修正
+        bPrm.CorrectToLimit();
     }
 
     /**
@@ -1150,12 +1637,16 @@ public class FEBattleMapManager {
     /**
      指定したマーカ要素の行動範囲を用いてマップ中の行動範囲を更新する。
      */
-    private void _UpdateOverallActionRange(FEMapElement elem) {
+    private void _UpdateOverallActionRange(FEMapElement elem, boolean isConsiderMoving) {
+        _UpdateSelfActionRange(elem, isConsiderMoving);
+        _ClearIntegerArray(_actionRanges);
+        FEMapElement e;
         for (int i=0; i<_mapHeight; i++) {
             for (int j=0; j<_mapWidth; j++) {
-                if (elem.GetActionRange()[i][j]) {
+                e = GetMapElementOnPos(j, i);
+                if (elem.GetActionRange()[i][j] && (e == null || elem == e)) {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_ACTION;
-                } else if (elem.GetAttackRange()[i][j]) {
+                } else if (elem.GetAttackRange()[i][j] && (e == null || elem.IsPlayerUnit() != e.IsPlayerUnit())) {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_ATTACK;
                 } else if (elem.GetCaneRange()[i][j]) {
                     _actionRanges[i][j] = FEConst.BATTLE_MAP_MARKER_CANE;
@@ -1164,35 +1655,23 @@ public class FEBattleMapManager {
         }
     }
 
-    private void _UpdateOverallRange(int[][] range, FEMapElement elem) {
-        for (int i=0; i<_mapHeight; i++) {
-            for (int j=0; j<_mapWidth; j++) {
-                if (elem.GetActionRange()[i][j]) {
-                    range[i][j] = FEConst.BATTLE_MAP_MARKER_ACTION;
-                } else if (elem.GetAttackRange()[i][j]) {
-                    range[i][j] = FEConst.BATTLE_MAP_MARKER_ATTACK;
-                } else if (elem.GetCaneRange()[i][j]) {
-                    range[i][j] = FEConst.BATTLE_MAP_MARKER_CANE;
-                }
-            }
+    /**
+     自軍、敵軍全てのユニットの行動範囲を更新し、行動範囲配列をクリアする。
+     */
+    private void _UpdateAllActionRange() {
+        for (int i=0; i<_mapElements.size(); i++) {
+            _UpdateSelfActionRange(_mapElements.get(i), true);
         }
+        _ClearIntegerArray(_actionRanges);
     }
 
     /**
      指定したマップ要素の行動範囲マーカを更新する。
      */
-    private void _UpdateSelfActionRange(FEMapElement elem) {
+    private void _UpdateSelfActionRange(FEMapElement elem, boolean isConsiderMoving) {
         if (elem == null) return;
         if (!(elem.GetMapObject() instanceof FEUnit)) return;
         FEUnit unit = (FEUnit)elem.GetMapObject();
-        boolean isPlayerUnit;
-        if (_sortieUnits.contains(unit)) {
-            isPlayerUnit = true;
-        } else if (_sortieEnemyUnits.contains(unit)) {
-            isPlayerUnit = false;
-        } else {
-            return;
-        }
         // ユニットの行動範囲の初期化
         for (int i=0; i<_mapHeight; i++) {
             for (int j=0; j<_mapWidth; j++) {
@@ -1206,26 +1685,20 @@ public class FEBattleMapManager {
 
         // TODO 杖の射程を考慮
         int mov, minR, maxR, x, y;
-        mov = unit.GetBaseParameter().GetMobility();
-        minR = maxR = 0;
-        FEActualItem aItem = unit.GetEquipWeapon();
-        if (aItem != null) {
-            FEWeapon wep = (FEWeapon)aItem.GetItem();
-            minR = wep.GetMinRange();
-            maxR = wep.GetMaxRange();
-        }
+        mov = isConsiderMoving ? unit.GetParameter().GetMov() : 0;
+        if (mov < 0) return;
+        minR = unit.GetBattleParameter().GetMinRange();
+        maxR = unit.GetBattleParameter().GetMaxRange();
+        minR = minR < 0 ? 0 : minR;
+        maxR = maxR < 0 ? 0 : maxR;
         x = (int)elem.GetPosition().x;
         y = (int)elem.GetPosition().y;
-        _SetRecursiveActionRange(elem, unitClass.GetClassType(), isPlayerUnit, x, y, x, y, 0, mov, minR, maxR, 0);
+        _SetRecursiveActionRange(elem, unitClass.GetClassType(), x, y, mov, minR, maxR, 0);
     }
 
-    private void _SetRecursiveActionRange(FEMapElement elem, int classType, boolean isPlayerUnit, int baseX, int baseY, int x, int y, int dir, int remain, int minR, int maxR, int caneR) {
+    private void _SetRecursiveActionRange(FEMapElement elem, int classType, int x, int y, int remain, int minR, int maxR, int caneR) {
         if (!IsInMap(x, y)) return;
         if (remain < 0) return;
-        if (x != baseX || y != baseY) {
-            if (dir == 0 && y >= baseY || dir == 1 && x >= baseX || dir == 2 && y <= baseY || dir == 3 && x <= baseX) return;
-        }
-        if (elem.GetActionRange()[y][x]) return;
 
         FETerrain ter = GetTerrains()[y][x];
         FETerrainEffect terE = feManager.GetDataBase().GetTerrainEffects().get(ter.GetEffectID());
@@ -1234,8 +1707,12 @@ public class FEBattleMapManager {
 
         FEMapElement otherElem = GetMapElementOnPos(x, y);
         if (otherElem != null && otherElem.GetMapObject() instanceof FEUnit) {
-            if (_sortieUnits.contains(otherElem.GetMapObject()) && !isPlayerUnit) return;
-            if (_sortieEnemyUnits.contains(otherElem.GetMapObject()) && isPlayerUnit) return;
+            if (otherElem != elem) {
+                if (remain == 0) return;
+                // 敵はすり抜けられない
+                if (_sortieUnits.contains(otherElem.GetMapObject()) && !elem.IsPlayerUnit()) return;
+                if (_sortieEnemyUnits.contains(otherElem.GetMapObject()) && elem.IsPlayerUnit()) return;
+            }
         }
 
         elem.GetActionRange()[y][x] = true;
@@ -1245,10 +1722,10 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x, y - 1, 0, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x - 1, y, 1, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x, y + 1, 2, remain - cost, minR, maxR, caneR);
-        _SetRecursiveActionRange(elem, classType, isPlayerUnit, baseX, baseY, x + 1, y, 3, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x, y - 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x - 1, y, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x, y + 1, remain - cost, minR, maxR, caneR);
+        _SetRecursiveActionRange(elem, classType, x + 1, y, remain - cost, minR, maxR, caneR);
     }
 
     private void _SetRange(int x, int y, int minR, int maxR, boolean[][] target) {
@@ -1267,12 +1744,12 @@ public class FEBattleMapManager {
         }
     }
 
-    private ArrayList<PVector> _MakeRouteToAimPosition(FEMapElement elem, int classType, PVector baseP, int aimX, int aimY, int x, int y, int dir, int remain) {
+    /**
+     いまいる座標から目標座標へのルートを作成する。
+     */
+    private ArrayList<PVector> _MakeRouteToAimPosition(FEMapElement elem, int classType, int aimX, int aimY, int x, int y, int remain) {
         if (!IsInMap(x, y)) return null;
         if (remain < 0) return null;
-        if (x != baseP.x || y != baseP.y) {
-            if (dir == 0 && y >= baseP.y || dir == 1 && x >= baseP.x || dir == 2 && y <= baseP.y || dir == 3 && x <= baseP.x) return null;
-        }
         if (!elem.GetActionRange()[y][x]) return null;
 
         FETerrain ter = GetTerrains()[y][x];
@@ -1288,22 +1765,22 @@ public class FEBattleMapManager {
         }
 
         int cost = terE.GetMoveConts().get(classType);
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x, y - 1, 0, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x, y - 1, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x - 1, y, 1, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x - 1, y, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x, y + 1, 2, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x, y + 1, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
         }
-        aim =  _MakeRouteToAimPosition(elem, classType, baseP, aimX, aimY, x + 1, y, 3, remain - cost);
+        aim =  _MakeRouteToAimPosition(elem, classType, aimX, aimY, x + 1, y, remain - cost);
         if (aim != null) {
             aim.add(new PVector(x, y));
             return aim;
@@ -1328,8 +1805,8 @@ public class FEJsonUtility {
         if (value != null) {
             data.SetExplain(value);
         }
-        id = json.GetInt("ID", -99999);
-        if (id != -99999) {
+        id = json.GetInt("ID", FEConst.NOT_FOUND);
+        if (id != FEConst.NOT_FOUND) {
             data.SetID(id);
         } else {
             dialog.Show("エラー", "IDが設定されていないデータがあります。\njson = " + json);
@@ -1404,19 +1881,14 @@ public class FEJsonUtility {
     public void LoadWeaponCompatibility(FEWeaponCompatibility wcm, JsonObject json) throws Exception {
         if (wcm == null || json == null) return;
         wcm.SetBadCompatibility(json.GetBoolean("Is Bad Compatibility", false));
-        int value = json.GetInt("Weapon Class ID", -99999);
-        if (value != -99999) {
+        int value = json.GetInt("Weapon Class ID", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
             wcm.SetWeaponClassID(value);
         } else {
             dialog.Show("エラー", "武器タイプIDが設定されていないデータがあります。\njson = " + json);
             throw new Exception();
         }
-        wcm.SetAttackCorrect(json.GetInt("Attack", 0));
-        wcm.SetDefenseCorrect(json.GetInt("Defense", 0));
-        wcm.SetAccuracyCorrect(json.GetInt("Accuracy", 0));
-        wcm.SetAvoidCorrect(json.GetInt("Avoid", 0));
-        wcm.SetCriticalCorrect(json.GetInt("Critical", 0));
-        wcm.SetCriticalAvoidCorrect(json.GetInt("Critical Avoid", 0));
+        LoadUnitBattleParameter(wcm.GetCorrect(), json.GetJsonObject("Correct"));
     }
 
     /**
@@ -1424,16 +1896,108 @@ public class FEJsonUtility {
      */
     public void LoadUnitParameter(FEUnitParameter prm, JsonObject json) {
         if (prm == null || json == null) return;
-        prm.SetHp(json.GetInt("HP", -1));
-        prm.SetAttack(json.GetInt("ATK", -1));
-        prm.SetMAttack(json.GetInt("MAT", -1));
-        prm.SetTech(json.GetInt("TEC", -1));
-        prm.SetSpeed(json.GetInt("SPD", -1));
-        prm.SetLucky(json.GetInt("LUC", -1));
-        prm.SetDefense(json.GetInt("DEF", -1));
-        prm.SetMDefense(json.GetInt("MDF", -1));
-        prm.SetMobility(json.GetInt("MOV", -1));
-        prm.SetProficiency(json.GetInt("PRO", -1));
+        int value;
+        value = json.GetInt("HP", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetHp(value);
+        }
+        value = json.GetInt("ATK", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetAtk(value);
+        }
+        value = json.GetInt("MAT", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMat(value);
+        }
+        value = json.GetInt("TEC", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetTec(value);
+        }
+        value = json.GetInt("SPD", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetSpd(value);
+        }
+        value = json.GetInt("LUC", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetLuc(value);
+        }
+        value = json.GetInt("DEF", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetDef(value);
+        }
+        value = json.GetInt("MDF", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMdf(value);
+        }
+        value = json.GetInt("MOV", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMov(value);
+        }
+        value = json.GetInt("PRO", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetPro(value);
+        }
+    }
+
+    /**
+     省略されたパラメータに代入しないよう退避処理を設けている。
+     */
+    public void LoadUnitBattleParameter(FEUnitBattleParameter prm, JsonObject json) {
+        if (prm == null || json == null) return;
+        int value;
+        value = json.GetInt("Power", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetPower(value);
+        }
+        String pType = json.GetString("Power Type", null);
+        if (pType != null) {
+            switch(pType) {
+            case "PHYSICS":
+                prm.SetPowerType(FEConst.WEAPON_POWER_PHYSICS);
+                break;
+            case "MAGIC":
+                prm.SetPowerType(FEConst.WEAPON_POWER_PHYSICS);
+                break;
+            case "UNKNOWN":
+                prm.SetPowerType(FEConst.WEAPON_POWER_PHYSICS);
+                break;
+            default:
+                prm.SetPowerType(FEConst.NOT_FOUND);
+                break;
+            }
+        }
+        value = json.GetInt("Defense", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetDefense(value);
+        }
+        value = json.GetInt("MDefense", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMDefense(value);
+        }
+        value = json.GetInt("Accuracy", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetAccuracy(value);
+        }
+        value = json.GetInt("Avoid", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetAvoid(value);
+        }
+        value = json.GetInt("Critical", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetCritical(value);
+        }
+        value = json.GetInt("Critical Avoid", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetCriticalAvoid(value);
+        }
+        value = json.GetInt("Min Range", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMinRange(value);
+        }
+        value = json.GetInt("Max Range", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
+            prm.SetMaxRange(value);
+        }
     }
 
     /**
@@ -1669,8 +2233,8 @@ public class FEJsonUtility {
     public void LoadWeapon(FEWeapon wep, JsonObject json) throws Exception {
         if (wep == null || json == null) return;
         LoadItemBase(wep, json);
-        int value = json.GetInt("Weapon Class ID", -99999);
-        if (value != -99999) {
+        int value = json.GetInt("Weapon Class ID", FEConst.NOT_FOUND);
+        if (value != FEConst.NOT_FOUND) {
             wep.SetWeaponClassID(value);
         } else {
             dialog.Show("エラー", "武器タイプIDが設定されていないデータがあります。\njson = " + json);
@@ -1721,7 +2285,7 @@ public class FEJsonUtility {
             for (int i=0; i<array.Size(); i++) {
                 state = array.GetJsonObject(i);
                 if (state == null) continue;
-                wep.GetGrantingStates().put(state.GetInt("State ID", -99999), state.GetInt("Accuracy", 0));
+                wep.GetGrantingStates().put(state.GetInt("State ID", FEConst.NOT_FOUND), state.GetInt("Accuracy", 0));
             }
         }
     }
@@ -1757,6 +2321,7 @@ public class FEJsonUtility {
         LoadUnitParameter(cls.GetChangeBonus(), json.GetJsonObject("Class Change Bonus"));
         LoadUnitParameter(cls.GetGrowthBonus(), json.GetJsonObject("Growth Rate Bonus"));
         LoadUnitParameter(cls.GetGrowthLimit(), json.GetJsonObject("Growth Limit"));
+        LoadUnitBattleParameter(cls.GetBattleParameter(), json.GetJsonObject("Battle Parameter"));
         JsonArray array = json.GetJsonArray("Learnable Skills");
         if (array != null) {
             JsonObject skill;
@@ -1764,9 +2329,9 @@ public class FEJsonUtility {
             for (int i=0; i<array.Size(); i++) {
                 skill = array.GetJsonObject(i);
                 if (skill == null) continue;
-                id = skill.GetInt("Skill ID", -99999);
-                if (id != -99999) {
-                    cls.GetLearnabeSkills().put(id, skill.GetInt("Level", -99999));
+                id = skill.GetInt("Skill ID", FEConst.NOT_FOUND);
+                if (id != FEConst.NOT_FOUND) {
+                    cls.GetLearnabeSkills().put(id, skill.GetInt("Level", FEConst.NOT_FOUND));
                 } else {
                     dialog.Show("エラー", "スキルIDが設定されていないデータがあります。\njson = " + json);
                     throw new Exception();
@@ -1779,8 +2344,8 @@ public class FEJsonUtility {
         if (unit == null || json == null) return;
         LoadFEData(unit, json);
         unit.SetOrganization(json.GetString("Organization", "無所属"));
-        int classID = json.GetInt("Class ID", -99999);
-        if (classID != -99999) {
+        int classID = json.GetInt("Class ID", FEConst.NOT_FOUND);
+        if (classID != FEConst.NOT_FOUND) {
             unit.SetUnitClassID(classID);
         } else {
             dialog.Show("エラー", "クラスIDが設定されていないデータがあります。\njson = " + json);
@@ -1824,14 +2389,16 @@ public class FEJsonUtility {
             break;
         }
         unit.SetLevel(json.GetInt("Level", -1));
+        unit.SetHp(json.GetInt("HP", -1));
+        unit.SetExp(json.GetInt("Exp", -1));
         LoadUnitParameter(unit.GetBaseGrowthRate(), json.GetJsonObject("Growth Rate"));
         LoadUnitParameter(unit.GetBaseParameter(), json.GetJsonObject("Parameter"));
         JsonArray array = json.GetJsonArray("Skills");
         if (array != null) {
             int id;
             for (int i=0; i<array.Size(); i++) {
-                id = array.GetInt(i, -99999);
-                if (id != -99999) {
+                id = array.GetInt(i, FEConst.NOT_FOUND);
+                if (id != FEConst.NOT_FOUND) {
                     unit.GetLearnSkillList().add(id);
                 } else {
                     dialog.Show("エラー", "スキルIDが設定されていないデータがあります。\njson = " + json);
@@ -1847,7 +2414,7 @@ public class FEJsonUtility {
             for (int i=0; i<array.Size(); i++) {
                 item = array.GetJsonObject(i);
                 if (item == null) continue;
-                actItem = feManager.GetDataBase().CreateItem(item.GetInt("ID", -99999), item.GetBoolean("Is Item", true));
+                actItem = feManager.GetDataBase().CreateItem(item.GetInt("ID", FEConst.NOT_FOUND), item.GetBoolean("Is Item", true));
                 actItem.SetEndurance(item.GetInt("Endurance", 0));
                 actItem.SetExchangeable(item.GetBoolean("Is Exchangeable", true));
                 if (actItem != null) {
@@ -1855,8 +2422,8 @@ public class FEJsonUtility {
                 }
             }
         }
-        int idx = json.GetInt("Equip Weapon Index", -99999);
-        if (idx != -99999) {
+        int idx = json.GetInt("Equip Weapon Index", FEConst.NOT_FOUND);
+        if (idx != FEConst.NOT_FOUND) {
             unit.SetEquipWeapon(unit.GetItemList().get(idx));
         }
     }

@@ -43,9 +43,10 @@ public final class ClassID {
     public static final int CID_FE_MAP_MOUSE_CURSOR = 10001;
     public static final int CID_FE_MAP_UNIT_VIEWER = 10002;
     public static final int CID_FE_MAP_TERRAIN_VIEWER = 10003;
-    public static final int CID_FE_MAP_UNIT_ROUTER = 10004;
+    public static final int CID_FE_MAP_UNIT_ANIMATOR = 10004;
     public static final int CID_FE_MAP_CURSOR = 10005;
     public static final int CID_FE_MAP_ACTION_RANGE_DRAWER = 10006;
+    public static final int CID_FE_MAP_IMAGE_DRAWER = 10007;
 }
 
 public final class SceneID {
