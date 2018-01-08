@@ -273,6 +273,27 @@ public class FEUnitParameter implements Copyable<FEUnitParameter> {
         own._mov += _mov;
         own._pro += _pro;
     }
+
+    /**
+     下限突破が起きないように修正。
+     */
+    public void CorrectToLimit() {
+        // パラメータの
+        if (_hp < 1) _hp = 1;
+        if (_atk < 0) _atk = 0;
+        if (_mat < 0) _mat = 0;
+        if (_tec < 0) _tec = 0;
+        if (_spd < 0) _spd = 0;
+        if (_luc < 0) _luc = 0;
+        if (_def < 0) _def = 0;
+        if (_mdf < 0) _mdf = 0;
+        if (_mov < 0) _mov = 0;
+        if (_pro < 0) _pro = 0;
+    }
+
+    public String toString() {
+        return "Parameter : [\nHP:"+_hp+"\nATK:"+_atk+"\nMAT:"+_mat+"\nTEC:"+_tec+"\nSPD:"+_spd+"\nLUC:"+_luc+"\nDEF:"+_def+"\nMDF:"+_mdf+"\nMOV:"+_mov+"\nPRO:"+_pro+"\n]";
+    }
 }
 
 /**
@@ -324,7 +345,7 @@ public class FEUnitBattleParameter implements Copyable<FEUnitBattleParameter> {
     }
 
     private int _accuracy;
-    public int GeAccuracy() {
+    public int GetAccuracy() {
         return _accuracy;
     }
     public void SetAccuracy(int value) {
@@ -400,6 +421,17 @@ public class FEUnitBattleParameter implements Copyable<FEUnitBattleParameter> {
         _maxRange += value;
     }
 
+    private int _attackNum;
+    public int GetAttackNum() {
+        return _attackNum;
+    }
+    public void SetAttackNum(int value) {
+        _attackNum = value;
+    }
+    public void AddAttackNum(int value) {
+        _attackNum += value;
+    }
+
     public void CopyTo(FEUnitBattleParameter own) {
         if (own == null) return;
         own._power = _power;
@@ -413,6 +445,7 @@ public class FEUnitBattleParameter implements Copyable<FEUnitBattleParameter> {
         own._speed = _speed;
         own._minRange = _minRange;
         own._maxRange = _maxRange;
+        own._attackNum = _attackNum;
     }
 
     /**
@@ -429,6 +462,94 @@ public class FEUnitBattleParameter implements Copyable<FEUnitBattleParameter> {
         _criticalAvoid = value;
         _minRange = value;
         _maxRange = value;
+        _attackNum = value;
+    }
+
+    /**
+     下限突破が起きないように修正。
+     */
+    public void CorrectToLimit() {
+        if (_power < 0) _power = 0;
+        if (_defense < 0) _defense = 0;
+        if (_mDefense < 0) _mDefense = 0;
+        if (_accuracy < 0) _accuracy = 0;
+        if (_speed < 0) _speed = 0;
+        if (_avoid < 0) _avoid = 0;
+        if (_critical < 0) _critical = 0;
+        if (_criticalAvoid < 0) _criticalAvoid = 0;
+        if (_minRange < 0) _minRange = 0;
+        if (_maxRange < 0) _maxRange = 0;
+        if (_attackNum < 0) _attackNum = 0;
+    }
+
+    public String toString() {
+        return 
+            "Battle Parameter : [\nPower:"+_power+"\nPower Type:"+_powerType+"\nDEF:"+_defense+"\nMDF:"+_mDefense+"\nAccurracy:"+_accuracy+"\nSpeed:"+_speed+"\nAvoid:"+_avoid
+            +"\nCritical:"+_critical+"\nCritical Avoid:"+_criticalAvoid+"\nMin Range:"+_minRange+"\nMax Range:"+_maxRange+"\nAttack Num:"+_attackNum+"\n]";
+    }
+}
+
+/**
+ 戦闘前に互いのパラメータを考慮した値を保持するクラス。
+ バトルマネージャが直接保持する。
+ */
+public class FEUnitBattleConsider {
+    private int _power;
+    public int GetPower() {
+        return _power;
+    }
+    public void SetPower(int value) {
+        _power = value;
+    }
+    public void AddPower(int value) {
+        _power += value;
+    }
+
+    private int _accuracy;
+    public int GetAccuracy() {
+        return _accuracy;
+    }
+    public void SetAccuracy(int value) {
+        _accuracy = value;
+    }
+    public void AddAccuracy(int value) {
+        _accuracy += value;
+    }
+
+    private int _critical;
+    public int GetCritical() {
+        return _critical;
+    }
+    public void SetCritical(int value) {
+        _critical = value;
+    }
+    public void AddCritical(int value) {
+        _critical += value;
+    }
+
+    private int _damage;
+    public int GetDamage() {
+        return _damage;
+    }
+    public void SetDamage(int value) {
+        _damage = value;
+    }
+    public void AddDamage(int value) {
+        _damage += value;
+    }
+
+    public void Reset(int value) {
+        _power = value;
+        _accuracy = value;
+        _critical = value;
+        _damage = value;
+    }
+
+    public void CorrectToLimit() {
+        if (_power < 0) _power = 0;
+        if (_accuracy < 0) _accuracy = 0;
+        if (_critical < 0) _critical = 0;
+        if (_damage < 0) _damage = 0;
     }
 }
 
@@ -698,6 +819,10 @@ public class FEUnit extends FEMapObject {
         } else {
             own.DetachWeapon();
         }
+    }
+
+    public String toString() {
+        return "Unit : [\nName:"+GetName()+"\nBase P:"+_baseParameter+"\nBase G:"+_baseGrowthRate+"\nBattle:"+_battleParameter+"\n]";
     }
 }
 
@@ -1064,6 +1189,12 @@ public class FEWeapon extends FEItemBase {
     }
     public void SetSpecialAttack(int[] value) {
         _specialAttack = value;
+    }
+    public boolean IsContainSpecialAttack(int classType) {
+        for (int i=0; i<_specialAttack.length; i++) {
+            if (_specialAttack[i] == classType) return true;
+        }
+        return false;
     }
 
     /**
@@ -1610,12 +1741,12 @@ public class FEMapElement implements Comparable<FEMapElement> {
     /**
      アニメーションするかどうか
      */
-    private boolean _isAnimaiton;
+    private boolean _isAnimation;
     public boolean IsAnimation() {
-        return _isAnimaiton;
+        return _isAnimation;
     }
     public void SetAnimation(boolean value) {
-        _isAnimaiton = value;
+        _isAnimation = value;
     }
 
     /**
@@ -1639,6 +1770,25 @@ public class FEMapElement implements Comparable<FEMapElement> {
     }
     public void SetAlready(boolean value) {
         _isAlready = value;
+    }
+
+    /**
+     死亡したかどうか
+     */
+    private boolean _isDead;
+    public boolean IsDead() {
+        return _isDead;
+    }
+    public void SetDead(boolean value) {
+        _isDead = value;
+    }
+
+    private int _alpha;
+    public int GetAlpha() {
+        return _alpha;
+    }
+    public void SetAlpha(int value) {
+        _alpha = value;
     }
 
     /**
@@ -1683,6 +1833,11 @@ public class FEMapElement implements Comparable<FEMapElement> {
         _caneRange = new boolean[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
 
         _isPlayerUnit = isPlayerUnit;
+        _isAnimation = true;
+        _isFixDirection = false;
+        _isAlready = false;
+        _isDead = false;
+        _alpha = 255;
     }
 
     public boolean IsSamePosition(int x, int y) {

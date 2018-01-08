@@ -28,7 +28,7 @@
             "ATK" : 6,
             "MAT" : 0,
             "TEC" : 7,
-            "SPD" : 6,
+            "SPD" : 5,
             "LUC" : 2,
             "DEF" : 4,
             "MDF" : 2,
@@ -78,7 +78,16 @@
             "PRO" : 12
         },
         "Skills" : [
-        ]
+        ],
+        "Item List" : [
+            {
+                "Is Item" : false,
+                "ID" : 1,
+                "Endurance" : 24,
+                "Is Exchangeable" : true
+            }
+        ],
+        "Equip Weapon Index" : 0
     },
     {
         "ID" : 2,

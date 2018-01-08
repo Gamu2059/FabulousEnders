@@ -23,7 +23,7 @@ public class FEConst {
     public static final int CONFIG_LEADER_GAIN_EXP = 50;
     public static final int CONFIG_SUB_LEADER_GAIN_EXP = 30;
     public static final float CONFIG_CRITICAL_HIT_RATE = 3f;
-    public static final float CONFIG_SPECIAL_HIT_RATE = 2f;
+    public static final float CONFIG_SPECIAL_HIT_RATE = 2.5f;
     public static final int CONFIG_MAX_LEVEL = 30;
     public static final int CONFIG_MAX_HP = 99;
     public static final int CONFIG_MAX_ATK = 40;
@@ -169,8 +169,11 @@ public class FEConst {
     public static final int BATTLE_OPE_MODE_MOVING = -7202;
     public static final int BATTLE_OPE_MODE_FINISH_MOVE = -7203;
     public static final int BATTLE_OPE_MODE_BACK_MENU = -7204;
-    public static final int BATTLE_OPE_MODE_PRE_ATTACK = -7205;
-    public static final int BATTLE_OPE_MODE_ATTACK = -7206;
+    public static final int BATTLE_OPE_MODE_PRE_BATTLE = -7205;
+    public static final int BATTLE_OPE_MODE_BATTLE_START = -7206;
+    public static final int BATTLE_OPE_MODE_BATTLE = -7207;
+    public static final int BATTLE_OPE_MODE_BATTLE_END = -7209;
+    public static final int BATTLE_OPE_MODE_BATTLE_RESULT = -7209;
     
     // マーカ
     public static final int BATTLE_MAP_MARKER_ACTION = -7300;
