@@ -746,6 +746,17 @@ public class FEUnit extends FEMapObject {
     }
 
     /**
+     ユニットの戦闘力バイアス
+     */
+    private int _powerBias;
+    public int GetPowerBias() {
+        return _powerBias;
+    }
+    public void SetPowerBias(int value) {
+        _powerBias = value;
+    }
+
+    /**
      現在の装備中の武器
      */
     private FEActualItem _equipWeapon;
@@ -830,49 +841,84 @@ public class FEUnit extends FEMapObject {
  行動パターンを持つユニットのクラス。
  */
 public class FEOtherUnit extends FEUnit {
-    private int _actionPattern;
-    public int GetActionPattern() {
-        return _actionPattern;
+    // 損益分布     
+    private int[][] _unitProfitDistribution;
+    public int[][] GetUnitProfitDistribution() {
+        return _unitProfitDistribution;
     }
-
-    /**
-     行動に影響するリージョンの配列
-     */
-    private int[] _regions;
-    public int[] GetRegions() {
-        return _regions;
+    // 対象優先型かどうか     
+    private boolean _isTargetPriorityType;
+    public boolean IsTargetPriorityType() {
+        return _isTargetPriorityType;
     }
-
-    /**
-     攻撃対象にする組織
-     */
-    private String[] _attackOnOrg;
-    public String[] GetAttackOnOrg() {
-        return _attackOnOrg;
+    public void SetTargetPriorityType(boolean value) {
+        _isTargetPriorityType = value;
     }
-
-    /**
-     攻撃優先度オプション
-     */
-    private FEAttackPriority[] _attackPriority;
-    public FEAttackPriority[] GetAttackPriority() {
-        return _attackPriority;
+    // 対象優先行動を採用するための損益値の閾値
+    private int _threshTargetPriority;
+    public int GetThreshTargetPriority() {
+        return _threshTargetPriority;
+    }
+    public void SetThreshTargetPriority(int value) {
+        _threshTargetPriority = value;
+    }
+    // 行動リスト
+    private ArrayList<FEUnitAction> _actionList;
+    public ArrayList<FEUnitAction> GetActionList() {
+        return _actionList;
+    }
+    // 行先
+    private PVector _gotoPos;
+    public PVector GetGotoPos() {
+        return _gotoPos;
+    }
+    // 攻撃先
+    private PVector _attackPos;
+    public PVector GetAttackPos() {
+        return _attackPos;
     }
 
     public FEOtherUnit() {
         super();
+        _unitProfitDistribution = new int[FEConst.SYSTEM_MAP_MAX_HEIGHT][FEConst.SYSTEM_MAP_MAX_WIDTH];
+        _actionList = new ArrayList<FEUnitAction>();
+        _gotoPos = new PVector();
+        _attackPos = new PVector();
     }
 }
 
-public class FEAttackPriority {
-    private int _optionID;
-    public int GetOptionID() {
-        return _optionID;
+public class FEUnitAction {
+    // 行動を識別するID
+    private int _actionID;
+    public int GetActionID() {
+        return _actionID;
+    }
+    public void SetActionID(int value) {
+        _actionID = value;
+    }
+    // 範囲行動限定かどうか
+    private boolean _isOnlyRangeAction;
+    public boolean IsOnlyRangeAction() {
+        return _isOnlyRangeAction;
+    }
+    public void SetOnlyRangeAction(boolean value) {
+        _isOnlyRangeAction = value;
+    }
+    // 行動パラメータ(複雑なのでJsonObjectで保持)
+    private JsonObject _actionParameter;
+    public JsonObject GetActionParameter() {
+        return _actionParameter;
+    }
+    public void  SetActionParameter(JsonObject value) {
+        _actionParameter = value;
     }
 
-    private String _parameter;
-    public String GetParameter() {
-        return _parameter;
+    private FEMapElement _target;
+    public FEMapElement GetTarget() {
+        return _target;
+    }
+    public void SetTarget(FEMapElement value) {
+        _target = value;
     }
 }
 

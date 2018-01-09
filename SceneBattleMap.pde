@@ -176,6 +176,7 @@ public class FEMapActionRangeDrawer extends SceneObjectBehavior {
         case FEConst.BATTLE_OPE_MODE_BATTLE_START:
         case FEConst.BATTLE_OPE_MODE_BATTLE:
         case FEConst.BATTLE_OPE_MODE_BATTLE_RESULT:
+        case FEConst.BATTLE_OPE_MODE_BATTLE_DEAD:
             return false;
         }
     }
@@ -244,7 +245,7 @@ public class FEMapObjectDrawer extends SceneObjectBehavior {
         PVector pos;
         float x, y, rate;
         String imgPath;
-        colorMode(HSB, 360, 100, 100);
+        colorMode(HSB, 360, 100, 100, 255);
         noStroke();
         for (int i=0; i<bm.GetMapElements().size(); i++) {
             e = bm.GetMapElements().get(i);
@@ -265,23 +266,25 @@ public class FEMapObjectDrawer extends SceneObjectBehavior {
                 tint(0, 0, e.IsAlready()?50:100, e.GetAlpha());
             }
             image(imageManager.GetImage(imgPath), x, y, FEConst.SYSTEM_MAP_OBJECT_PX, FEConst.SYSTEM_MAP_OBJECT_PX);
-            if (e.IsDead()) {
-                e.SetAlpha((int)(e.GetAlpha() - 255/frameRate));
-                if (e.GetAlpha() <= 0) {
-                    bm.RemoveDeadElement(e);
-                }
-            }
 
             // HPゲージを表示する
             if (!(o instanceof FEUnit)) continue;
             u = (FEUnit) o;
-            fill(0);
+            fill(0, e.GetAlpha());
             rect(x + 12, y + FEConst.SYSTEM_MAP_OBJECT_PX - 15, 36, 5);
             rate = (float)u.GetHp() / u.GetBaseParameter().GetHp();
-            fill(0, 100, 20);
+            fill(0, 100, 20, e.GetAlpha());
             rect(x + 13, y + FEConst.SYSTEM_MAP_OBJECT_PX - 14, 34, 3);
-            fill(rate * 180, 100, 100);
+            fill(rate * 180, 100, 100, e.GetAlpha());
             rect(x + 13, y + FEConst.SYSTEM_MAP_OBJECT_PX - 14, 34 * rate, 3);
+
+            // ユニットの消滅は不透明度で判断する
+            if (e.IsDead()) {
+                e.SetAlpha((int)(e.GetAlpha() - 255/(frameRate * 0.5)));
+                if (e.GetAlpha() <= 0) {
+                    bm.RemoveDeadElement(e);
+                }
+            }
         }
     }
 
@@ -344,7 +347,7 @@ public class FEMapUnitAnimator extends SceneObjectBehavior {
             private PVector aimPos, crtPos;
             private FEMapElement elem;
             private SceneObjectDuration dur;
-            private float settedTime, dX, dY;
+            private float settedTime, rate, dX, dY;
 
             public void OnInit() {
                 dur = duration;
@@ -362,8 +365,9 @@ public class FEMapUnitAnimator extends SceneObjectBehavior {
                 return false;
             }
             public void OnUpdate() {
-                crtPos.x += dX /(frameRate * settedTime);
-                crtPos.y += dY /(frameRate * settedTime);
+                rate = frameRate * settedTime;
+                crtPos.x += dX / rate;
+                crtPos.y += dY / rate;
             }
             public void OnEnd() {
                 crtPos.x = aimPos.x;
@@ -470,21 +474,22 @@ public class FEMapUnitAnimator extends SceneObjectBehavior {
     }
 
     private void _BattlerGoing(float settedTime) {
+        float rate = frameRate * settedTime;
         if (bm.GetBattlePhase()) {
             if (isGoing) {
-                atkPos.x += 0.4 * cos(atkRad) / (frameRate * settedTime);
-                atkPos.y += 0.4 * sin(atkRad) / (frameRate * settedTime);
+                atkPos.x += 0.4 * cos(atkRad) / rate;
+                atkPos.y += 0.4 * sin(atkRad) / rate;
             } else {
-                atkPos.x -= 0.4 * cos(atkRad) / (frameRate * settedTime);
-                atkPos.y -= 0.4 * sin(atkRad) / (frameRate * settedTime);
+                atkPos.x -= 0.4 * cos(atkRad) / rate;
+                atkPos.y -= 0.4 * sin(atkRad) / rate;
             }
         } else {
             if (isGoing) {
-                defPos.x += 0.4 * cos(atkRad + PI) / (frameRate * settedTime);
-                defPos.y += 0.4 * sin(atkRad + PI) / (frameRate * settedTime);
+                defPos.x += 0.4 * cos(atkRad + PI) / rate;
+                defPos.y += 0.4 * sin(atkRad + PI) / rate;
             } else {
-                defPos.x -= 0.4 * cos(atkRad + PI) / (frameRate * settedTime);
-                defPos.y -= 0.4 * sin(atkRad + PI) / (frameRate * settedTime);
+                defPos.x -= 0.4 * cos(atkRad + PI) / rate;
+                defPos.y -= 0.4 * sin(atkRad + PI) / rate;
             }
         }
     }
@@ -835,7 +840,9 @@ public class FEMapCursor extends SceneObjectBehavior {
         _mapCur = sbm.GetMapCursor();
         inputManager.GetMouseClickedHandler().GetEvents().Add("FE Battle Map Interface On Click", new IEvent() {
             public void Event() {
-                bm.OnClick(_mapCur.GetMapX(), _mapCur.GetMapY());
+                if (bm.GetActionPhase()) {
+                    bm.OnClick(_mapCur.GetMapX(), _mapCur.GetMapY());
+                }
             }
         }
         );

@@ -374,6 +374,8 @@ public final class SceneGameOver extends Scene {
         img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
         img.GetColorInfo().SetAlpha(1);
         img.GetColorInfo().SetColor(255, 255, 255);
+        
+        feManager.GetProgressDataBase().SetSceneMoce(FEConst.OVERALL_MODE_GAME_OVER);
     }
 
     public void OnDisabled() {

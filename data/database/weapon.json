@@ -33,8 +33,8 @@
     },
     {
         "ID" : 1,
-        "Name" : "武勲の剣",
-        "Explain" : "サンスの栄誉を讃えて国王から贈られた誉れ高き剣。",
+        "Name" : "弓",
+        "Explain" : "",
         "Icon Image Path" : "",
         "Effect Image Folder Path" : "",
         "Price" : 0,
@@ -52,9 +52,9 @@
         "Weight" : 1,
         "Min Range" : 2,
         "Max Range" : 3,
-        "Accuracy" : 100,
+        "Accuracy" : 80,
         "Critical" : 5,
-        "Attack Num" : 2,
+        "Attack Num" : 1,
         "Wearable Proficiency" : 12,
         "Special Attacks" : [
         ],
