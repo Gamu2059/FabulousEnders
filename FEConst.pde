@@ -168,7 +168,6 @@ public class FEConst {
     public static final int BATTLE_OPE_MODE_ACTIVE = -7201;
     public static final int BATTLE_OPE_MODE_MOVING = -7202;
     public static final int BATTLE_OPE_MODE_FINISH_MOVE = -7203;
-    public static final int BATTLE_OPE_MODE_BACK_MENU = -7204;
     public static final int BATTLE_OPE_MODE_PRE_BATTLE = -7205;
     public static final int BATTLE_OPE_MODE_BATTLE_START = -7206;
     public static final int BATTLE_OPE_MODE_BATTLE = -7207;
@@ -177,6 +176,9 @@ public class FEConst {
     public static final int BATTLE_OPE_MODE_BATTLE_DEAD = -7210;
     public static final int BATTLE_OPE_MODE_AI_THINKING = -7211;
     public static final int BATTLE_OPE_MODE_AI_MOVING = -7212;
+    public static final int BATTLE_OPE_MODE_BACK_MENU = -7213;
+    public static final int BATTLE_OPE_MODE_OPERATE_MENU = -7214;
+    public static final int BATTLE_OPE_MODE_UNIT_MENU = -7215;
 
     // マーカ
     public static final int BATTLE_MAP_MARKER_ACTION = -7300;

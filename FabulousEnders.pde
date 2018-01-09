@@ -8,7 +8,7 @@ import java.util.*;
 import java.io.*;
 
 // pjsで実行するときはfalseにする
-boolean isProcessing = true;
+boolean isProcessing = false;
 
 // マネージャインスタンス
 InputManager inputManager;

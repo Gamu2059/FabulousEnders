@@ -885,9 +885,23 @@ public class FEOtherUnit extends FEUnit {
         _gotoPos = new PVector();
         _attackPos = new PVector();
     }
+
+    public void CopyTo(FEOtherUnit own) {
+        if (own == null) return;
+        super.CopyTo(own);
+        own._isTargetPriorityType = _isTargetPriorityType;
+        own._threshTargetPriority = _threshTargetPriority;
+        own._actionList.clear();
+        FEUnitAction act;
+        for (int i=0; i<_actionList.size(); i++) {
+            act = new FEUnitAction();
+            _actionList.get(i).CopyTo(act);
+            own._actionList.add(act);
+        }
+    }
 }
 
-public class FEUnitAction {
+public class FEUnitAction implements Copyable<FEUnitAction> {
     // 行動を識別するID
     private int _actionID;
     public int GetActionID() {
@@ -919,6 +933,13 @@ public class FEUnitAction {
     }
     public void SetTarget(FEMapElement value) {
         _target = value;
+    }
+
+    public void CopyTo(FEUnitAction own) {
+        if (own == null) return;
+        own._actionID = _actionID;
+        own._isOnlyRangeAction = _isOnlyRangeAction;
+        own._actionParameter = _actionParameter;
     }
 }
 

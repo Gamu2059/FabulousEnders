@@ -2,13 +2,21 @@
  戦闘マップ及びマップイベントを描画するシーン。
  */
 public class FESceneBattleMap extends Scene {
-    private SceneObject mapImageObj, actionRangeObj, mapElementObj, unitViewObj, terrainViewObj, cursorObj;
+    private SceneObject mapImageObj, actionRangeObj, mapElementObj, unitViewObj, terrainViewObj, cursorObj, opeMenuObj, unitMenuObj;
 
     private SceneObjectImage mapImage;
 
     private FEMapMouseCursor mapCursor;
     public FEMapMouseCursor GetMapCursor() {
         return mapCursor;
+    }
+
+    private boolean _isOpenMenu;
+    public boolean IsOpenMenu() {
+        return _isOpenMenu;
+    }
+    public void SetOpenMenu(boolean value) {
+        _isOpenMenu = value;
     }
 
     public FESceneBattleMap() {
@@ -49,6 +57,11 @@ public class FESceneBattleMap extends Scene {
         objT.SetParent(mapImageObj.GetTransform(), true);
         objT.AddPriority(7);
         new FEMapCursor(cursorObj);
+
+        opeMenuObj = new SceneObject("Operate Menu Object", this);
+        objT = opeMenuObj.GetTransform();
+        objT.AddPriority(100);
+        new FEMapOperateMenuViewer(opeMenuObj);
     }
 
     public void OnEnabled() {
@@ -599,7 +612,8 @@ public class FEMapUnitViewer extends SceneObjectBehavior {
 
     private SceneObject _prmBackObj, _faceBackObj;
     private SceneObjectDrawBack _prmBack, _faceBack;
-    private SceneObjectImage _faceImg;
+    private SceneObjectImage _faceImg, wepImg;
+    private SceneObjectText levelTx, nameTx, wepTx, hpTx;
 
     public FEMapUnitViewer(SceneObject obj) {
         super();
@@ -675,6 +689,84 @@ public class FEMapUnitViewer extends SceneObjectBehavior {
         objD.SetEnable(true, false);
         objD.GetBackColorInfo().SetColor(40, 10, 10);
         _faceImg = new SceneObjectImage(_faceFrontObj, null);
+
+        SceneObject obj;
+        SceneObjectText tex;
+
+        obj = new SceneObject("Unit Parameter Viewer Level Label", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmBackObj.GetTransform(), true);
+        objT.SetSize(40, 30);
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetPivot(0, 0);
+        tex = new SceneObjectText(obj, "Lv.");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(18);
+        tex.GetColorInfo().SetColor(240, 220, 190);
+
+        obj = new SceneObject("Unit Parameter Viewer Level Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmBackObj.GetTransform(), true);
+        objT.SetSize(40, 30);
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetPivot(0, 0);
+        objT.SetTranslation(10, 0);
+        levelTx = new SceneObjectText(obj, "");
+        levelTx.SetAlign(RIGHT, CENTER);
+        levelTx.SetFontSize(18);
+        levelTx.GetColorInfo().SetColor(255, 255, 255);
+
+        obj = new SceneObject("Unit Parameter Viewer Unit Name Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmBackObj.GetTransform(), true);
+        objT.SetSize(0, 30);
+        objT.SetAnchor(0, 0, 1, 0);
+        objT.SetPivot(0.5, 0);
+        objT.SetOffsetMin(0, 0);
+        nameTx = new SceneObjectText(obj, "");
+        nameTx.SetAlign(CENTER, CENTER);
+        nameTx.SetFontSize(16);
+        nameTx.GetColorInfo().SetColor(255, 255, 255);
+
+        obj = new SceneObject("Unit Parameter Viewer Weapon Icon Image", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmFrontObj.GetTransform(), true);
+        objT.SetSize(30, 30);
+        objT.SetAnchor(0, 0, 0, 0);
+        objT.SetPivot(0, 0);
+        objT.SetTranslation(2, 2);
+        wepImg = new SceneObjectImage(obj, null);
+
+        obj = new SceneObject("Unit Parameter Viewer Unit Weapon Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmFrontObj.GetTransform(), true);
+        objT.SetAnchor(0, 0, 0.5, 1);
+        objT.SetOffsetMin(35, 0);
+        wepTx = new SceneObjectText(obj, "武勲の剣");
+        wepTx.SetAlign(CENTER, CENTER);
+        wepTx.SetFontSize(14);
+        wepTx.GetColorInfo().SetColor(50, 50, 100);
+
+        obj = new SceneObject("Unit Parameter Viewer HP Label", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.5, 0, 1, 1);
+        objT.SetOffsetMax(-50, 0);
+        tex = new SceneObjectText(obj, "HP : ");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(14);
+        tex.GetColorInfo().SetColor(50, 50, 100);
+
+        obj = new SceneObject("Unit Parameter Viewer HP Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_prmFrontObj.GetTransform(), true);
+        objT.SetAnchor(1, 0, 1, 1);
+        objT.SetPivot(1, 0.5);
+        objT.SetSize(60, 0);
+        hpTx = new SceneObjectText(obj, "");
+        hpTx.SetAlign(LEFT, CENTER);
+        hpTx.SetFontSize(14);
+        hpTx.GetColorInfo().SetColor(50, 50, 100);
     }
 
     public void Update() {
@@ -709,6 +801,27 @@ public class FEMapUnitViewer extends SceneObjectBehavior {
                 _prmBack.GetBackColorInfo().SetColor(150, 0, 20);
                 _faceBack.GetBackColorInfo().SetColor(150, 0, 20);
             }
+
+            levelTx.SetText(unit.GetLevel()+"");
+            nameTx.SetText(unit.GetName());
+
+            FEItemBase item;
+            if (unit.GetEquipWeapon() != null) {
+                item = unit.GetEquipWeapon().GetItem();
+                wepImg.SetUsingImageName("character/face/a.png");
+                wepTx.SetText(item.GetName());
+            } else {
+                wepImg.SetUsingImageName("character/face/a.png");
+                wepTx.SetText("");
+            }
+
+            hpTx.SetText(unit.GetHp() + " / " + unit.GetParameter().GetHp());
+            float rate = (float)unit.GetHp()/unit.GetParameter().GetHp();
+            if (rate < 0.4) {
+                hpTx.GetColorInfo().SetColor(250, 20, 20);
+            } else {
+                hpTx.GetColorInfo().SetColor(50, 50, 100);
+            }
         }
     }
 }
@@ -725,6 +838,8 @@ public class FEMapTerrainViewer extends SceneObjectBehavior {
 
     private FEMapMouseCursor _mapCur;
     private SceneObjectTransform _objT;
+
+    private SceneObjectText nameTx, avoidTx, recoverTx, defTx, mdfTx;
 
     public FEMapTerrainViewer(SceneObject obj) {
         super();
@@ -781,6 +896,104 @@ public class FEMapTerrainViewer extends SceneObjectBehavior {
         objD.SetCorner(7);
         objD.SetEnable(true, false);
         objD.GetBackColorInfo().SetColor(255, 250, 220);
+
+        // テキストオブジェクト
+        SceneObject obj;
+        SceneObjectText tex;
+        obj = new SceneObject("Terrain Viewer Terrain Name", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terBackObj.GetTransform(), true);
+        objT.SetSize(0, 30);
+        objT.SetAnchor(0, 0, 1, 0);
+        objT.SetPivot(0.5, 0);
+        nameTx = new SceneObjectText(obj, "");
+        nameTx.SetAlign(CENTER, CENTER);
+        nameTx.SetFontSize(18);
+        nameTx.GetColorInfo().SetColor(240, 220, 190);
+
+        obj = new SceneObject("Terrain Viewer Avoid Label", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0, 0, 0.25, 0.5);
+        objT.SetOffsetMin(20, 0);
+        objT.SetOffsetMax(-10, 0);
+        tex = new SceneObjectText(obj, "回避");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(14);
+        tex.GetColorInfo().SetColor(50, 50, 100);
+
+        obj = new SceneObject("Terrain Viewer Recover Label", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0, 0.5, 0.25, 1);
+        objT.SetOffsetMin(20, 0);
+        objT.SetOffsetMax(-10, 0);
+        tex = new SceneObjectText(obj, "回復");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(14);
+        tex.GetColorInfo().SetColor(50, 50, 100);
+
+        obj = new SceneObject("Terrain Viewer Defense Label", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.5, 0, 0.75, 0.5);
+        objT.SetOffsetMin(20, 0);
+        objT.SetOffsetMax(-10, 0);
+        tex = new SceneObjectText(obj, "防御");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(14);
+        tex.GetColorInfo().SetColor(50, 50, 100);
+
+        obj = new SceneObject("Terrain Viewer MDefense Label", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.5, 0.5, 0.75, 1);
+        objT.SetOffsetMin(20, 0);
+        objT.SetOffsetMax(-10, 0);
+        tex = new SceneObjectText(obj, "魔防");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(14);
+        tex.GetColorInfo().SetColor(50, 50, 100);
+
+        obj = new SceneObject("Terrain Viewer Avoid Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.25, 0, 0.5, 0.5);
+        objT.SetOffsetMin(10, 0);
+        objT.SetOffsetMax(-20, 0);
+        avoidTx = new SceneObjectText(obj, "");
+        avoidTx.SetAlign(CENTER, CENTER);
+        avoidTx.SetFontSize(14);
+
+        obj = new SceneObject("Terrain Viewer Recover Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.25, 0.5, 0.5, 1);
+        objT.SetOffsetMin(10, 0);
+        objT.SetOffsetMax(-20, 0);
+        recoverTx = new SceneObjectText(obj, "");
+        recoverTx.SetAlign(CENTER, CENTER);
+        recoverTx.SetFontSize(14);
+
+        obj = new SceneObject("Terrain Viewer Defense Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.75, 0, 1, 0.5);
+        objT.SetOffsetMin(10, 0);
+        objT.SetOffsetMax(-20, 0);
+        defTx = new SceneObjectText(obj, "");
+        defTx.SetAlign(CENTER, CENTER);
+        defTx.SetFontSize(14);
+
+        obj = new SceneObject("Terrain Viewer MDefense Text", sbm);
+        objT = obj.GetTransform();
+        objT.SetParent(_terFrontObj.GetTransform(), true);
+        objT.SetAnchor(0.75, 0.5, 1, 1);
+        objT.SetOffsetMin(10, 0);
+        objT.SetOffsetMax(-20, 0);
+        mdfTx = new SceneObjectText(obj, "");
+        mdfTx.SetAlign(CENTER, CENTER);
+        mdfTx.SetFontSize(14);
     }
 
     public void Update() {
@@ -795,6 +1008,7 @@ public class FEMapTerrainViewer extends SceneObjectBehavior {
         }
 
         FETerrain terrain = bm.GetTerrains()[_mapCur.GetMapY()][_mapCur.GetMapX()];
+        FETerrainEffect terE = feManager.GetDataBase().GetTerrainEffects().get(terrain.GetEffectID());
         if (terrain == null) {
             _objT.SetScale(0, 0);
             return;
@@ -803,6 +1017,42 @@ public class FEMapTerrainViewer extends SceneObjectBehavior {
 
             boolean f = mouseY < height / 2;
             _objT.SetTranslation(0, (f?1:-1) * ((height - _objT.GetSize().y) / 2 - 5));
+
+            nameTx.SetText(terrain.GetName());
+
+            if (terE.IsMovable()) {
+                int value;
+                value = terE.GetAvoid();
+                _SetTextColor(value, avoidTx);
+                avoidTx.SetText(value+"");
+
+                value = terE.GetRecover();
+                _SetTextColor(value, recoverTx);
+                recoverTx.SetText(value+"");
+
+                value = terE.GetDefense();
+                _SetTextColor(value, defTx);
+                defTx.SetText(value+"");
+
+                value = terE.GetMDefense();
+                _SetTextColor(value, mdfTx);
+                mdfTx.SetText(value+"");
+            } else {
+                avoidTx.SetUsingFontName("--");
+                recoverTx.SetUsingFontName("--");
+                defTx.SetUsingFontName("--");
+                mdfTx.SetUsingFontName("--");
+            }
+        }
+    }
+
+    private void _SetTextColor(int value, SceneObjectText tex) {
+        if (value > 0) {
+            tex.GetColorInfo().SetColor(30, 220, 250);
+        } else if (value < 0) {
+            tex.GetColorInfo().SetColor(150, 10, 10);
+        } else {
+            tex.GetColorInfo().SetColor(0, 0, 0);
         }
     }
 }
@@ -816,6 +1066,7 @@ public class FEMapCursor extends SceneObjectBehavior {
         return ClassID.CID_FE_MAP_CURSOR;
     }
 
+    private FESceneBattleMap sbm;
     private FEBattleMapManager bm;
 
     private FEMapMouseCursor _mapCur;
@@ -836,11 +1087,11 @@ public class FEMapCursor extends SceneObjectBehavior {
     public void Start() {
         super.Start();
         bm = feManager.GetBattleMapManager();
-        FESceneBattleMap sbm = (FESceneBattleMap) GetObject().GetScene();
+        sbm = (FESceneBattleMap) GetObject().GetScene();
         _mapCur = sbm.GetMapCursor();
         inputManager.GetMouseClickedHandler().GetEvents().Add("FE Battle Map Interface On Click", new IEvent() {
             public void Event() {
-                if (bm.GetActionPhase()) {
+                if (bm.GetActionPhase() && !sbm.IsOpenMenu()) {
                     bm.OnClick(_mapCur.GetMapX(), _mapCur.GetMapY());
                 }
             }
@@ -878,6 +1129,225 @@ public class FEMapCursor extends SceneObjectBehavior {
             rect(1, 1, 12, 2);
             translate(offset, offset);
             rotate(HALF_PI);
+        }
+    }
+}
+
+public class FEMapOperateMenuViewer extends SceneObjectBehavior {
+    public int GetID() {
+        return ClassID.CID_FE_MAP_OPERATE_VIEWER;
+    }
+
+    private FEBattleMapManager bm;
+    private FESceneBattleMap sbm;
+
+    private FEMapMouseCursor _mapCur;
+    private SceneObjectTransform atkMenuT, itemMenuT, waitMenuT, resetMenuT;
+    private SceneObjectDrawBack atkMenuD, itemMenuD, waitMenuD, resetMenuD;
+
+    public FEMapOperateMenuViewer(SceneObject obj) {
+        super();
+        if (obj == null) return;
+        obj.AddBehavior(this);
+    }
+
+    protected void _OnDestroy() {
+        ;
+    }
+
+    public void Start() {
+        super.Start();
+        bm = feManager.GetBattleMapManager();
+        sbm = (FESceneBattleMap) GetObject().GetScene();
+        _mapCur = sbm.GetMapCursor();
+
+        SceneObject obj;
+        SceneObjectDrawBack objD;
+        SceneObjectText tex;
+        SceneObjectButton btn;
+
+        obj = new SceneObject("OperateMenu Viewer Attack Menu", sbm);
+        atkMenuT = obj.GetTransform();
+        atkMenuT.SetParent(GetObject().GetTransform(), true);
+        atkMenuT.SetAnchor(0, 0, 0, 0);
+        atkMenuT.SetPivot(0, 0);
+        atkMenuT.SetSize(120, 30);
+        atkMenuD = obj.GetDrawBack();
+        atkMenuD.SetEnable(true, false);
+        atkMenuD.GetBorderColorInfo().SetColor(150, 255, 255);
+        atkMenuD.SetBorderSize(3);
+        atkMenuD.SetCorner(7);
+        atkMenuD.GetBackColorInfo().SetColor(20, 60, 130);
+        tex = new SceneObjectText(obj, "攻撃");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(16);
+        tex.GetColorInfo().SetColor(240, 220, 190);
+        btn = new SceneObjectButton(obj, "FESceneBattleMap Operate Menu Viewer Attack Menu Button");
+        btn.GetDecideHandler().GetEvents().Add("On Click", new IEvent() {
+            public void Event() {
+                bm.OnClickAttackMenu();
+            }
+        }
+        );
+        btn.GetEnabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                atkMenuD.SetEnable(true, true);
+                atkMenuT.AddPriority(1);
+            }
+        }
+        );
+        btn.GetDisabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                atkMenuD.SetEnable(true, false);
+                atkMenuT.AddPriority(-1);
+            }
+        }
+        );
+
+        obj = new SceneObject("OperateMenu Viewer Item Menu", sbm);
+        itemMenuT = obj.GetTransform();
+        itemMenuT.SetParent(GetObject().GetTransform(), true);
+        itemMenuT.SetAnchor(0, 0, 0, 0);
+        itemMenuT.SetPivot(0, 0);
+        itemMenuT.SetSize(120, 30);
+        itemMenuD = obj.GetDrawBack();
+        itemMenuD.SetEnable(true, false);
+        itemMenuD.GetBorderColorInfo().SetColor(150, 255, 255);
+        itemMenuD.SetBorderSize(3);
+        itemMenuD.SetCorner(7);
+        itemMenuD.GetBackColorInfo().SetColor(20, 60, 130);
+        tex = new SceneObjectText(obj, "持ち物");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(16);
+        tex.GetColorInfo().SetColor(240, 220, 190);
+        btn = new SceneObjectButton(obj, "FESceneBattleMap Operate Menu Viewer Item Menu Button");
+        btn.GetDecideHandler().GetEvents().Add("On Click", new IEvent() {
+            public void Event() {
+                bm.OnClickItemMenu();
+            }
+        }
+        );
+        btn.GetEnabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                itemMenuD.SetEnable(true, true);
+                itemMenuT.AddPriority(1);
+            }
+        }
+        );
+        btn.GetDisabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                itemMenuD.SetEnable(true, false);
+                itemMenuT.AddPriority(-1);
+            }
+        }
+        );
+
+        obj = new SceneObject("OperateMenu Viewer Wait Menu", sbm);
+        waitMenuT = obj.GetTransform();
+        waitMenuT.SetParent(GetObject().GetTransform(), true);
+        waitMenuT.SetAnchor(0, 0, 0, 0);
+        waitMenuT.SetPivot(0, 0);
+        waitMenuT.SetSize(120, 30);
+        waitMenuD = obj.GetDrawBack();
+        waitMenuD.SetEnable(true, false);
+        waitMenuD.GetBorderColorInfo().SetColor(150, 255, 255);
+        waitMenuD.SetBorderSize(3);
+        waitMenuD.SetCorner(7);
+        waitMenuD.GetBackColorInfo().SetColor(20, 60, 130);
+        tex = new SceneObjectText(obj, "待機");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(16);
+        tex.GetColorInfo().SetColor(240, 220, 190);
+        btn = new SceneObjectButton(obj, "FESceneBattleMap Operate Menu Viewer Wait Menu Button");
+        btn.GetDecideHandler().GetEvents().Add("On Click", new IEvent() {
+            public void Event() {
+                println(111);
+                bm.OnClickWaitMenu();
+            }
+        }
+        );
+        btn.GetEnabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                waitMenuD.SetEnable(true, true);
+                waitMenuT.AddPriority(1);
+            }
+        }
+        );
+        btn.GetDisabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                waitMenuD.SetEnable(true, false);
+                waitMenuT.AddPriority(-1);
+            }
+        }
+        );
+
+        obj = new SceneObject("OperateMenu Viewer Reset Menu", sbm);
+        resetMenuT = obj.GetTransform();
+        resetMenuT.SetParent(GetObject().GetTransform(), true);
+        resetMenuT.SetAnchor(0, 0, 0, 0);
+        resetMenuT.SetPivot(0, 0);
+        resetMenuT.SetSize(120, 30);
+        resetMenuD = obj.GetDrawBack();
+        resetMenuD.SetEnable(true, false);
+        resetMenuD.GetBorderColorInfo().SetColor(150, 255, 255);
+        resetMenuD.SetBorderSize(3);
+        resetMenuD.SetCorner(7);
+        resetMenuD.GetBackColorInfo().SetColor(20, 60, 130);
+        tex = new SceneObjectText(obj, "やり直す");
+        tex.SetAlign(CENTER, CENTER);
+        tex.SetFontSize(16);
+        tex.GetColorInfo().SetColor(240, 220, 190);
+        btn = new SceneObjectButton(obj, "FESceneBattleMap Operate Menu Viewer Reset Menu Button");
+        btn.GetDecideHandler().GetEvents().Add("On Click", new IEvent() {
+            public void Event() {
+                bm.OnClickResetMenu();
+            }
+        }
+        );
+        btn.GetEnabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                resetMenuD.SetEnable(true, true);
+                resetMenuT.AddPriority(1);
+            }
+        }
+        );
+        btn.GetDisabledActiveHandler().GetEvents().Add("On Active", new IEvent() {
+            public void Event() {
+                resetMenuD.SetEnable(true, false);
+                resetMenuT.AddPriority(-1);
+            }
+        }
+        );
+    }
+
+    public void Draw() {
+        super.Draw();
+        if (bm.GetOperationMode() == FEConst.BATTLE_OPE_MODE_FINISH_MOVE) {
+            sbm.SetOpenMenu(true);
+            float sX, sY;
+            if (bm.IsAttackable()) {
+                sX = atkMenuT.GetSize().x + waitMenuT.GetSize().x + resetMenuT.GetSize().x;
+                sY = atkMenuT.GetSize().y + waitMenuT.GetSize().y + resetMenuT.GetSize().y;
+            } else {
+                sX = waitMenuT.GetSize().x + resetMenuT.GetSize().x;
+                sY = waitMenuT.GetSize().y + resetMenuT.GetSize().y;
+            }
+            float x, y;
+            boolean fX, fY;
+            x = bm.GetSelectedElement().GetPosition().x * FEConst.SYSTEM_MAP_GRID_PX;
+            y = bm.GetSelectedElement().GetPosition().y * FEConst.SYSTEM_MAP_GRID_PX;
+            fX = x + FEConst.SYSTEM_MAP_GRID_PX + sX >= width;
+            fY = y + FEConst.SYSTEM_MAP_GRID_PX + sY >= height;
+
+            atkMenuT.SetTranslation(fX?(x-sX):(x + FEConst.SYSTEM_MAP_GRID_PX), fY?(y-sY):(y + FEConst.SYSTEM_MAP_GRID_PX) + (bm.IsAttackable()?0:-1000));
+            waitMenuT.SetTranslation(fX?(x-sX):(x + FEConst.SYSTEM_MAP_GRID_PX), fY?(y-sY):(y + FEConst.SYSTEM_MAP_GRID_PX) + (bm.IsAttackable()?30:0));
+            resetMenuT.SetTranslation(fX?(x-sX):(x + FEConst.SYSTEM_MAP_GRID_PX), fY?(y-sY):(y + FEConst.SYSTEM_MAP_GRID_PX) + (bm.IsAttackable()?60:30));
+        } else {
+            sbm.SetOpenMenu(false);
+            atkMenuT.SetTranslation(-1000, -1000);
+            itemMenuT.SetTranslation(-1000, -1000);
+            waitMenuT.SetTranslation(-1000, -1000);
+            resetMenuT.SetTranslation(-1000, -1000);
         }
     }
 }

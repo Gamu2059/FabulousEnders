@@ -82,12 +82,23 @@
             "Item List" : [
                 {
                     "Is Item" : false,
-                    "ID" : 1,
+                    "ID" : 0,
                     "Endurance" : 24,
                     "Is Exchangeable" : true
                 }
             ],
-            "Equip Weapon Index" : 0
+            "Equip Weapon Index" : 0,
+            "Is Target Priority" : true,
+            "Threshold" : 0,
+            "Action List" : [
+                {
+                    "Action ID" : "UNIT",
+                    "Is Only Range Action" : false,
+                    "Action Parameter" : {
+                        "ID" : 1
+                    }
+                }
+            ]
         },
         {
             "ID" : 1,
@@ -130,12 +141,14 @@
             "Item List" : [
                 {
                     "Is Item" : false,
-                    "ID" : 1,
+                    "ID" : 0,
                     "Endurance" : 24,
                     "Is Exchangeable" : true
                 }
             ],
-            "Equip Weapon Index" : 0
+            "Equip Weapon Index" : 0,
+            "Is Target Priority" : true,
+            "Threshold" : 0
         }
     ],
     "Events" : [
