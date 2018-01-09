@@ -840,7 +840,9 @@ public class FEMapCursor extends SceneObjectBehavior {
         _mapCur = sbm.GetMapCursor();
         inputManager.GetMouseClickedHandler().GetEvents().Add("FE Battle Map Interface On Click", new IEvent() {
             public void Event() {
-                bm.OnClick(_mapCur.GetMapX(), _mapCur.GetMapY());
+                if (bm.GetActionPhase()) {
+                    bm.OnClick(_mapCur.GetMapX(), _mapCur.GetMapY());
+                }
             }
         }
         );

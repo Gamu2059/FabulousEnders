@@ -29,11 +29,8 @@ void setup() {
         SetScenes();
         feManager.Init();
 
-        sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
+        sceneManager.LoadScene(SceneID.SID_TITLE);
         sceneManager.Start();
-        feManager.StartGame();
-        
-        feManager.GetBattleMapManager().LoadMapData("test_map.json");
     } 
     catch(Exception e) {
         println(e);
@@ -62,15 +59,16 @@ void SetScenes() {
 }
 
 void draw() {
-    try {
+    //try {
         background(0);
         sceneManager.Update();
         inputManager.Update();
+        feManager.Update();
         //println(frameRate);
-    } 
-    catch(Exception e) {
-        println(e);
-    }
+    //} 
+    //catch(Exception e) {
+    //    println(e);
+    //}
 }
 
 void keyPressed() {

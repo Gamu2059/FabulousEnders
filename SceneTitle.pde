@@ -46,8 +46,10 @@ public final class SceneTitle extends Scene {
             TitleButton b = new TitleButton(obj, titleButtons[i]);
             b.GetDecideHandler().GetEvents().Add("Go GameOver", new IEvent() {
                 public void Event() {
-                    SceneGameOver g = (SceneGameOver)sceneManager.GetScene(SceneID.SID_GAMEOVER);
-                    g.GoGameOver();
+                    feManager.StartGame();
+                    feManager.GetBattleMapManager().LoadMapData("test_map.json");
+                    sceneManager.ReleaseScene(SceneID.SID_TITLE);
+                    sceneManager.LoadScene(SceneID.SID_FE_BATTLE_MAP);
                 }
             }
             );
@@ -105,6 +107,8 @@ public final class SceneTitle extends Scene {
 
         obj = GetObject(titleBack);
         img = (SceneObjectImage)obj.GetBehaviorOnID(ClassID.CID_IMAGE);
+        
+        feManager.GetProgressDataBase().SetSceneMoce(FEConst.OVERALL_MODE_TITLE);
     }
 
     public void OnDisabled() {
