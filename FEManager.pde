@@ -802,29 +802,18 @@ public class FEBattleMapManager {
             _isFirstPhase = json.GetBoolean("First Phase", true);
 
             // 地形情報
-            boolean[][] terrain = new boolean[_mapHeight][_mapWidth];
-            FETerrain defTerrain = feManager.GetDataBase().GetTerrains().get(json.GetInt("Default Terrain ID", 0));
             array = json.GetJsonArray("Terrains");
-            JsonObject terrainObj;
+            JsonArray terArray;
             if (array != null) {
                 int x, y, id;
                 boolean exsId;
                 for (int i=0; i<array.Size(); i++) {
-                    terrainObj = array.GetJsonObject(i);
-                    if (terrainObj == null) continue;
-                    x = terrainObj.GetInt("x", -1);
-                    y = terrainObj.GetInt("y", -1);
-                    id = terrainObj.GetInt("ID", FEConst.NOT_FOUND);
-                    exsId = feManager.GetDataBase().GetTerrains().containsKey(id);
-                    if (x == -1 || y == -1 || !exsId) continue;
-                    _terrains[y][x] = feManager.GetDataBase().GetTerrains().get(id);
-                    terrain[y][x] = true;
-                }
-            }
-            for (int i=0; i<_mapHeight; i++) {
-                for (int j=0; j<_mapWidth; j++) {
-                    if (terrain[i][j]) continue;
-                    _terrains[i][j] = defTerrain;
+                    terArray = array.GetJsonArray(i);
+                    for (int j=0; j<terArray.Size(); j++) {
+                        id = terArray.GetInt(j, FEConst.NOT_FOUND);
+                        if (!feManager.GetDataBase().GetTerrains().containsKey(id)) continue;
+                        _terrains[i][j] = feManager.GetDataBase().GetTerrains().get(id);
+                    }
                 }
             }
 
@@ -1327,9 +1316,8 @@ public class FEBattleMapManager {
         }
         if (_mapEnemyObjects.isEmpty()) {
             // ゲームクリア
-            colorMode(RGB, 255, 255, 255);
-            background(0, 255, 255);
-            noLoop();
+            sceneManager.ReleaseAllScenes();
+            sceneManager.LoadScene(SceneID.SID_GAMECLEAR);
             return;
         }
     }
@@ -1398,6 +1386,27 @@ public class FEBattleMapManager {
             UpdateAllUnitsParameter();
             UpdateAllUnitsPowerBias();
             _operationMode = FEConst.BATTLE_OPE_MODE_AI_THINKING;
+        }
+        // ターン開始時に回復効果を得る
+        ArrayList<FEMapElement> elems = (_actionPhase?_mapPlayerObjects:_mapEnemyObjects);
+        FEMapElement elem;
+        FEUnit unit;
+        FETerrainEffect terE;
+        int x, y;
+        for (int i=0; i<elems.size(); i++) {
+            elem = elems.get(i);
+            x = (int)elem.GetPosition().x;
+            y = (int)elem.GetPosition().y;
+            terE = feManager.GetDataBase().GetTerrainEffects().get(_terrains[y][x].GetEffectID());
+            if (terE != null) {
+                unit = (FEUnit)elem.GetMapObject();
+                unit.AddHp(terE.GetRecover());
+                if (unit.GetHp() < 1) {
+                    unit.SetHp(1);
+                } else if (unit.GetHp() > unit.GetParameter().GetHp()) {
+                    unit.SetHp(unit.GetParameter().GetHp());
+                }
+            }
         }
     }
 
@@ -2354,6 +2363,7 @@ public class FEBattleMapManager {
         if (posX == -1 && posY == -1) {
             posX = (int)elem.GetPosition().x;
             posY = (int)elem.GetPosition().y;
+            println(1111);
         }
         unit.GetGotoPos().x = posX;
         unit.GetGotoPos().y = posY;

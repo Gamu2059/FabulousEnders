@@ -34,7 +34,7 @@ public final class SceneTitle extends Scene {
         // ボタンとか
         String[] paths = new String[]{"start", "load", "option"};
 
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<1; i++) {
             obj = new SceneObject(titleButtons[i], this);
             objT = obj.GetTransform();
             objT.SetPriority(20);
@@ -64,7 +64,7 @@ public final class SceneTitle extends Scene {
         obj = new SceneObject(dustF, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
-        objT.SetTranslation(203, 118);
+        objT.SetTranslation(193, 108);
         objT.SetSize(100, 0);
         objT.SetRotate(-1.114);
         obj.SetActivatable(false);
@@ -73,7 +73,7 @@ public final class SceneTitle extends Scene {
         obj = new SceneObject(dustE, this);
         objT = obj.GetTransform();
         objT.SetAnchor(0, 0, 0, 0);
-        objT.SetTranslation(277, 252);
+        objT.SetTranslation(267, 254);
         objT.SetSize(100, 0);
         objT.SetRotate(-1.114);
         obj.SetActivatable(false);

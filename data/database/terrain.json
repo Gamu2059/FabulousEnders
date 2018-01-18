@@ -7,8 +7,32 @@
     },
     {
         "ID" : 1,
-        "Name" : "瓦礫",
+        "Name" : "林",
+        "Effect ID" : 2,
+        "Map Image Path" : "map/terrain/林.png"
+    },
+    {
+        "ID" : 2,
+        "Name" : "砦",
+        "Effect ID" : 3,
+        "Map Image Path" : "map/terrain/砦.png"
+    },
+    {
+        "ID" : 3,
+        "Name" : "城壁",
         "Effect ID" : 1,
-        "Map Image Path" : "map/terrain/test.png"
+        "Map Image Path" : null
+    },
+    {
+        "ID" : 4,
+        "Name" : "階段",
+        "Effect ID" : 0,
+        "Map Image Path" : null
+    },
+    {
+        "ID" : 5,
+        "Name" : "城内",
+        "Effect ID" : 0,
+        "Map Image Path" : null
     }
 ]

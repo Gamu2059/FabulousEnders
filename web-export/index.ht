@@ -78,7 +78,7 @@ function getProcessingSketchId () { return 'interactiveGameOriginal'; }
 	<body>
 		<div id="content">
 			<div>
-				<canvas id="interactiveGameOriginal" data-processing-sources="./FabulousEnders.pde" >
+				<canvas id="interactiveGameOriginal" data-processing-sources="./interactiveGameOriginal.pde" >
 					<p>Your browser does not support the canvas tag.</p>
 					<!-- Note: you can put any alternative content here. -->
 				</canvas>
@@ -95,7 +95,7 @@ function getProcessingSketchId () { return 'interactiveGameOriginal'; }
 			</p>
 		</div>
 		<div id="source">
-			<iframe src="./FabulousEnders.pde"></iframe>
+			<iframe src="./interactiveGameOriginal.pde"></iframe>
 		</div>
 	</body>
 </html>
