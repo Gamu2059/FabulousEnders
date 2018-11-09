@@ -38,16 +38,6 @@
             "x" : 3,
             "y" : 10,
             "ID" : 2
-        },
-        {
-            "x" : 2,
-            "y" : 10,
-            "ID" : 3
-        },
-        {
-            "x" : 3,
-            "y" : 11,
-            "ID" : 4
         }
     ],
     "Enemy Positions" : [
@@ -120,31 +110,6 @@
             "x" : 14,
             "y" : 2,
             "ID" : 5
-        },
-        {
-            "x" : 4,
-            "y" : 2,
-            "ID" : 6
-        },
-        {
-            "x" : 13,
-            "y" : 10,
-            "ID" : 6
-        },
-        {
-            "x" : 13,
-            "y" : 12,
-            "ID" : 6
-        },
-        {
-            "x" : 12,
-            "y" : 2,
-            "ID" : 7
-        },
-        {
-            "x" : 16,
-            "y" : 2,
-            "ID" : 7
         }
     ],
     "Event Positions" : [
@@ -371,111 +336,6 @@
             "Action List" : [
                 {
                     "Action ID" : "NO MOVE"
-                }
-            ]
-        },
-        {
-            "ID" : 6,
-            "Name" : "魔導士",
-            "Explain" : "",
-            "Organization" : "",
-            "Face Image Path" : null,
-            "Map Image Folder Path" : "character/map/敵魔導士",
-            "Importance" : "NORMAL",
-            "Class ID" : 3,
-            "Level" : 2,
-            "HP" : 30,
-            "Exp" : 0,
-            "Parameter" : {
-                "HP" : 30,
-                "ATK" : 3,
-                "MAT" : 9,
-                "TEC" : 7,
-                "SPD" : 8,
-                "LUC" : 2,
-                "DEF" : 2,
-                "MDF" : 8,
-                "MOV" : 4,
-                "PRO" : 12
-            },
-            "Item List" : [
-                {
-                    "Is Item" : false,
-                    "ID" : 3,
-                    "Endurance" : 30,
-                    "Is Exchangeable" : true
-                }
-            ]
-        },
-        {
-            "ID" : 7,
-            "Name" : "魔導士",
-            "Explain" : "",
-            "Organization" : "",
-            "Face Image Path" : null,
-            "Map Image Folder Path" : "character/map/敵魔導士",
-            "Importance" : "NORMAL",
-            "Class ID" : 3,
-            "Level" : 6,
-            "HP" : 53,
-            "Exp" : 0,
-            "Parameter" : {
-                "HP" : 53,
-                "ATK" : 15,
-                "MAT" : 0,
-                "TEC" : 13,
-                "SPD" : 8,
-                "LUC" : 0,
-                "DEF" : 16,
-                "MDF" : 0,
-                "MOV" : 3,
-                "PRO" : 12
-            },
-            "Item List" : [
-                {
-                    "Is Item" : false,
-                    "ID" : 4,
-                    "Endurance" : 30,
-                    "Is Exchangeable" : true
-                }
-            ],
-            "Equip Weapon Index" : 0,
-            "Action List" : [
-                {
-                    "Action ID" : "NO MOVE"
-                }
-            ]
-        },
-        {
-            "ID" : 7,
-            "Name" : "魔導士",
-            "Explain" : "",
-            "Organization" : "",
-            "Face Image Path" : null,
-            "Map Image Folder Path" : "character/map/敵魔導士",
-            "Importance" : "NORMAL",
-            "Class ID" : 3,
-            "Level" : 5,
-            "HP" : 38,
-            "Exp" : 0,
-            "Parameter" : {
-                "HP" : 38,
-                "ATK" : 5,
-                "MAT" : 14,
-                "TEC" : 18,
-                "SPD" : 12,
-                "LUC" : 10,
-                "DEF" : 5,
-                "MDF" : 10,
-                "MOV" : 4,
-                "PRO" : 12
-            },
-            "Item List" : [
-                {
-                    "Is Item" : false,
-                    "ID" : 4,
-                    "Endurance" : 30,
-                    "Is Exchangeable" : true
                 }
             ]
         }

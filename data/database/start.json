@@ -17,18 +17,6 @@
         },
         {
             "ID" : 1,
-        "Name" : "剣士",
-        "Explain" : "",
-        "Organization" : "",
-        "Face Image Path" : "character/face/レイチェル.png",
-        "Map Image Folder Path" : "character/map/レイチェル",
-        "Importance" : "NORMAL",
-        "Class ID" : 0,
-        "Level" : 4,
-        "HP" : 35
-        },
-        {
-            "ID" : 2,
         "Name" : "騎士",
         "Explain" : "",
         "Organization" : "",
@@ -40,24 +28,12 @@
         "HP" : 42
         },
         {
-            "ID" : 3,
-        "Name" : "アーチャー",
-        "Explain" : "",
-        "Organization" : "",
-        "Face Image Path" : null,
-        "Map Image Folder Path" : "character/map/アーチャー",
-        "Importance" : "NORMAL",
-        "Class ID" : 0,
-        "Level" : 4,
-        "HP" : 30
-        },
-        {
-            "ID" : 4,
+            "ID" : 2,
         "Name" : "魔導士",
         "Explain" : "",
         "Organization" : "",
-        "Face Image Path" : null,
-        "Map Image Folder Path" : "character/map/魔導士",
+        "Face Image Path" : "character/face/レイチェル.png",
+        "Map Image Folder Path" : "character/map/レイチェル",
         "Importance" : "NORMAL",
         "Class ID" : 0,
         "Level" : 4,

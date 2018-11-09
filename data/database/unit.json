@@ -4,40 +4,6 @@
         "Name" : "剣士",
         "Explain" : "",
         "Organization" : "",
-        "Face Image Path" : "character/face/ミゼル.png",
-        "Map Image Folder Path" : null,
-        "Importance" : "NORMAL",
-        "Class ID" : 0,
-        "Level" : 4,
-        "HP" : 35,
-        "Exp" : 0,
-        "Parameter" : {
-            "HP" : 35,
-            "ATK" : 13,
-            "MAT" : 0,
-            "TEC" : 14,
-            "SPD" : 12,
-            "LUC" : 8,
-            "DEF" : 8,
-            "MDF" : 3,
-            "MOV" : 4,
-            "PRO" : 12
-        },
-        "Item List" : [
-            {
-                "Is Item" : false,
-                "ID" : 0,
-                "Endurance" : 30,
-                "Is Exchangeable" : true
-            }
-        ],
-        "Equip Weapon Index" : 0
-    },
-    {
-        "ID" : 1,
-        "Name" : "剣士",
-        "Explain" : "",
-        "Organization" : "",
         "Face Image Path" : null,
         "Map Image Folder Path" : null,
         "Importance" : "NORMAL",
@@ -68,7 +34,7 @@
         "Equip Weapon Index" : 0
     },
     {
-        "ID" : 2,
+        "ID" : 1,
         "Name" : "騎士",
         "Explain" : "",
         "Organization" : "",
@@ -102,41 +68,7 @@
         "Equip Weapon Index" : 0
     },
     {
-        "ID" : 3,
-        "Name" : "アーチャー",
-        "Explain" : "",
-        "Organization" : "",
-        "Face Image Path" : null,
-        "Map Image Folder Path" : null,
-        "Importance" : "NORMAL",
-        "Class ID" : 0,
-        "Level" : 4,
-        "HP" : 30,
-        "Exp" : 0,
-        "Parameter" : {
-            "HP" : 30,
-            "ATK" : 12,
-            "MAT" : 0,
-            "TEC" : 18,
-            "SPD" : 15,
-            "LUC" : 8,
-            "DEF" : 5,
-            "MDF" : 2,
-            "MOV" : 4,
-            "PRO" : 12
-        },
-        "Item List" : [
-            {
-                "Is Item" : false,
-                "ID" : 2,
-                "Endurance" : 30,
-                "Is Exchangeable" : true
-            }
-        ],
-        "Equip Weapon Index" : 0
-    },
-    {
-        "ID" : 4,
+        "ID" : 2,
         "Name" : "魔導士",
         "Explain" : "",
         "Organization" : "",
