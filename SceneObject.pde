@@ -9,20 +9,14 @@ public class SceneObject implements Comparable<SceneObject> {
         return _behaviors;
     }
 
-    /**
-     オブジェクトは一回だけシーンを設定することができる。
-     */
     private Scene _scene;
     public Scene GetScene() {
         return _scene;
     }
     public void SetScene(Scene value) {
-        if (_isSettedScene) return;
         if (value == null) return;
-        _isSettedScene = true;
         _scene = value;
     }
-    private boolean _isSettedScene;
 
     private SceneObjectTransform _transform;
     public SceneObjectTransform GetTransform() {
@@ -48,6 +42,29 @@ public class SceneObject implements Comparable<SceneObject> {
         } else {
             _OnDisable();
         }
+        _SetEnableRecursive(value);
+    }
+
+    /**
+    親オブジェクトの有効フラグが変更された時に同時に自身の有効フラグも変更するかどうか。
+    trueの場合、自身の有効フラグも変更する。
+    */
+    private boolean _isAutoChangeEnable;
+    public boolean IsAutoChangeEnable() {
+        return _isAutoChangeEnable;
+    }
+    public void SetAutoChangeEnable(boolean value) {
+        _isAutoChangeEnable = value;
+    }
+    
+    private void _SetEnableRecursive(boolean value) {
+        SceneObjectTransform trans = GetTransform();
+        SceneObject obj;
+        for (int i=0;i<trans.GetChildren().size();i++) {
+            obj = trans.GetChildren().get(i).GetObject();
+            if (!obj.IsAutoChangeEnable()) continue;
+            obj.SetEnable(value);
+        }
     }
 
     /**
@@ -70,6 +87,18 @@ public class SceneObject implements Comparable<SceneObject> {
     }
 
     public SceneObject(String name) {
+        _InitParameterOnConstructor(name);
+    }
+
+    public SceneObject(String name, Scene scene) {
+        _InitParameterOnConstructor(name);
+        if (scene != null) {
+            scene.AddObject(this);
+            scene.AddChild(this);
+        }
+    }
+
+    private void _InitParameterOnConstructor(String name) {
         _name = name;
 
         _behaviors = new ArrayList<SceneObjectBehavior>();
@@ -78,10 +107,11 @@ public class SceneObject implements Comparable<SceneObject> {
 
         _drawBack = new SceneObjectDrawBack();
         AddBehavior(_drawBack);
-
+        
         // トランスフォームが設定されてからでないと例外を発生させてしまう
         SetEnable(true);
         SetActivatable(true);
+        SetAutoChangeEnable(true);
     }
 
     public void Start() {
@@ -114,7 +144,7 @@ public class SceneObject implements Comparable<SceneObject> {
 
     public void Draw() {
         GetTransform().GetTransformProcessor().TransformProcessing();
-        
+
         SceneObjectBehavior b;
         for (int i=0; i<_behaviors.size(); i++) {
             b = _behaviors.get(i);
@@ -122,6 +152,16 @@ public class SceneObject implements Comparable<SceneObject> {
                 b.Draw();
             }
         }
+    }
+
+    public void Destroy() {
+        SceneObjectBehavior b;
+        for (int i=0; i<_behaviors.size(); i++) {
+            b = _behaviors.get(i);
+            b.Destroy();
+        }
+        if (GetScene() == null) return;
+        GetScene().RemoveObject(this);
     }
 
     public boolean IsAbleActiveObject() {

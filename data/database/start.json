@@ -1,0 +1,43 @@
+{
+    "Money" : 0,
+    "Items" : [
+    ],
+    "Player Units" : [
+        {
+            "ID" : 0,
+        "Name" : "剣士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : "character/face/ミゼル.png",
+        "Map Image Folder Path" : "character/map/ミゼル",
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 35
+        },
+        {
+            "ID" : 1,
+        "Name" : "騎士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : "character/face/イグニス.png",
+        "Map Image Folder Path" : "character/map/イグニス",
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 42
+        },
+        {
+            "ID" : 2,
+        "Name" : "魔導士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : "character/face/レイチェル.png",
+        "Map Image Folder Path" : "character/map/レイチェル",
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 25
+        }
+    ]
+}

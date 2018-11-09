@@ -1,0 +1,152 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "剣",
+        "Explain" : "標準的な武器。バランスが良く会心率が高い。",
+        "Icon Image Path" : "icon/剣アイコン.png",
+        "Weapon Type" : "FIGHTER",
+        "Is Wear On Hit" : true,
+        "Compatibility" : [
+            {
+                "Is Bad Compatibility" : false,
+                "Weapon Class ID" : 1,
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
+            },
+            {
+                "Is Bad Compatibility" : true,
+                "Weapon Class ID" : 2,
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
+            }
+        ]
+    },
+    {
+        "ID" : 1,
+        "Name" : "斧",
+        "Explain" : "標準的な武器。命中しづらいが威力が高い。",
+        "Icon Image Path" : "icon/斧アイコン.png",
+        "Weapon Type" : "FIGHTER",
+        "Is Wear On Hit" : true,
+        "Compatibility" : [
+            {
+                "Is Bad Compatibility" : false,
+                "Weapon Class ID" : 2,
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
+            },
+            {
+                "Is Bad Compatibility" : true,
+                "Weapon Class ID" : 0,
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
+            }
+        ]
+    },
+    {
+        "ID" : 2,
+        "Name" : "槍",
+        "Explain" : "標準的な武器。バランスが良く命中率が高い。",
+        "Icon Image Path" : "icon/槍アイコン.png",
+        "Weapon Type" : "FIGHTER",
+        "Is Wear On Hit" : true,
+        "Compatibility" : [
+            {
+                "Is Bad Compatibility" : false,
+                "Weapon Class ID" : 0,
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
+            },
+            {
+                "Is Bad Compatibility" : true,
+                "Weapon Class ID" : 1,
+                "Correct" : {
+                    "Power" : 2,
+                    "Accuracy" : 5,
+                    "Critical" : 2
+                }
+            }
+        ]
+    },
+    {
+        "ID" : 3,
+        "Name" : "弓",
+        "Explain" : "遠距離攻撃ができる武器。命中率が高く、飛行ユニットに特攻効果を持つ。",
+        "Icon Image Path" : "icon/弓アイコン.png",
+        "Weapon Type" : "ARCHER",
+        "Is Wear On Hit" : false,
+        "Compatibility" : [
+            
+        ]
+    },
+    {
+        "ID" : 4,
+        "Name" : "炎の書",
+        "Explain" : "標準的な魔導書。威力が高く、騎馬ユニットに特攻効果を持つ。",
+        "Icon Image Path" : "icon/書アイコン.png",
+        "Weapon Type" : "SORCERER",
+        "Is Wear On Hit" : false,
+        "Compatibility" : [
+            
+        ]
+    },
+    {
+        "ID" : 5,
+        "Name" : "雷の書",
+        "Explain" : "標準的な魔導書。会心率が高く、重装備ユニットに特攻効果を持つ。",
+        "Icon Image Path" : "icon/書アイコン.png",
+        "Weapon Type" : "SORCERER",
+        "Is Wear On Hit" : false,
+        "Compatibility" : [
+            
+        ]
+    },
+    {
+        "ID" : 6,
+        "Name" : "風の書",
+        "Explain" : "標準的な魔導書。命中率が高く、飛行ユニットに特攻効果を持つ。",
+        "Icon Image Path" : "icon/書アイコン.png",
+        "Weapon Type" : "SORCERER",
+        "Is Wear On Hit" : false,
+        "Compatibility" : [
+            
+        ]
+    },
+    {
+        "ID" : 7,
+        "Name" : "闇の書",
+        "Explain" : "上位の魔導士にしか扱えない。極めて高い威力を誇るが命中しづらい。",
+        "Icon Image Path" : "icon/書アイコン.png",
+        "Weapon Type" : "SORCERER",
+        "Is Wear On Hit" : true,
+        "Compatibility" : [
+            
+        ]
+    },
+    {
+        "ID" : 8,
+        "Name" : "光の書",
+        "Explain" : "上位の魔導士にしか扱えない。高性能だが扱うには相当の熟練度を必要とする。",
+        "Icon Image Path" : "icon/書アイコン.png",
+        "Weapon Type" : "SORCERER",
+        "Is Wear On Hit" : true,
+        "Compatibility" : [
+            
+        ]
+    }
+]

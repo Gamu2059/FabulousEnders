@@ -1,0 +1,162 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "鉄の剣",
+        "Explain" : "",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 30,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Weapon Class ID" : 0,
+        "Power Type" : "PHYSICS",
+        "Power" : 7,
+        "Weight" : 1,
+        "Min Range" : 1,
+        "Max Range" : 1,
+        "Accuracy" : 95,
+        "Critical" : 5,
+        "Attack Num" : 1,
+        "Wearable Proficiency" : 12,
+        "Special Attacks" : [
+        ],
+        "Granted Skills" : [
+        ],
+        "Granting States" : [
+        ]
+    },
+    {
+        "ID" : 1,
+        "Name" : "鉄の槍",
+        "Explain" : "",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 30,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Weapon Class ID" : 2,
+        "Power Type" : "PHYSICS",
+        "Power" : 8,
+        "Weight" : 2,
+        "Min Range" : 1,
+        "Max Range" : 1,
+        "Accuracy" : 80,
+        "Critical" : 3,
+        "Attack Num" : 1,
+        "Wearable Proficiency" : 12,
+        "Special Attacks" : [
+        ],
+        "Granted Skills" : [
+        ],
+        "Granting States" : [
+        ]
+    },
+    {
+        "ID" : 2,
+        "Name" : "鉄の弓",
+        "Explain" : "",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 30,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Weapon Class ID" : 3,
+        "Power Type" : "PHYSICS",
+        "Power" : 5,
+        "Weight" : 1,
+        "Min Range" : 2,
+        "Max Range" : 4,
+        "Accuracy" : 120,
+        "Critical" : 10,
+        "Attack Num" : 1,
+        "Wearable Proficiency" : 12,
+        "Special Attacks" : [
+        ],
+        "Granted Skills" : [
+        ],
+        "Granting States" : [
+        ]
+    },
+    {
+        "ID" : 3,
+        "Name" : "ファイアー",
+        "Explain" : "",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 30,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Weapon Class ID" : 4,
+        "Power Type" : "MAGIC",
+        "Power" : 5,
+        "Weight" : 1,
+        "Min Range" : 1,
+        "Max Range" : 2,
+        "Accuracy" : 95,
+        "Critical" : 5,
+        "Attack Num" : 1,
+        "Wearable Proficiency" : 12,
+        "Special Attacks" : [
+        ],
+        "Granted Skills" : [
+        ],
+        "Granting States" : [
+        ]
+    },
+    {
+        "ID" : 4,
+        "Name" : "ベラグ",
+        "Explain" : "",
+        "Icon Image Path" : "",
+        "Effect Image Folder Path" : "",
+        "Price" : 0,
+        "Endurance" : 30,
+        "Is Salable" : false,
+        "Is Important" : false,
+        "Is Exchangeable" : true,
+        "Parameter Bonus" : {
+        },
+        "Growth Rate Bonus" : {
+        },
+        "Weapon Class ID" : 2,
+        "Power Type" : "PHYSICS",
+        "Power" : 12,
+        "Weight" : 10,
+        "Min Range" : 1,
+        "Max Range" : 2,
+        "Accuracy" : 100,
+        "Critical" : 12,
+        "Attack Num" : 1,
+        "Wearable Proficiency" : 12,
+        "Special Attacks" : [
+        ],
+        "Granted Skills" : [
+        ],
+        "Granting States" : [
+        ]
+    }
+]

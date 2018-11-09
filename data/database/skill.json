@@ -1,0 +1,13 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "先制攻撃",
+        "Explain" : "相手から攻撃を仕掛けられても先に攻撃する。",
+        "Icon Image Path" : "",
+        "Activate Ref" : "UNIQUE",
+        "Unique Activate Rate" : 100,
+        "Feature" : "PREEMPTIVE",
+        "Feature Parameter" : {
+        }
+    }
+]

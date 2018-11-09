@@ -1,0 +1,72 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "剣士",
+        "Explain" : "剣を扱うことができる。速さは高いが守備が低め。",
+        "Face Image Path" : "",
+        "Map Image Folder Path" : "",
+        "Class Type" : "NORMAL",
+        "Is Consider Tile Effect" : true,
+        "Wearable Weapon Class ID" : [
+            0
+        ],
+        "Can Use Cane" : false,
+        "Is Advanced Class" : false
+    },
+    {
+        "ID" : 1,
+        "Name" : "騎士",
+        "Explain" : "",
+        "Face Image Path" : "",
+        "Map Image Folder Path" : "",
+        "Class Type" : "ARMOR",
+        "Is Consider Tile Effect" : true,
+        "Wearable Weapon Class ID" : [
+            2
+        ],
+        "Can Use Cane" : false,
+        "Is Advanced Class" : false
+    },
+    {
+        "ID" : 2,
+        "Name" : "アーチャー",
+        "Explain" : "",
+        "Face Image Path" : "",
+        "Map Image Folder Path" : "",
+        "Class Type" : "NORMAL",
+        "Is Consider Tile Effect" : true,
+        "Wearable Weapon Class ID" : [
+            3
+        ],
+        "Can Use Cane" : false,
+        "Is Advanced Class" : false
+    },
+    {
+        "ID" : 3,
+        "Name" : "魔導士",
+        "Explain" : "",
+        "Face Image Path" : "",
+        "Map Image Folder Path" : "",
+        "Class Type" : "SORCERER",
+        "Is Consider Tile Effect" : true,
+        "Wearable Weapon Class ID" : [
+            4,5,6
+        ],
+        "Can Use Cane" : false,
+        "Is Advanced Class" : false
+    },
+    {
+        "ID" : 4,
+        "Name" : "バルベリド",
+        "Explain" : "",
+        "Face Image Path" : "",
+        "Map Image Folder Path" : "",
+        "Class Type" : "ARMOR",
+        "Is Consider Tile Effect" : true,
+        "Wearable Weapon Class ID" : [
+            2
+        ],
+        "Can Use Cane" : false,
+        "Is Advanced Class" : true
+    }
+]

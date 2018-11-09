@@ -1,0 +1,104 @@
+[
+    {
+        "ID" : 0,
+        "Name" : "剣士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : null,
+        "Map Image Folder Path" : null,
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 35,
+        "Exp" : 0,
+        "Parameter" : {
+            "HP" : 35,
+            "ATK" : 13,
+            "MAT" : 0,
+            "TEC" : 14,
+            "SPD" : 12,
+            "LUC" : 8,
+            "DEF" : 8,
+            "MDF" : 3,
+            "MOV" : 4,
+            "PRO" : 12
+        },
+        "Item List" : [
+            {
+                "Is Item" : false,
+                "ID" : 0,
+                "Endurance" : 30,
+                "Is Exchangeable" : true
+            }
+        ],
+        "Equip Weapon Index" : 0
+    },
+    {
+        "ID" : 1,
+        "Name" : "騎士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : null,
+        "Map Image Folder Path" : null,
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 42,
+        "Exp" : 0,
+        "Parameter" : {
+            "HP" : 42,
+            "ATK" : 17,
+            "MAT" : 0,
+            "TEC" : 8,
+            "SPD" : 6,
+            "LUC" : 7,
+            "DEF" : 12,
+            "MDF" : 2,
+            "MOV" : 2,
+            "PRO" : 12
+        },
+        "Item List" : [
+            {
+                "Is Item" : false,
+                "ID" : 1,
+                "Endurance" : 30,
+                "Is Exchangeable" : true
+            }
+        ],
+        "Equip Weapon Index" : 0
+    },
+    {
+        "ID" : 2,
+        "Name" : "魔導士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : null,
+        "Map Image Folder Path" : null,
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 25,
+        "Exp" : 0,
+        "Parameter" : {
+            "HP" : 25,
+            "ATK" : 3,
+            "MAT" : 12,
+            "TEC" : 14,
+            "SPD" : 7,
+            "LUC" : 13,
+            "DEF" : 3,
+            "MDF" : 8,
+            "MOV" : 4,
+            "PRO" : 12
+        },
+        "Item List" : [
+            {
+                "Is Item" : false,
+                "ID" : 3,
+                "Endurance" : 30,
+                "Is Exchangeable" : true
+            }
+        ],
+        "Equip Weapon Index" : 0
+    }
+]
