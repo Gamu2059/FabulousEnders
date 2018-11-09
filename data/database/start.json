@@ -5,43 +5,39 @@
     "Player Units" : [
         {
             "ID" : 0,
-            "Name" : "ミゼル",
-            "Explain" : "レイヴ家の一人娘だが複雑な生い立ちを持つ。剣の扱いに長ける。",
-            "Organization" : "ノーラス解放団",
-            "Face Image Path" : "character/face/ミゼル.png",
-            "Map Image Folder Path" : "character/map/ミゼル",
-            "Importance" : "LEADER",
-            "Class ID" : 0,
-            "Level" : 4,
-            "HP" : 24,
-            "Exp" : 0,
-            "Equip Weapon Index" : 0
+        "Name" : "剣士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : "character/face/ミゼル.png",
+        "Map Image Folder Path" : "character/map/ミゼル",
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 35
         },
         {
             "ID" : 1,
-            "Name" : "イソP",
-            "Explain" : "aaaaaaaaaa",
-            "Organization" : "ノーラス解放団",
-            "Face Image Path" : "character/face/isoP.png",
-            "Map Image Folder Path" : "character/map/ミゼル",
-            "Importance" : "NORMAL",
-            "Class ID" : 0,
-            "Level" : 4,
-            "HP" : 24,
-            "Exp" : 0
+        "Name" : "騎士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : "character/face/イグニス.png",
+        "Map Image Folder Path" : "character/map/イグニス",
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 42
         },
         {
             "ID" : 2,
-            "Name" : "カナト",
-            "Explain" : "aaaaaaaaaa",
-            "Organization" : "ノーラス解放団",
-            "Face Image Path" : "character/face/カナト.png",
-            "Map Image Folder Path" : "character/map/ミゼル",
-            "Importance" : "NORMAL",
-            "Class ID" : 0,
-            "Level" : 4,
-            "HP" : 24,
-            "Exp" : 0
+        "Name" : "魔導士",
+        "Explain" : "",
+        "Organization" : "",
+        "Face Image Path" : "character/face/レイチェル.png",
+        "Map Image Folder Path" : "character/map/レイチェル",
+        "Importance" : "NORMAL",
+        "Class ID" : 0,
+        "Level" : 4,
+        "HP" : 25
         }
     ]
 }

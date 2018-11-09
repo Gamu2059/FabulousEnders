@@ -47,12 +47,15 @@ public final class ClassID {
     public static final int CID_FE_MAP_CURSOR = 10005;
     public static final int CID_FE_MAP_ACTION_RANGE_DRAWER = 10006;
     public static final int CID_FE_MAP_IMAGE_DRAWER = 10007;
+    public static final int CID_FE_MAP_OPERATE_VIEWER = 10008;
+    public static final int CID_FE_MAP_SCROLLER = 10009;
 }
 
 public final class SceneID {
     public static final String SID_DIALOG = "Dialog";
     public static final String SID_TITLE = "Title";
     public static final String SID_GAMEOVER = "Gameover";
+    public static final String SID_GAMECLEAR = "Gameclear";
     public static final String SID_ILLUST = "One Illust";
     public static final String SID_FE_BATTLE_MAP = "FE Battle Map";
 }

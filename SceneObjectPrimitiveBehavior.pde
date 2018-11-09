@@ -380,7 +380,9 @@ public final class SceneObjectTransform extends SceneObjectBehavior implements C
     public boolean IsInRegion(float y, float x) {
         _inverse = _matrix.get();
         if (!_inverse.invert()) {
-            println("逆アフィン変換ができません。");
+            if (isProcessing) {
+                println("逆アフィン変換ができません。");
+            }
             return false;
         }
 
@@ -783,13 +785,14 @@ public class SceneObjectText extends SceneObjectDrawBase {
         _drawSpeed = value;
     }
 
+    private SceneObjectTransform _objT;
+
     private float _deltaTime;
     private int _drawingIndex;
     private String _tempText;
 
     private PVector _objSize;
     private float _xRate, _yRate;
-
 
     public SceneObjectText() {
         super();
@@ -818,7 +821,8 @@ public class SceneObjectText extends SceneObjectDrawBase {
 
     public void Start() {
         super.Start();
-        _objSize = GetObject().GetTransform().GetSize();
+        _objT = GetObject().GetTransform();
+        _objSize = _objT.GetSize();
     }
 
     public void Update() {
@@ -833,18 +837,23 @@ public class SceneObjectText extends SceneObjectDrawBase {
 
     public void Draw() {
         if (GetText() == null) return;
-        fill(GetColorInfo().GetColor());
-        textFont(fontManager.GetFont(GetUsingFontName()));
-        textSize(GetFontSize());
-        textAlign(GetHorizontalAlign(), GetVerticalAlign());
-        textLeading(GetLineSpace());
+        try {
+            if (_objT.GetMatrix().determinant() == 0) return;
+            fill(GetColorInfo().GetColor());
+            textFont(fontManager.GetFont(GetUsingFontName()));
+            textSize(GetFontSize());
+            textAlign(GetHorizontalAlign(), GetVerticalAlign());
+            textLeading(GetLineSpace());
 
-        if (_isDrawInOrder) {
-            _tempText = GetText().substring(0, _drawingIndex);
-        } else {
-            _tempText = GetText();
+            if (_isDrawInOrder) {
+                _tempText = GetText().substring(0, _drawingIndex);
+            } else {
+                _tempText = GetText();
+            }
+            text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
+        } 
+        catch(Exception e) {
         }
-        text(_tempText, _objSize.x * _xRate, _objSize.y * _yRate);
     }
 
     protected void _OnDestroy() {

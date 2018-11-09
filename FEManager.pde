@@ -1,4 +1,4 @@
-public class FEManager { //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+public class FEManager { //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
     /**
      環境コンフィグ
      全てのデータで共通のため、別枠保持
@@ -647,6 +647,11 @@ public class FEBattleMapManager {
     public FEUnitBattleConsider GetBattleResult() {
         return _battleResult;
     }
+    // 攻撃範囲内に敵がいて攻撃可能かどうか
+    private boolean _isAttackable;
+    public boolean IsAttackable() {
+        return _isAttackable;
+    }
 
     //////////////////////////////////////////////////////
     // 出撃ユニット及びイベント情報
@@ -797,29 +802,18 @@ public class FEBattleMapManager {
             _isFirstPhase = json.GetBoolean("First Phase", true);
 
             // 地形情報
-            boolean[][] terrain = new boolean[_mapHeight][_mapWidth];
-            FETerrain defTerrain = feManager.GetDataBase().GetTerrains().get(json.GetInt("Default Terrain ID", 0));
             array = json.GetJsonArray("Terrains");
-            JsonObject terrainObj;
+            JsonArray terArray;
             if (array != null) {
                 int x, y, id;
                 boolean exsId;
                 for (int i=0; i<array.Size(); i++) {
-                    terrainObj = array.GetJsonObject(i);
-                    if (terrainObj == null) continue;
-                    x = terrainObj.GetInt("x", -1);
-                    y = terrainObj.GetInt("y", -1);
-                    id = terrainObj.GetInt("ID", FEConst.NOT_FOUND);
-                    exsId = feManager.GetDataBase().GetTerrains().containsKey(id);
-                    if (x == -1 || y == -1 || !exsId) continue;
-                    _terrains[y][x] = feManager.GetDataBase().GetTerrains().get(id);
-                    terrain[y][x] = true;
-                }
-            }
-            for (int i=0; i<_mapHeight; i++) {
-                for (int j=0; j<_mapWidth; j++) {
-                    if (terrain[i][j]) continue;
-                    _terrains[i][j] = defTerrain;
+                    terArray = array.GetJsonArray(i);
+                    for (int j=0; j<terArray.Size(); j++) {
+                        id = terArray.GetInt(j, FEConst.NOT_FOUND);
+                        if (!feManager.GetDataBase().GetTerrains().containsKey(id)) continue;
+                        _terrains[i][j] = feManager.GetDataBase().GetTerrains().get(id);
+                    }
                 }
             }
 
@@ -897,7 +891,7 @@ public class FEBattleMapManager {
             if (array != null) {
                 JsonObject enemyPosition;
                 FEMapElement elem;
-                FEUnit unit, toUnit;
+                FEOtherUnit unit, toUnit;
                 int x, y;
                 for (int i=0; i<array.Size(); i++) {
                     enemyPosition = array.GetJsonObject(i);
@@ -915,7 +909,7 @@ public class FEBattleMapManager {
                     elem.SetFixElement(true);
                     elem.SetMapObject(toUnit);
                     _mapEnemyObjects.add(elem);
-                }
+                };
             }
 
             _sortieMode = FEConst.BATTLE_SORTIE_MODE_NONE;
@@ -1322,9 +1316,8 @@ public class FEBattleMapManager {
         }
         if (_mapEnemyObjects.isEmpty()) {
             // ゲームクリア
-            colorMode(RGB, 255, 255, 255);
-            background(0, 255, 255);
-            noLoop();
+            sceneManager.ReleaseAllScenes();
+            sceneManager.LoadScene(SceneID.SID_GAMECLEAR);
             return;
         }
     }
@@ -1394,6 +1387,27 @@ public class FEBattleMapManager {
             UpdateAllUnitsPowerBias();
             _operationMode = FEConst.BATTLE_OPE_MODE_AI_THINKING;
         }
+        // ターン開始時に回復効果を得る
+        ArrayList<FEMapElement> elems = (_actionPhase?_mapPlayerObjects:_mapEnemyObjects);
+        FEMapElement elem;
+        FEUnit unit;
+        FETerrainEffect terE;
+        int x, y;
+        for (int i=0; i<elems.size(); i++) {
+            elem = elems.get(i);
+            x = (int)elem.GetPosition().x;
+            y = (int)elem.GetPosition().y;
+            terE = feManager.GetDataBase().GetTerrainEffects().get(_terrains[y][x].GetEffectID());
+            if (terE != null) {
+                unit = (FEUnit)elem.GetMapObject();
+                unit.AddHp(terE.GetRecover());
+                if (unit.GetHp() < 1) {
+                    unit.SetHp(1);
+                } else if (unit.GetHp() > unit.GetParameter().GetHp()) {
+                    unit.SetHp(unit.GetParameter().GetHp());
+                }
+            }
+        }
     }
 
     /**
@@ -1403,6 +1417,24 @@ public class FEBattleMapManager {
         for (int i=0; i<_mapElements.size(); i++) {
             _mapElements.get(i).SetAlready(false);
         }
+    }
+
+    public void OnClickAttackMenu() {
+        _operationMode = FEConst.BATTLE_OPE_MODE_PRE_BATTLE;
+    }
+
+    public void OnClickItemMenu() {
+    }
+
+    public void OnClickWaitMenu() {
+        SetAlreadyUnit(_selectedElement);
+        println(_selectedElement.GetPosition());
+    }
+
+    public void OnClickResetMenu() {
+        _selectedElement.GetPosition().x = _basePosOfMovingUnit.x;
+        _selectedElement.GetPosition().y = _basePosOfMovingUnit.y;
+        _SetToNormalMode();
     }
 
     /**
@@ -1526,10 +1558,6 @@ public class FEBattleMapManager {
         boolean isLeft = mouseButton == LEFT;
         if (isLeft || !_actionPhase) {
             SetAlreadyUnit(_selectedElement);
-        } else {
-            _selectedElement.GetPosition().x = _basePosOfMovingUnit.x;
-            _selectedElement.GetPosition().y = _basePosOfMovingUnit.y;
-            _SetToNormalMode();
         }
     }
 
@@ -1619,8 +1647,7 @@ public class FEBattleMapManager {
         _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
         _elementSorter.SortList(_mapElements);
 
-        // テスト用で戦闘準備にすぐ移行する
-        _operationMode = FEConst.BATTLE_OPE_MODE_PRE_BATTLE;
+        // 攻撃範囲内に敵がいるかどうか
         _UpdateOverallActionRange(_selectedElement, false);
         // 攻撃範囲に敵ユニットが一切いない場合はモードを戻す
         FEMapElement elem;
@@ -1636,8 +1663,11 @@ public class FEBattleMapManager {
                 break;
             }
         }
-        if (!flag) {
-            _operationMode = FEConst.BATTLE_OPE_MODE_FINISH_MOVE;
+        _isAttackable = flag;
+        if (_actionPhase) {
+            //_operationMode = FEConst.BATTLE_OPE_MODE_OPERATE_MENU;
+        } else {
+            _operationMode = FEConst.BATTLE_OPE_MODE_PRE_BATTLE;
         }
     }
 
@@ -1922,10 +1952,10 @@ public class FEBattleMapManager {
      */
     public void Update() {
         if (feManager.GetProgressDataBase().GetSceneMode() !=  FEConst.OVERALL_MODE_SORTIE) return;
-        if (mousePressed&&!_actionPhase) {
-            println(_operationMode);
-            println(GetMapElementOnPos(5, 9));
-        }
+        //if (mousePressed&&!_actionPhase) {
+        //    println(_operationMode);
+        //    println(GetMapElementOnPos(5, 9));
+        //}
         switch(_operationMode) {
         case FEConst.BATTLE_OPE_MODE_AI_THINKING:
             if (_actionPhase) {
@@ -1936,13 +1966,13 @@ public class FEBattleMapManager {
                 for (int i=0; i<_mapEnemyObjects.size(); i++) {
                     elem = _mapEnemyObjects.get(i);
                     if (elem.IsAlready()) continue;
-                    for (int a=0; a<_mapHeight; a++) {
-                        for (int b=0; b<_mapWidth; b++) {
-                            print((elem.GetActionRange()[a][b]?"T":"f")+", ");
-                        }
-                        println("");
-                    }
-                    println("");
+                    //for (int a=0; a<_mapHeight; a++) {
+                    //    for (int b=0; b<_mapWidth; b++) {
+                    //        print((elem.GetActionRange()[a][b]?"T":"f")+", ");
+                    //    }
+                    //    println("");
+                    //}
+                    //println("");
                     _UpdateOverallActionRange(elem, true);
                     _UpdateOverallHazardArea();
                     _CalcUnitProfitDistribution(elem);
@@ -2124,8 +2154,8 @@ public class FEBattleMapManager {
         if (rangePriority < unit.GetActionList().size()) {
             range = unit.GetActionList().get(rangePriority).GetTarget();
         }
-        if (targetPriority <= rangePriority) {
-            if (rangePriority > 0) {
+        if (targetPriority >= rangePriority) {
+            if (rangePriority < unit.GetActionList().size()) {
                 target = range;
             } else {
                 if (!_PickUpTarget(elem, enemies, false, _dummyAction)) {
@@ -2297,6 +2327,7 @@ public class FEBattleMapManager {
         FEOtherUnit unit;
         FEUnit tarUnit;
         FEUnitBattleParameter unitBP, tarUnitBP;
+        FEMapElement mapE;
         FETerrainEffect terE;
         int x, y, posX, posY, maxValue;
 
@@ -2313,11 +2344,12 @@ public class FEBattleMapManager {
         // 敵のその場の射程範囲のところを減算する
         _AddRangeDistribution(x, y, tarUnitBP.GetMaxRange(), tarUnitBP.GetMinRange(), -5);
         posX = posY = -1;
-        maxValue = -1;
+        maxValue = -99999999;
         for (int i=0; i<_mapHeight; i++) {
             for (int j=0; j<_mapWidth; j++) {
                 if (!elem.GetActionRange()[i][j]) continue;   
-                if (GetMapElementOnPos(j, i) != null) continue;
+                mapE = GetMapElementOnPos(j, i);
+                if (mapE != null && mapE != elem) continue;
                 terE = feManager.GetDataBase().GetTerrainEffects().get(_terrains[i][j].GetEffectID());
                 if (terE != null && !terE.IsMovable()) continue;
                 _rangeProfitDistribution[i][j] += _terrainEffectBias[i][j] + unit.GetUnitProfitDistribution()[i][j];                
@@ -2327,6 +2359,11 @@ public class FEBattleMapManager {
                     maxValue = _rangeProfitDistribution[i][j];
                 }
             }
+        }
+        if (posX == -1 && posY == -1) {
+            posX = (int)elem.GetPosition().x;
+            posY = (int)elem.GetPosition().y;
+            println(1111);
         }
         unit.GetGotoPos().x = posX;
         unit.GetGotoPos().y = posY;
@@ -3046,5 +3083,41 @@ public class FEJsonUtility {
     public void LoadOtherUnit(FEOtherUnit unit, JsonObject json) throws Exception {
         if (unit == null || json == null) return;
         LoadUnit(unit, json);
+        unit.SetTargetPriorityType(json.GetBoolean("Is Target Priority", false));
+        unit.SetThreshTargetPriority(json.GetInt("Threshold", 0));
+        JsonArray array = json.GetJsonArray("Action List");
+        if (array != null) {
+            JsonObject act;
+            FEUnitAction unitAction;
+            for (int i=0; i<array.Size(); i++) {
+                act = array.GetJsonObject(i);
+                if (act == null) continue;
+                unitAction = new FEUnitAction();
+                LoadUnitAction(unitAction, act);
+                if (unitAction.GetActionID() == FEConst.NOT_FOUND) continue;
+                unit.GetActionList().add(unitAction);
+            }
+        }
+    }
+
+    public void LoadUnitAction(FEUnitAction act, JsonObject json) throws Exception {
+        if (act == null || json == null) return;
+        switch(json.GetString("Action ID", "NO ID")) {
+        case "UNIT":
+            act.SetActionID(FEConst.BATTLE_AI_UNIT);
+            break;
+        case "IMPORTANCE":
+            act.SetActionID(FEConst.BATTLE_AI_IMPORTANCE);
+            break;
+        case "NO MOVE":
+            act.SetActionID(FEConst.BATTLE_AI_NO_MOVE);
+            break;
+        default :
+            act.SetActionID(FEConst.NOT_FOUND);
+            return;
+        }
+        act.SetOnlyRangeAction(json.GetBoolean("Is Only Range Action", false));
+        JsonObject actPrm = json.GetJsonObject("Action Parameter");
+        act.SetActionParameter(actPrm);
     }
 }
